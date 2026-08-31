@@ -1,0 +1,137 @@
+@startuml componentes-hexagonal
+' ============================================================
+'  Chronova — Diagrama de componentes (arquitectura hexagonal)
+'  Las flechas de dependencia apuntan siempre hacia el dominio.
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam roundcorner 8
+skinparam nodesep 30
+skinparam ranksep 50
+
+skinparam component {
+  BorderColor #0E6E62
+  BackgroundColor #FFFFFF
+  FontColor #101817
+  BorderThickness 1.3
+}
+skinparam interface {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontColor #7A3F06
+}
+skinparam package {
+  BorderColor #A9BAB7
+  BackgroundColor #FCFDFD
+  FontColor #4E5C59
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam ArrowColor #4E5C59
+skinparam database {
+  BorderColor #40606E
+  BackgroundColor #F4F8FA
+}
+
+title <b>Chronova — Arquitectura hexagonal (puertos y adaptadores)</b>\n<size:11>Las dependencias apuntan siempre hacia adentro: el dominio no conoce a nadie</size>
+
+' ================= 1. ENTRADA =================
+package "1 · Adaptadores de ENTRADA" as ENT #F7FAFB {
+  component "App movil\nExpo + React Native" as APP
+  component "Tarea programada\ncierre de tomas c/15 min" as CRON
+  component "API HTTP\nExpress · Zod · JWT" as HTTP
+}
+
+' ================= 2. APLICACION =================
+package "2 · APLICACION" as APL #FBF9F5 {
+  component "Casos de uso\n\nAuth · Medicamentos\nTomas · Cuidadores" as UC
+  component "PoliticaDeAcceso\npunto unico de control" as POL
+}
+
+' ================= 3. DOMINIO =================
+package "3 · DOMINIO — cero dependencias externas" as DOM #F2F8F7 {
+  component "Paciente" as E1
+  component "Cuidador" as E2
+  component "Medicamento\nDosis · Stock · Frecuencia" as E3
+  component "Toma\nResumenDeAdherencia" as E4
+  component "Vinculo" as E5
+}
+
+' ================= 4. PUERTOS =================
+package "4 · PUERTOS" as PUE #FBF1E6 {
+  interface "Repositorios" as IREPO
+  interface "Seguridad" as ISEG
+  interface "Sistema" as ISIS
+  interface "Notificador" as INOT
+}
+
+' ================= 5. SALIDA =================
+package "5 · Adaptadores de SALIDA" as SAL #F7FAFB {
+  component "Repositorios\nPostgreSQL" as A1
+  component "Repositorios\nen memoria" as A2
+  component "CifradorBcrypt\nServicioDeTokensJwt" as A3
+  component "RelojDelSistema\nGeneradorDeIdsUuid" as A4
+  component "NotificadorEnConsola" as A5
+}
+
+database "PostgreSQL 16" as DB
+
+' ---------------- 1 -> 2 ----------------
+APP --> HTTP
+CRON --> UC
+HTTP --> UC
+
+' ---------------- 2 -> 3 ----------------
+UC --> E1
+UC --> E2
+UC --> E3
+UC --> E4
+UC --> POL
+POL --> E5
+
+' ---------------- 3/2 declaran puertos ----------------
+DOM ..> IREPO : declara
+UC ..> ISEG
+UC ..> ISIS
+UC ..> INOT
+
+' ---------------- 5 implementa 4 ----------------
+IREPO <|.. A1
+IREPO <|.. A2
+ISEG <|.. A3
+ISIS <|.. A4
+INOT <|.. A5
+
+A1 --> DB : SQL parametrizado
+
+' ---------------- notas ----------------
+note right of DOM
+  <b>Regla de oro</b>
+  Ningun archivo de src/domain/ importa
+  express, pg, bcrypt ni ninguna libreria
+  externa. Solo TypeScript.
+end note
+
+note right of PUE
+  Los puertos son <b>interfaces de TypeScript</b>.
+  Quien decide que adaptador se conecta a cada
+  uno es un solo archivo: <b>contenedor.ts</b>
+  (composition root).
+end note
+
+note right of SAL
+  Los repositorios en memoria cumplen los mismos
+  puertos que los de PostgreSQL. Por eso la
+  aplicacion corre entera sin base de datos
+  (PERSISTENCE=memory) y las 71 pruebas terminan
+  en menos de 2 segundos.
+end note
+
+@enduml

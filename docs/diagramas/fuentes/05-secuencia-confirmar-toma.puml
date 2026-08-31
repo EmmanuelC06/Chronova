@@ -1,0 +1,144 @@
+@startuml secuencia-confirmar-toma
+' ============================================================
+'  Chronova — Diagrama de secuencia: confirmar una toma
+'  Refleja RegistrarToma.ts y el recorrido por las capas
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+
+skinparam sequence {
+  ArrowColor #101817
+  LifeLineBorderColor #A9BAB7
+  LifeLineBackgroundColor #EDF2F1
+  ParticipantBorderColor #0E6E62
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #101817
+  ActorBorderColor #0E6E62
+  ActorBackgroundColor #FFFFFF
+  BoxBorderColor #C2CFCC
+  BoxFontColor #4E5C59
+  GroupBorderColor #A0530A
+  GroupHeaderFontColor #A0530A
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+
+actor "Paciente" as PAC
+
+box "Infraestructura (entrada)" #FBFCFC
+  participant "App movil\n<size:10>hoy.tsx</size>" as APP
+  participant "API HTTP\n<size:10>routes/tomas.ts</size>" as API
+end box
+
+box "Aplicacion" #FBFCFC
+  participant "RegistrarToma\n<size:10>caso de uso</size>" as CU
+  participant "PoliticaDeAcceso" as POL
+end box
+
+box "Dominio" #F5FAF9
+  participant "Toma\n<size:10>entidad</size>" as TOMA
+  participant "Medicamento\n<size:10>entidad</size>" as MED
+end box
+
+box "Infraestructura (salida)" #FBFCFC
+  participant "RepositorioDeTomas\n<size:10>PostgreSQL</size>" as RTOM
+  participant "RepositorioDeMedicamentos\n<size:10>PostgreSQL</size>" as RMED
+  participant "Notificador" as NOT
+end box
+
+PAC -> APP : toca "Ya la tome"
+activate APP
+
+APP -> API : POST /api/tomas/{id}/registro\n{ accion: "CONFIRMAR" }
+activate API
+
+API -> API : verificar token (JWT)\nvalidar cuerpo (Zod)
+note right of API
+  El adaptador HTTP solo valida
+  la FORMA de los datos. Las
+  reglas de negocio no estan aqui.
+end note
+
+API -> CU : ejecutar({ solicitante, tomaId, accion })
+activate CU
+
+CU -> RTOM : buscarPorId(tomaId)
+activate RTOM
+RTOM --> CU : Toma
+deactivate RTOM
+
+CU -> POL : asegurarAccesoAPaciente(\n  solicitante, pacienteId,\n  "puedeRegistrarTomas")
+activate POL
+alt sin vinculo o sin permiso
+  POL --> CU : ErrorDeAutorizacion
+  CU --> API : (excepcion)
+  API --> APP : 403 "No tienes permiso..."
+end
+POL --> CU : autorizado
+deactivate POL
+
+CU -> TOMA : confirmar({ ahora, origen, registradaPorId })
+activate TOMA
+alt la toma ya estaba resuelta
+  TOMA --> CU : ErrorDeReglaDeNegocio
+end
+TOMA -> TOMA : estado = TOMADA\nresueltaEn = ahora
+TOMA --> CU : ok
+deactivate TOMA
+
+CU -> RTOM : guardar(toma)
+activate RTOM
+RTOM --> CU : ok
+deactivate RTOM
+
+group Descuento de inventario
+  CU -> RMED : buscarPorId(medicamentoId)
+  activate RMED
+  RMED --> CU : Medicamento
+  deactivate RMED
+
+  CU -> MED : registrarConsumoDeUnaDosis()
+  activate MED
+  MED -> MED : stock = stock.descontar(\n  dosis.unidadesConsumidasPorToma)
+  MED --> CU : ok
+  deactivate MED
+
+  CU -> RMED : guardar(medicamento)
+  activate RMED
+  RMED --> CU : ok
+  deactivate RMED
+end
+
+alt stock.necesitaReabastecimiento
+  CU -> NOT : enviar(aviso STOCK_BAJO)
+  activate NOT
+  NOT --> CU : ok
+  deactivate NOT
+  CU --> API : { toma, avisoDeStock: "Te quedan 3 unidades..." }
+else inventario suficiente
+  CU --> API : { toma, avisoDeStock: null }
+end
+deactivate CU
+
+API --> APP : 200 OK
+deactivate API
+
+APP -> APP : recargar agenda\nresincronizar alarmas locales
+APP --> PAC : tarjeta en verde "Tomada"\n+ aviso de inventario si aplica
+deactivate APP
+
+note over CU, MED
+  <b>El caso de uso orquesta, no decide.</b>
+  Cuanto inventario consume una dosis lo sabe Dosis;
+  si la toma admite confirmarse lo sabe Toma. El caso
+  de uso solo encadena esas decisiones y las persiste.
+end note
+
+@enduml

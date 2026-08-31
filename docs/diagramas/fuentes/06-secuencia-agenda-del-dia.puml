@@ -1,0 +1,125 @@
+@startuml secuencia-agenda-del-dia
+' ============================================================
+'  Chronova — Secuencia: generar la agenda del dia
+'  Refleja ObtenerAgendaDelDia.ts, incluida la resolucion
+'  de peticiones simultaneas.
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+
+skinparam sequence {
+  ArrowColor #101817
+  LifeLineBorderColor #A9BAB7
+  LifeLineBackgroundColor #EDF2F1
+  ParticipantBorderColor #0E6E62
+  ParticipantBackgroundColor #FFFFFF
+  BoxBorderColor #C2CFCC
+  BoxFontColor #4E5C59
+  GroupBorderColor #A0530A
+  GroupHeaderFontColor #A0530A
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+
+participant "App movil" as APP
+
+box "Aplicacion" #FBFCFC
+  participant "ObtenerAgendaDelDia" as CU
+end box
+
+box "Dominio" #F5FAF9
+  participant "Medicamento" as MED
+  participant "Frecuencia" as FRE
+  participant "Toma" as TOMA
+  participant "ResumenDeAdherencia" as RES
+end box
+
+box "Infraestructura" #FBFCFC
+  participant "RepositorioDeMedicamentos" as RMED
+  participant "RepositorioDeTomas" as RTOM
+end box
+
+APP -> CU : ejecutar({ solicitante, pacienteId, fecha })
+activate CU
+
+CU -> RMED : listarPorPaciente(pacienteId, activos)
+activate RMED
+RMED --> CU : Medicamento[]
+deactivate RMED
+
+CU -> RTOM : listarPorPacienteEnRango(pacienteId, dia)
+activate RTOM
+RTOM --> CU : Toma[] ya existentes
+deactivate RTOM
+
+group Calcular que falta programar
+  loop por cada medicamento activo
+    CU -> MED : horariosDelDia(fecha)
+    activate MED
+    MED -> MED : estaVigenteEn(fecha)
+    MED -> FRE : aplicaEn(fecha, fechaInicio)
+    activate FRE
+    FRE --> MED : si / no
+    deactivate FRE
+    MED --> CU : Hora[] (vacio si hoy no toca)
+    deactivate MED
+
+    loop por cada hora sin toma creada
+      CU -> TOMA : programar({ id, medicamentoId,\n  pacienteId, programadaPara })
+      activate TOMA
+      TOMA --> CU : Toma en estado PENDIENTE
+      deactivate TOMA
+    end
+  end
+end
+
+alt hay tomas por crear
+  CU -> RTOM : programarSiNoExisten(candidatas)
+  activate RTOM
+  note right of RTOM
+    <b>ON CONFLICT DO NOTHING</b> sobre la clave
+    (medicamento_id, programada_originalmente_para).
+
+    Si otra peticion simultanea ya las creo, el
+    choque se ignora en silencio en vez de fallar.
+    Antes de esta correccion, la peticion que
+    perdia la carrera devolvia un error 500.
+  end note
+  RTOM --> CU : cuantas se insertaron
+  deactivate RTOM
+
+  CU -> RTOM : listarPorPacienteEnRango(pacienteId, dia)
+  activate RTOM
+  note right of RTOM
+    Se relee el dia completo: puede que
+    algunas tomas las haya creado la otra
+    peticion, y esas son las validas.
+  end note
+  RTOM --> CU : Toma[] definitivas
+  deactivate RTOM
+end
+
+CU -> RES : calcular(tomas, ventanaDeTolerancia)
+activate RES
+RES --> CU : ResumenDeAdherencia
+deactivate RES
+
+CU --> APP : { fecha, elementos[], resumen }
+deactivate CU
+
+APP -> APP : programar alarmas locales\n(expo-notifications)
+
+note over CU
+  <b>Operacion idempotente.</b> Consultar la agenda
+  diez veces el mismo dia crea las tomas una sola vez.
+  Verificado con 25 peticiones simultaneas contra
+  PostgreSQL 16: sin duplicados y sin errores.
+end note
+
+@enduml

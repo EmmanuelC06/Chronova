@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="826px" preserveAspectRatio="none" style="width:1267px;height:826px;" version="1.1" viewBox="0 0 1267 826" width="1267px" zoomAndPan="magnify"><defs/><g><text fill="#000000" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="396" x="438.5" y="12.0669">Chronova — Casos de uso del Cuidador y del Sistema</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="477" x="398" y="25.3433">Familiar, acompanante o profesional de la salud, y la tarea automatica del servidor</text><!--MD5=[a8cbb15f5744aeb0981b05e24db4ffb8]
+cluster Acceso--><polygon fill="#FCFDFD" points="864,551.9375,922,551.9375,929,573.0703,1014,573.0703,1014,692.9375,864,692.9375,864,551.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="864" x2="929" y1="573.0703" y2="573.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="52" x="868" y="566.0044">Acceso</text><!--MD5=[87edd22dcea3649a58163553a95b0db2]
+cluster Vinculacion--><polygon fill="#FCFDFD" points="851.5,716.9375,940.5,716.9375,947.5,738.0703,1026.5,738.0703,1026.5,814.9375,851.5,814.9375,851.5,716.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="851.5" x2="947.5" y1="738.0703" y2="738.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="83" x="855.5" y="731.0044">Vinculacion</text><!--MD5=[8434b867a3ac976710412a8f810093d5]
+cluster Seguimiento--><polygon fill="#FCFDFD" points="820,182.9375,918,182.9375,925,204.0703,1058,204.0703,1058,527.9375,820,527.9375,820,182.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="820" x2="925" y1="204.0703" y2="204.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="92" x="824" y="197.0044">Seguimiento</text><!--MD5=[3d1fe8590568b95b043f1bd3dd369cc1]
+cluster Procesos automaticos--><polygon fill="#FCFDFD" points="189,435.9375,358,435.9375,365,457.0703,666,457.0703,666,537.9375,189,537.9375,189,435.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="189" x2="365" y1="457.0703" y2="457.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="163" x="193" y="450.0044">Procesos automaticos</text><ellipse cx="938.9117" cy="600.138" fill="#F2F8F7" rx="53.9117" ry="13.7005" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="72" x="902.9117" y="604.2044">Registrarse</text><ellipse cx="938.7877" cy="663.095" fill="#F2F8F7" rx="58.7877" ry="14.1575" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="82" x="897.7877" y="667.1614">Iniciar sesion</text><ellipse cx="939.0956" cy="774.6984" fill="#F2F8F7" rx="71.5956" ry="23.7609" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="100" x="889.0956" y="772.1181">Solicitar acceso</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="87" x="895.5956" y="787.2509">a un paciente</text><ellipse cx="938.8769" cy="240.9809" fill="#F2F8F7" rx="70.8769" ry="23.5434" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="100" x="888.8769" y="238.7202">Consultar panel</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="82" x="897.8769" y="253.853">de pacientes</text><ellipse cx="938.9708" cy="405.9317" fill="#F2F8F7" rx="102.9708" ry="22.9942" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="161" x="858.4708" y="405.7088">Consultar medicamentos</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="78" x="899.9708" y="420.8416">del paciente</text><ellipse cx="939.1104" cy="487.863" fill="#F2F8F7" rx="80.6104" ry="23.4255" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="115" x="881.6104" y="485.7773">Consultar historial</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="91" x="893.6104" y="500.9101">de adherencia</text><ellipse cx="939.0701" cy="323.7039" fill="#F2F8F7" rx="93.5701" ry="23.7664" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="115" x="881.5701" y="319.2921">Registrar toma en</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="132" x="873.0701" y="334.425">nombre del paciente</text><ellipse cx="268.6357" cy="494.7768" fill="#F2F8F7" rx="63.6357" ry="24.3393" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="85" x="226.1357" y="491.1893">Cerrar tomas</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="86" x="225.6357" y="506.3221">sin respuesta</text><ellipse cx="572.9156" cy="487.7206" fill="#F2F8F7" rx="76.9156" ry="17.7831" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="127" x="509.4156" y="491.787">Notificar al cuidador</text><!--MD5=[00a53cdc1199406b772e5950891343c5]
+entity CUI--><ellipse cx="741.5" cy="458.9375" fill="#FFFFFF" rx="8" ry="8" style="stroke: #0E6E62; stroke-width: 1.5;"/><path d="M741.5,466.9375 L741.5,493.9375 M728.5,474.9375 L754.5,474.9375 M741.5,493.9375 L728.5,508.9375 M741.5,493.9375 L754.5,508.9375 " fill="none" style="stroke: #0E6E62; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="57" x="713" y="523.5044">Cuidador</text><!--MD5=[7338090c0ee400a8c1fb27781965fcfd]
+entity SIS--><ellipse cx="54.5" cy="459.9375" fill="#FFFFFF" rx="8" ry="8" style="stroke: #0E6E62; stroke-width: 1.5;"/><path d="M54.5,467.9375 L54.5,494.9375 M41.5,475.9375 L67.5,475.9375 M54.5,494.9375 L41.5,509.9375 M54.5,494.9375 L67.5,509.9375 " fill="none" style="stroke: #0E6E62; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="53" x="6" y="524.5044">Sistema</text><text fill="#000000" font-family="Helvetica" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="97" x="6" y="536.8525">(tarea programada)</text><!--MD5=[363c8216f9d6bd18ac5da32510276bd5]
+entity PAC--><ellipse cx="1227.5" cy="745.9375" fill="#FFFFFF" rx="8" ry="8" style="stroke: #0E6E62; stroke-width: 1.5;"/><path d="M1227.5,753.9375 L1227.5,780.9375 M1214.5,761.9375 L1240.5,761.9375 M1227.5,780.9375 L1214.5,795.9375 M1227.5,780.9375 L1240.5,795.9375 " fill="none" style="stroke: #0E6E62; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="55" x="1200" y="810.5044">Paciente</text><path d="M831,118.9375 L831,167.3516 A0,0 0 0 0 831,167.3516 L935,167.3516 L939,217.2175 L943,167.3516 L1047,167.3516 A0,0 0 0 0 1047,167.3516 L1047,128.9375 L1037,118.9375 L831,118.9375 A0,0 0 0 0 831,118.9375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M1037,118.9375 L1037,128.9375 L1047,128.9375 L1037,118.9375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="177" x="837" y="134.1479">Ordenado por prioridad clinica:</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="188" x="837" y="146.9526">primero quien requiere atencion,</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="195" x="837" y="159.7573">luego por adherencia ascendente.</text><path d="M831,35.9375 L831,84.3516 L1047,84.3516 L1047,45.9375 L1037,35.9375 L831,35.9375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M1037,35.9375 L1037,45.9375 L1047,45.9375 L1037,35.9375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="159" x="837" y="51.1479">Solo si el paciente concedio</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="195" x="837" y="63.9526">el permiso puedeRegistrarTomas.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="136" x="837" y="76.7573">Por defecto NO lo tiene.</text><path d="M164,358.4375 L164,419.6563 A0,0 0 0 0 164,419.6563 L265,419.6563 L269,470.3575 L273,419.6563 L373,419.6563 A0,0 0 0 0 373,419.6563 L373,368.4375 L363,358.4375 L164,358.4375 A0,0 0 0 0 164,358.4375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M363,358.4375 L363,368.4375 L373,368.4375 L363,358.4375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="163" x="170" y="373.6479">Se ejecuta cada 15 minutos.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="180" x="170" y="386.4526">Cierra las tomas que vencieron</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="188" x="170" y="399.2573">el margen de gracia del paciente</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="188" x="170" y="412.062">y las marca con origen SISTEMA.</text><!--MD5=[b135d98c02be1d2df806227149bf4411]
+link CUI to UC01--><path d="M751,526.4775 C751,558.8775 751,599.9375 751,599.9375 C751,599.9375 879.87,599.9375 879.87,599.9375 " fill="none" id="CUI-&gt;UC01" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="884.87,599.9375,875.87,595.9375,879.87,599.9375,875.87,603.9375,884.87,599.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[7b9469c69190d773496bb09af8b4340a]
+link CUI to UC02--><path d="M732,526.7775 C732,578.3275 732,662.9375 732,662.9375 C732,662.9375 874.96,662.9375 874.96,662.9375 " fill="none" id="CUI-&gt;UC02" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="879.96,662.9375,870.96,658.9375,874.96,662.9375,870.96,666.9375,879.96,662.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[c87f3161ac9c90f821abbb404c68ec3f]
+link CUI to UC15--><path d="M770.25,518.9375 C809.22,518.9375 874,518.9375 874,518.9375 C874,518.9375 874,759.8975 874,759.8975 " fill="none" id="CUI-&gt;UC15" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="874,764.8975,878,755.8975,874,759.8975,870,755.8975,874,764.8975" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[608de66a6e81080b2869b1f261728545]
+link CUI to UC19--><path d="M732,449.3475 C732,379.8775 732,240.9375 732,240.9375 C732,240.9375 862.76,240.9375 862.76,240.9375 " fill="none" id="CUI-&gt;UC19" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="867.76,240.9375,858.76,236.9375,862.76,240.9375,858.76,244.9375,867.76,240.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[d09d38e0267ea8ae92e1d06e1e4b9f3b]
+link CUI to UC06--><path d="M770.04,456.9375 C801.59,456.9375 848,456.9375 848,456.9375 C848,456.9375 848,421.7575 848,421.7575 " fill="none" id="CUI-&gt;UC06" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="848,416.7575,844,425.7575,848,421.7575,852,425.7575,848,416.7575" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[ab7dd1e4e6970082b064ecb5a6533d47]
+link CUI to UC14--><path d="M770.22,487.9375 C770.22,487.9375 853.16,487.9375 853.16,487.9375 " fill="none" id="CUI-&gt;UC14" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="858.16,487.9375,849.16,483.9375,853.16,487.9375,849.16,491.9375,858.16,487.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[12b83d31164460bbc8f59b9bfa53991f]
+link CUI to UC11--><path d="M751,449.3775 C751,403.1775 751,331.9375 751,331.9375 C751,331.9375 845.78,331.9375 845.78,331.9375 " fill="none" id="CUI-&gt;UC11" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="850.78,331.9375,841.78,327.9375,845.78,331.9375,841.78,335.9375,850.78,331.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[1383a9090e38c1b079d133a5df7559e1]
+link SIS to UC20--><path d="M103.06,494.9375 C103.06,494.9375 199.7,494.9375 199.7,494.9375 " fill="none" id="SIS-&gt;UC20" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="204.7,494.9375,195.7,490.9375,199.7,494.9375,195.7,498.9375,204.7,494.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[d992767dd3e210caf31250fcafb76218]
+link UC20 to UC21--><path d="M329.75,488.1875 C329.75,488.1875 490.87,488.1875 490.87,488.1875 " fill="none" id="UC20-&gt;UC21" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#4E5C59" points="495.87,488.1875,486.87,484.1875,490.87,488.1875,486.87,492.1875,495.87,488.1875" style="stroke: #4E5C59; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="404" y="483.0044">«include»</text><!--MD5=[e3e31fa53e48f931cd26a1513f32a436]
+link UC21 to CUI--><path d="M650.35,487.9375 C650.35,487.9375 707.94,487.9375 707.94,487.9375 " fill="none" id="UC21-&gt;CUI" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="712.94,487.9375,703.94,483.9375,707.94,487.9375,703.94,491.9375,712.94,487.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[99d6e22fdf32e6dd18001e3dd4278a6d]
+link UC15 to PAC--><path d="M1010.69,774.9375 C1010.69,774.9375 1194.92,774.9375 1194.92,774.9375 " fill="none" id="UC15-&gt;PAC" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#4E5C59" points="1199.92,774.9375,1190.92,770.9375,1194.92,774.9375,1190.92,778.9375,1199.92,774.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="53" x="1097" y="756.0044">requiere</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="91" x="1078" y="771.1372">aprobacion de</text><!--MD5=[fd767dcd47fb2c25e9624ffc5771787e]
+link UC11 to GMN32--><path d="M850.82,315.9375 C823.78,315.9375 801,315.9375 801,315.9375 C801,315.9375 801,59.9375 801,59.9375 C801,59.9375 813.48,59.9375 830.94,59.9375 " fill="none" id="UC11-GMN32" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[a5b4dc45bcbe8131bdac9e340297b7c6]
+@startuml casos-de-uso-cuidador
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam linetype ortho
+
+skinparam actor {
+  BorderColor #0E6E62
+  BackgroundColor #FFFFFF
+}
+skinparam usecase {
+  BorderColor #0E6E62
+  BackgroundColor #F2F8F7
+  FontColor #101817
+  BorderThickness 1.2
+}
+skinparam package {
+  BorderColor #A9BAB7
+  BackgroundColor #FCFDFD
+  FontColor #4E5C59
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam ArrowColor #4E5C59
+
+title <b>Chronova — Casos de uso del Cuidador y del Sistema</b>\n<size:11>Familiar, acompanante o profesional de la salud, y la tarea automatica del servidor</size>
+
+left to right direction
+
+actor "Cuidador" as CUI
+actor "Sistema\n<size:10>(tarea programada)</size>" as SIS
+actor "Paciente" as PAC
+
+package "Acceso" {
+  usecase "Registrarse" as UC01
+  usecase "Iniciar sesion" as UC02
+}
+
+package "Vinculacion" {
+  usecase "Solicitar acceso\na un paciente" as UC15
+}
+
+package "Seguimiento" {
+  usecase "Consultar panel\nde pacientes" as UC19
+  usecase "Consultar medicamentos\ndel paciente" as UC06
+  usecase "Consultar historial\nde adherencia" as UC14
+  usecase "Registrar toma en\nnombre del paciente" as UC11
+}
+
+package "Procesos automaticos" {
+  usecase "Cerrar tomas\nsin respuesta" as UC20
+  usecase "Notificar al cuidador" as UC21
+}
+
+CUI - -> UC01
+CUI - -> UC02
+CUI - -> UC15
+CUI - -> UC19
+CUI - -> UC06
+CUI - -> UC14
+CUI - -> UC11
+
+SIS - -> UC20
+UC20 ..> UC21 : <<include>>
+UC21 - -> CUI
+
+UC15 ..> PAC : requiere\naprobacion de
+
+note bottom of UC19
+  Ordenado por prioridad clinica:
+  primero quien requiere atencion,
+  luego por adherencia ascendente.
+end note
+
+note bottom of UC11
+  Solo si el paciente concedio
+  el permiso puedeRegistrarTomas.
+  Por defecto NO lo tiene.
+end note
+
+note bottom of UC20
+  Se ejecuta cada 15 minutos.
+  Cierra las tomas que vencieron
+  el margen de gracia del paciente
+  y las marca con origen SISTEMA.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Ubuntu-124.04
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

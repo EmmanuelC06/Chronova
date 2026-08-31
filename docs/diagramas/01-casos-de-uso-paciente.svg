@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1351px" preserveAspectRatio="none" style="width:905px;height:1351px;" version="1.1" viewBox="0 0 905 1351" width="905px" zoomAndPan="magnify"><defs/><g><text fill="#000000" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="288" x="311.5" y="12.0669">Chronova — Casos de uso del Paciente</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="427" x="242" y="25.3433">Adulto mayor o persona con enfermedad cronica que sigue un tratamiento</text><!--MD5=[c671e72108982fdd66f20835aca3a040]
+cluster Acceso y configuracion--><polygon fill="#FCFDFD" points="115.5,51.9375,291.5,51.9375,298.5,73.0703,326.5,73.0703,326.5,275.9375,115.5,275.9375,115.5,51.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="115.5" x2="298.5" y1="73.0703" y2="73.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="170" x="119.5" y="66.0044">Acceso y configuracion</text><!--MD5=[3f9edc064e9d6c1a672523204f78905b]
+cluster Gestion del tratamiento--><polygon fill="#FCFDFD" points="460,250.9375,642,250.9375,649,272.0703,677,272.0703,677,644.9375,460,644.9375,460,250.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="460" x2="649" y1="272.0703" y2="272.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="176" x="464" y="265.0044">Gestion del tratamiento</text><!--MD5=[e236b0bb7abcadb3ce34abd90cd2f491]
+cluster Seguimiento diario--><polygon fill="#FCFDFD" points="114,630.9375,259,630.9375,266,652.0703,328,652.0703,328,1000.9375,114,1000.9375,114,630.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="114" x2="266" y1="652.0703" y2="652.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="139" x="118" y="645.0044">Seguimiento diario</text><!--MD5=[e061a4a5d0cf0d2126e6511e80acd4b8]
+cluster Control de acompanamiento--><polygon fill="#FCFDFD" points="108,1024.9375,324,1024.9375,331,1046.0703,334,1046.0703,334,1339.9375,108,1339.9375,108,1024.9375" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="108" x2="331" y1="1046.0703" y2="1046.0703"/><text fill="#4E5C59" font-family="Helvetica" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="210" x="112" y="1039.0044">Control de acompanamiento</text><ellipse cx="220.9117" cy="100.138" fill="#F2F8F7" rx="53.9117" ry="13.7005" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="72" x="184.9117" y="104.2044">Registrarse</text><ellipse cx="220.7877" cy="163.095" fill="#F2F8F7" rx="58.7877" ry="14.1575" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="82" x="179.7877" y="167.1614">Iniciar sesion</text><ellipse cx="220.8457" cy="235.854" fill="#F2F8F7" rx="89.3457" ry="23.4165" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="128" x="156.8457" y="233.7817">Ajustar preferencias</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="101" x="170.3457" y="248.9145">de accesibilidad</text><ellipse cx="568.5016" cy="304.7378" fill="#F2F8F7" rx="87.0016" ry="19.8003" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="150" x="493.5016" y="308.8042">Registrar medicamento</text><ellipse cx="568.4467" cy="380.7268" fill="#F2F8F7" rx="91.9467" ry="20.7893" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="161" x="487.9467" y="384.7932">Consultar medicamentos</text><ellipse cx="568.5016" cy="456.7378" fill="#F2F8F7" rx="87.0016" ry="19.8003" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="150" x="493.5016" y="460.8042">Modificar medicamento</text><ellipse cx="568.3995" cy="532.8174" fill="#F2F8F7" rx="92.3995" ry="20.8799" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="162" x="487.3995" y="536.8838">Suspender medicamento</text><ellipse cx="568.6651" cy="608.9705" fill="#F2F8F7" rx="85.6651" ry="19.533" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="147" x="495.1651" y="613.0369">Reabastecer inventario</text><ellipse cx="221.0427" cy="686.046" fill="#F2F8F7" rx="91.0427" ry="20.6085" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="159" x="141.5427" y="690.1124">Consultar agenda del dia</text><ellipse cx="221.0992" cy="757.0573" fill="#F2F8F7" rx="66.0992" ry="15.6198" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="101" x="170.5992" y="761.1238">Confirmar toma</text><ellipse cx="220.977" cy="821.7329" fill="#F2F8F7" rx="56.977" ry="13.7954" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="77" x="182.477" y="825.7993">Omitir toma</text><ellipse cx="220.9053" cy="886.8186" fill="#F2F8F7" rx="64.9053" ry="15.3811" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="98" x="171.9053" y="890.885">Posponer toma</text><ellipse cx="221.1104" cy="960.863" fill="#F2F8F7" rx="80.6104" ry="23.4255" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="115" x="163.6104" y="958.7773">Consultar historial</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="91" x="175.6104" y="973.9101">de adherencia</text><ellipse cx="221.2081" cy="1076.9791" fill="#F2F8F7" rx="78.2081" ry="18.0416" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="130" x="156.2081" y="1081.0455">Invitar a un cuidador</text><ellipse cx="221.0456" cy="1152.9748" fill="#F2F8F7" rx="83.0456" ry="22.5373" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="124" x="159.0456" y="1152.2502">Responder solicitud</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="64" x="189.0456" y="1167.3831">de vinculo</text><ellipse cx="220.9459" cy="1234.0994" fill="#F2F8F7" rx="74.9459" ry="23.1619" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="108" x="166.9459" y="1232.4093">Ajustar permisos</text><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="78" x="181.9459" y="1247.5421">del cuidador</text><ellipse cx="221.1998" cy="1307.9775" fill="#F2F8F7" rx="65.6998" ry="15.54" style="stroke: #0E6E62; stroke-width: 1.2;"/><text fill="#101817" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="100" x="171.1998" y="1312.0439">Revocar acceso</text><!--MD5=[363c8216f9d6bd18ac5da32510276bd5]
+entity PAC--><ellipse cx="33.5" cy="656.9375" fill="#FFFFFF" rx="8" ry="8" style="stroke: #0E6E62; stroke-width: 1.5;"/><path d="M33.5,664.9375 L33.5,691.9375 M20.5,672.9375 L46.5,672.9375 M33.5,691.9375 L20.5,706.9375 M33.5,691.9375 L46.5,706.9375 " fill="none" style="stroke: #0E6E62; stroke-width: 1.5;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="55" x="6" y="721.5044">Paciente</text><path d="M724,502.4375 L724,528.9375 L661.29,532.9375 L724,536.9375 L724,563.6563 A0,0 0 0 0 724,563.6563 L893,563.6563 A0,0 0 0 0 893,563.6563 L893,512.4375 L883,502.4375 L724,502.4375 A0,0 0 0 0 724,502.4375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M883,502.4375 L883,512.4375 L893,512.4375 L883,502.4375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="118" x="730" y="517.6479">Suspende, no borra.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="118" x="730" y="530.4526">El historial de tomas</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="105" x="730" y="543.2573">se conserva como</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="148" x="730" y="556.062">evidencia del tratamiento.</text><path d="M491.5,1283.9375 L491.5,1303.9375 L286.77,1307.9375 L491.5,1311.9375 L491.5,1332.3516 A0,0 0 0 0 491.5,1332.3516 L645.5,1332.3516 A0,0 0 0 0 645.5,1332.3516 L645.5,1293.9375 L635.5,1283.9375 L491.5,1283.9375 A0,0 0 0 0 491.5,1283.9375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M635.5,1283.9375 L635.5,1293.9375 L645.5,1293.9375 L635.5,1283.9375 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="114" x="497.5" y="1299.1479">Disponible siempre.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="133" x="497.5" y="1311.9526">El paciente es el dueno</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="132" x="497.5" y="1324.7573">de sus datos de salud.</text><!--MD5=[219afeaacc80dee366485ed9debdc3f7]
+link PAC to UC01--><path d="M14,647.0375 C14,516.1575 14,99.9375 14,99.9375 C14,99.9375 161.88,99.9375 161.88,99.9375 " fill="none" id="PAC-&gt;UC01" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="166.88,99.9375,157.88,95.9375,161.88,99.9375,157.88,103.9375,166.88,99.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[71940d4fdc11ced1a8dd6885684129fd]
+link PAC to UC02--><path d="M22,647.0575 C22,525.8475 22,162.9375 22,162.9375 C22,162.9375 156.83,162.9375 156.83,162.9375 " fill="none" id="PAC-&gt;UC02" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="161.83,162.9375,152.83,158.9375,156.83,162.9375,152.83,166.9375,161.83,162.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[4deab73fb10800cb7661170cc5d89632]
+link PAC to UC04--><path d="M30,647.1775 C30,538.0275 30,235.9375 30,235.9375 C30,235.9375 126.37,235.9375 126.37,235.9375 " fill="none" id="PAC-&gt;UC04" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="131.37,235.9375,122.37,231.9375,126.37,235.9375,122.37,239.9375,131.37,235.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[877f67346a86884a73363102ff37ab8f]
+link PAC to UC05--><path d="M38,647.3075 C38,550.4475 38,304.9375 38,304.9375 C38,304.9375 476.49,304.9375 476.49,304.9375 " fill="none" id="PAC-&gt;UC05" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="481.49,304.9375,472.49,300.9375,476.49,304.9375,472.49,308.9375,481.49,304.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[851d889baf0a1f32f0b7e4767c9661c2]
+link PAC to UC06--><path d="M46,647.3075 C46,565.2375 46,380.9375 46,380.9375 C46,380.9375 471.29,380.9375 471.29,380.9375 " fill="none" id="PAC-&gt;UC06" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="476.29,380.9375,467.29,376.9375,471.29,380.9375,467.29,384.9375,476.29,380.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[4c46a53521b8a3e160674dae1146ba8d]
+link PAC to UC07--><path d="M54,647.3475 C54,582.0875 54,456.9375 54,456.9375 C54,456.9375 476.22,456.9375 476.22,456.9375 " fill="none" id="PAC-&gt;UC07" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="481.22,456.9375,472.22,452.9375,476.22,456.9375,472.22,460.9375,481.22,456.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[c26d165fb1aaf490a7d825bc4de29efc]
+link PAC to UC08--><path d="M61.09,653.4375 C158.44,653.4375 480,653.4375 480,653.4375 C480,653.4375 480,544.0775 480,544.0775 " fill="none" id="PAC-&gt;UC08" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="480,539.0775,476,548.0775,480,544.0775,484,548.0775,480,539.0775" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[0f22e5625ba0c78740f3530e405772ed]
+link PAC to UC09--><path d="M61.12,659.4375 C159.37,659.4375 486,659.4375 486,659.4375 C486,659.4375 486,619.3375 486,619.3375 " fill="none" id="PAC-&gt;UC09" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="486,614.3375,482,623.3375,486,619.3375,490,623.3375,486,614.3375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[0a454e56f17ba1636398eba576a132b5]
+link PAC to UC10--><path d="M61.17,685.9375 C61.17,685.9375 124.67,685.9375 124.67,685.9375 " fill="none" id="PAC-&gt;UC10" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="129.67,685.9375,120.67,681.9375,124.67,685.9375,120.67,689.9375,129.67,685.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[88ac1b0e6e5c1d630d8332647e76c73a]
+link PAC to UC11--><path d="M55,724.7575 C55,741.3375 55,756.9375 55,756.9375 C55,756.9375 149.92,756.9375 149.92,756.9375 " fill="none" id="PAC-&gt;UC11" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="154.92,756.9375,145.92,752.9375,149.92,756.9375,145.92,760.9375,154.92,756.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[05733f925d4cff75f4e5a139ee6d3cd1]
+link PAC to UC12--><path d="M48,724.5475 C48,764.7575 48,821.9375 48,821.9375 C48,821.9375 158.87,821.9375 158.87,821.9375 " fill="none" id="PAC-&gt;UC12" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="163.87,821.9375,154.87,817.9375,158.87,821.9375,154.87,825.9375,163.87,821.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[2ac0509078a9b71033022108221efa12]
+link PAC to UC13--><path d="M41,724.6875 C41,783.0975 41,886.9375 41,886.9375 C41,886.9375 150.76,886.9375 150.76,886.9375 " fill="none" id="PAC-&gt;UC13" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="155.76,886.9375,146.76,882.9375,150.76,886.9375,146.76,890.9375,155.76,886.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[a7e98eb6624c10307c7587a62858dff9]
+link PAC to UC14--><path d="M61.22,715.4375 C95.1,715.4375 148,715.4375 148,715.4375 C148,715.4375 148,946.0075 148,946.0075 " fill="none" id="PAC-&gt;UC14" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="148,951.0075,152,942.0075,148,946.0075,144,942.0075,148,951.0075" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[a4afc9f66a0f732048c5cb3b31292647]
+link PAC to UC15--><path d="M34,724.4975 C34,823.1375 34,1076.9375 34,1076.9375 C34,1076.9375 137.78,1076.9375 137.78,1076.9375 " fill="none" id="PAC-&gt;UC15" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="142.78,1076.9375,133.78,1072.9375,137.78,1076.9375,133.78,1080.9375,142.78,1076.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[507bae9e44ad27dec0a094d91a4ec4b6]
+link PAC to UC16--><path d="M27,724.5475 C27,836.4375 27,1152.9375 27,1152.9375 C27,1152.9375 132.88,1152.9375 132.88,1152.9375 " fill="none" id="PAC-&gt;UC16" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="137.88,1152.9375,128.88,1148.9375,132.88,1152.9375,128.88,1156.9375,137.88,1152.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[3e25bdaac829e26f43be01b96abf6c45]
+link PAC to UC17--><path d="M20,724.4675 C20,849.2075 20,1233.9375 20,1233.9375 C20,1233.9375 140.87,1233.9375 140.87,1233.9375 " fill="none" id="PAC-&gt;UC17" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="145.87,1233.9375,136.87,1229.9375,140.87,1233.9375,136.87,1237.9375,145.87,1233.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[587fc6365e0f3e6757d57040335ecc94]
+link PAC to UC18--><path d="M13,724.8475 C13,861.0175 13,1307.9375 13,1307.9375 C13,1307.9375 150.47,1307.9375 150.47,1307.9375 " fill="none" id="PAC-&gt;UC18" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="155.47,1307.9375,146.47,1303.9375,150.47,1307.9375,146.47,1311.9375,155.47,1307.9375" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[ccf767629192faf365c714ebc9917997]
+link UC11 to UC09--><path d="M287.25,756.9375 C366.61,756.9375 489,756.9375 489,756.9375 C489,756.9375 489,621.4775 489,621.4775 " fill="none" id="UC11-&gt;UC09" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#4E5C59" points="489,616.4775,485,625.4775,489,621.4775,493,625.4775,489,616.4775" style="stroke: #4E5C59; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="60" x="367" y="678.0044">«extend»</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="92" x="351" y="693.1372">si el inventario</text><text fill="#000000" font-family="Helvetica" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="71" x="361.5" y="708.27">queda bajo</text><!--MD5=[3784a748df71d1a7e52a911756168a05]
+@startuml casos-de-uso-paciente
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam linetype ortho
+
+skinparam actor {
+  BorderColor #0E6E62
+  BackgroundColor #FFFFFF
+}
+skinparam usecase {
+  BorderColor #0E6E62
+  BackgroundColor #F2F8F7
+  FontColor #101817
+  BorderThickness 1.2
+}
+skinparam package {
+  BorderColor #A9BAB7
+  BackgroundColor #FCFDFD
+  FontColor #4E5C59
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam ArrowColor #4E5C59
+
+title <b>Chronova — Casos de uso del Paciente</b>\n<size:11>Adulto mayor o persona con enfermedad cronica que sigue un tratamiento</size>
+
+left to right direction
+
+actor "Paciente" as PAC
+
+package "Acceso y configuracion" {
+  usecase "Registrarse" as UC01
+  usecase "Iniciar sesion" as UC02
+  usecase "Ajustar preferencias\nde accesibilidad" as UC04
+}
+
+package "Gestion del tratamiento" {
+  usecase "Registrar medicamento" as UC05
+  usecase "Consultar medicamentos" as UC06
+  usecase "Modificar medicamento" as UC07
+  usecase "Suspender medicamento" as UC08
+  usecase "Reabastecer inventario" as UC09
+}
+
+package "Seguimiento diario" {
+  usecase "Consultar agenda del dia" as UC10
+  usecase "Confirmar toma" as UC11
+  usecase "Omitir toma" as UC12
+  usecase "Posponer toma" as UC13
+  usecase "Consultar historial\nde adherencia" as UC14
+}
+
+package "Control de acompanamiento" {
+  usecase "Invitar a un cuidador" as UC15
+  usecase "Responder solicitud\nde vinculo" as UC16
+  usecase "Ajustar permisos\ndel cuidador" as UC17
+  usecase "Revocar acceso" as UC18
+}
+
+PAC - -> UC01
+PAC - -> UC02
+PAC - -> UC04
+PAC - -> UC05
+PAC - -> UC06
+PAC - -> UC07
+PAC - -> UC08
+PAC - -> UC09
+PAC - -> UC10
+PAC - -> UC11
+PAC - -> UC12
+PAC - -> UC13
+PAC - -> UC14
+PAC - -> UC15
+PAC - -> UC16
+PAC - -> UC17
+PAC - -> UC18
+
+UC11 ..> UC09 : <<extend>>\nsi el inventario\nqueda bajo
+
+note right of UC08
+  Suspende, no borra.
+  El historial de tomas
+  se conserva como
+  evidencia del tratamiento.
+end note
+
+note right of UC18
+  Disponible siempre.
+  El paciente es el dueno
+  de sus datos de salud.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Ubuntu-124.04
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

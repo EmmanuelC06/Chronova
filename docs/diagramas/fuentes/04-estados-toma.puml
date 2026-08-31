@@ -1,0 +1,72 @@
+@startuml estados-toma
+' ============================================================
+'  Chronova — Diagrama de estados de la entidad Toma
+'  Refleja backend/src/domain/toma/Toma.ts
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+
+skinparam state {
+  BorderColor #0E6E62
+  BackgroundColor #F2F8F7
+  FontColor #101817
+  StartColor #0E6E62
+  EndColor #101817
+  BorderThickness 1.3
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+
+[*] --> PENDIENTE : programar()\n<i>al generar la agenda del dia</i>
+
+state PENDIENTE #F2F8F7 : La toma existe y espera respuesta.\nEs la clave del proyecto: el registro\nse crea aunque el paciente no haga nada,\nasi el olvido queda documentado.
+
+state POSPUESTA #FEF6E9 : Se corrio la hora.\nvecesPospuesta <= 3
+
+state TOMADA #E8F6EC : resueltaEn registrado\nSe descuenta el inventario
+
+state OMITIDA #FBEAE9 : resueltaEn registrado\nNo se descuenta inventario
+
+PENDIENTE --> TOMADA : confirmar(paciente | cuidador)
+PENDIENTE --> OMITIDA : omitir(paciente | cuidador)
+PENDIENTE --> POSPUESTA : posponer(5..180 min)
+
+POSPUESTA --> TOMADA : confirmar()
+POSPUESTA --> OMITIDA : omitir()
+POSPUESTA --> POSPUESTA : posponer()\n[vecesPospuesta < 3]
+
+PENDIENTE --> OMITIDA : cerrarPorFaltaDeRespuesta()\n<i>tarea automatica</i>\n[ahora > programada + minutosDeGracia]
+POSPUESTA --> OMITIDA : cerrarPorFaltaDeRespuesta()\n<i>tarea automatica</i>
+
+TOMADA --> [*]
+OMITIDA --> [*]
+
+note right of POSPUESTA
+  Al cuarto intento de posponer se
+  lanza ErrorDeReglaDeNegocio.
+  El limite evita que aplazar se
+  convierta en una forma silenciosa
+  de nunca tomar el medicamento.
+end note
+
+note bottom of OMITIDA
+  <b>origenDelRegistro</b> distingue quien cerro la toma:
+  PACIENTE  — la marco el mismo
+  CUIDADOR  — la marco quien lo acompana
+  SISTEMA   — nadie respondio y vencio el plazo
+end note
+
+note top of TOMADA
+  TOMADA y OMITIDA son estados finales.
+  Intentar cambiarlos lanza
+  ErrorDeReglaDeNegocio: un registro
+  clinico no se reescribe.
+end note
+
+@enduml

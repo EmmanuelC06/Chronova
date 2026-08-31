@@ -1,0 +1,103 @@
+@startuml casos-de-uso-paciente
+' ============================================================
+'  Chronova — Casos de uso del actor Paciente
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam linetype ortho
+
+skinparam actor {
+  BorderColor #0E6E62
+  BackgroundColor #FFFFFF
+}
+skinparam usecase {
+  BorderColor #0E6E62
+  BackgroundColor #F2F8F7
+  FontColor #101817
+  BorderThickness 1.2
+}
+skinparam package {
+  BorderColor #A9BAB7
+  BackgroundColor #FCFDFD
+  FontColor #4E5C59
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam ArrowColor #4E5C59
+
+title <b>Chronova — Casos de uso del Paciente</b>\n<size:11>Adulto mayor o persona con enfermedad cronica que sigue un tratamiento</size>
+
+left to right direction
+
+actor "Paciente" as PAC
+
+package "Acceso y configuracion" {
+  usecase "Registrarse" as UC01
+  usecase "Iniciar sesion" as UC02
+  usecase "Ajustar preferencias\nde accesibilidad" as UC04
+}
+
+package "Gestion del tratamiento" {
+  usecase "Registrar medicamento" as UC05
+  usecase "Consultar medicamentos" as UC06
+  usecase "Modificar medicamento" as UC07
+  usecase "Suspender medicamento" as UC08
+  usecase "Reabastecer inventario" as UC09
+}
+
+package "Seguimiento diario" {
+  usecase "Consultar agenda del dia" as UC10
+  usecase "Confirmar toma" as UC11
+  usecase "Omitir toma" as UC12
+  usecase "Posponer toma" as UC13
+  usecase "Consultar historial\nde adherencia" as UC14
+}
+
+package "Control de acompanamiento" {
+  usecase "Invitar a un cuidador" as UC15
+  usecase "Responder solicitud\nde vinculo" as UC16
+  usecase "Ajustar permisos\ndel cuidador" as UC17
+  usecase "Revocar acceso" as UC18
+}
+
+PAC --> UC01
+PAC --> UC02
+PAC --> UC04
+PAC --> UC05
+PAC --> UC06
+PAC --> UC07
+PAC --> UC08
+PAC --> UC09
+PAC --> UC10
+PAC --> UC11
+PAC --> UC12
+PAC --> UC13
+PAC --> UC14
+PAC --> UC15
+PAC --> UC16
+PAC --> UC17
+PAC --> UC18
+
+UC11 ..> UC09 : <<extend>>\nsi el inventario\nqueda bajo
+
+note right of UC08
+  Suspende, no borra.
+  El historial de tomas
+  se conserva como
+  evidencia del tratamiento.
+end note
+
+note right of UC18
+  Disponible siempre.
+  El paciente es el dueno
+  de sus datos de salud.
+end note
+
+@enduml

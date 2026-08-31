@@ -244,7 +244,7 @@ cd chronova/backend
 npm test
 ```
 
-Deben pasar 70 pruebas. Si alguna falla, algo se rompió al modificar el código.
+Deben pasar 71 pruebas. Si alguna falla, algo se rompió al modificar el código.
 
 ```bash
 npm run typecheck

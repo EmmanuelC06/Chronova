@@ -1,0 +1,97 @@
+@startuml casos-de-uso-cuidador
+' ============================================================
+'  Chronova — Casos de uso del Cuidador y del Sistema
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam linetype ortho
+
+skinparam actor {
+  BorderColor #0E6E62
+  BackgroundColor #FFFFFF
+}
+skinparam usecase {
+  BorderColor #0E6E62
+  BackgroundColor #F2F8F7
+  FontColor #101817
+  BorderThickness 1.2
+}
+skinparam package {
+  BorderColor #A9BAB7
+  BackgroundColor #FCFDFD
+  FontColor #4E5C59
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam ArrowColor #4E5C59
+
+title <b>Chronova — Casos de uso del Cuidador y del Sistema</b>\n<size:11>Familiar, acompanante o profesional de la salud, y la tarea automatica del servidor</size>
+
+left to right direction
+
+actor "Cuidador" as CUI
+actor "Sistema\n<size:10>(tarea programada)</size>" as SIS
+actor "Paciente" as PAC
+
+package "Acceso" {
+  usecase "Registrarse" as UC01
+  usecase "Iniciar sesion" as UC02
+}
+
+package "Vinculacion" {
+  usecase "Solicitar acceso\na un paciente" as UC15
+}
+
+package "Seguimiento" {
+  usecase "Consultar panel\nde pacientes" as UC19
+  usecase "Consultar medicamentos\ndel paciente" as UC06
+  usecase "Consultar historial\nde adherencia" as UC14
+  usecase "Registrar toma en\nnombre del paciente" as UC11
+}
+
+package "Procesos automaticos" {
+  usecase "Cerrar tomas\nsin respuesta" as UC20
+  usecase "Notificar al cuidador" as UC21
+}
+
+CUI --> UC01
+CUI --> UC02
+CUI --> UC15
+CUI --> UC19
+CUI --> UC06
+CUI --> UC14
+CUI --> UC11
+
+SIS --> UC20
+UC20 ..> UC21 : <<include>>
+UC21 --> CUI
+
+UC15 ..> PAC : requiere\naprobacion de
+
+note bottom of UC19
+  Ordenado por prioridad clinica:
+  primero quien requiere atencion,
+  luego por adherencia ascendente.
+end note
+
+note bottom of UC11
+  Solo si el paciente concedio
+  el permiso puedeRegistrarTomas.
+  Por defecto NO lo tiene.
+end note
+
+note bottom of UC20
+  Se ejecuta cada 15 minutos.
+  Cierra las tomas que vencieron
+  el margen de gracia del paciente
+  y las marca con origen SISTEMA.
+end note
+
+@enduml

@@ -15,7 +15,7 @@ Medellín, Colombia · 2026
 chronova/
 ├── backend/     API en Node + TypeScript, arquitectura hexagonal, PostgreSQL
 ├── mobile/      App móvil en React Native (Expo) + TypeScript
-└── docs/        Guía de instalación, arquitectura y referencia de la API
+└── docs/        Guía de instalación, arquitectura, API y diagramas UML
 ```
 
 Chronova reemplaza al prototipo MedAlerta. Conserva su propósito y sus módulos, pero está reconstruida sobre una arquitectura que separa las reglas del negocio de la tecnología que las ejecuta.
@@ -100,7 +100,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Arranca el servidor y se recarga solo al guardar cambios |
-| `npm test` | Ejecuta las 70 pruebas automáticas |
+| `npm test` | Ejecuta las 71 pruebas automáticas |
 | `npm run typecheck` | Revisa que no haya errores de tipos |
 | `npm run build` | Compila para producción |
 | `npm run db:migrate` | Crea las tablas en PostgreSQL |
@@ -124,6 +124,8 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Qué es la arquitectura hexagonal y cómo está aplicada aquí |
 | [docs/API.md](docs/API.md) | Todos los endpoints con ejemplos listos para copiar |
 | [docs/DEL-MVP-A-CHRONOVA.md](docs/DEL-MVP-A-CHRONOVA.md) | Qué cambió respecto a MedAlerta y por qué |
+| [docs/diagramas/](docs/diagramas/) | Los 8 diagramas UML, en PNG, SVG y fuente editable |
+| [docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md](docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md) | Subir el proyecto a GitHub y traer cambios sin credenciales |
 
 ---
 
@@ -142,6 +144,6 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 
 ## Estado del proyecto
 
-- Backend completo, con 70 pruebas automáticas en verde.
+- Backend completo, con 71 pruebas automáticas en verde.
 - App móvil con las pantallas principales conectadas a la API.
 - Pendiente: notificaciones push desde el servidor, exportación de informes en PDF para el médico, y pruebas de usabilidad con adultos mayores reales.

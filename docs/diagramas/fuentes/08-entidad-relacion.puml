@@ -1,0 +1,153 @@
+@startuml entidad-relacion
+' ============================================================
+'  Chronova — Modelo entidad-relacion
+'  Refleja backend/src/infrastructure/persistence/postgres/esquema.sql
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam roundcorner 4
+
+skinparam class {
+  BorderColor #0E6E62
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #DDEDE9
+  FontColor #101817
+  AttributeFontColor #4E5C59
+  BorderThickness 1.2
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+
+hide circle
+hide methods
+
+entity "pacientes" as pacientes {
+  <b>PK</b> id : UUID
+  --
+  nombre : TEXT <<NN>>
+  <b>UQ</b> email : TEXT <<NN>>
+  telefono : TEXT
+  fecha_de_nacimiento : DATE
+  contrasena_cifrada : TEXT <<NN>>
+  preferencias : JSONB <<NN>>
+  activo : BOOLEAN <<NN>>
+  creado_en : TIMESTAMPTZ <<NN>>
+}
+
+entity "cuidadores" as cuidadores {
+  <b>PK</b> id : UUID
+  --
+  nombre : TEXT <<NN>>
+  <b>UQ</b> email : TEXT <<NN>>
+  telefono : TEXT
+  contrasena_cifrada : TEXT <<NN>>
+  rol : TEXT
+  activo : BOOLEAN <<NN>>
+  creado_en : TIMESTAMPTZ <<NN>>
+}
+
+entity "medicamentos" as medicamentos {
+  <b>PK</b> id : UUID
+  <b>FK</b> paciente_id : UUID <<NN>>
+  --
+  nombre : TEXT <<NN>>
+  dosis_cantidad : NUMERIC(10,2) <<NN>>
+  dosis_unidad : TEXT <<NN>>
+  frecuencia_tipo : TEXT <<NN>>
+  frecuencia_dias : SMALLINT[] <<NN>>
+  frecuencia_intervalo : INTEGER <<NN>>
+  horarios : TEXT[] <<NN>>
+  fecha_inicio : DATE <<NN>>
+  fecha_fin : DATE
+  instrucciones : TEXT
+  stock_unidades : INTEGER <<NN>>
+  stock_umbral : INTEGER <<NN>>
+  activo : BOOLEAN <<NN>>
+  creado_en : TIMESTAMPTZ <<NN>>
+  actualizado_en : TIMESTAMPTZ <<NN>>
+}
+
+entity "tomas" as tomas {
+  <b>PK</b> id : UUID
+  <b>FK</b> medicamento_id : UUID <<NN>>
+  <b>FK</b> paciente_id : UUID <<NN>>
+  --
+  programada_para : TIMESTAMPTZ <<NN>>
+  <b>UQ*</b> programada_originalmente_para : TIMESTAMPTZ <<NN>>
+  estado : TEXT <<NN>>
+  resuelta_en : TIMESTAMPTZ
+  origen_del_registro : TEXT
+  registrada_por_id : UUID
+  observaciones : TEXT
+  veces_pospuesta : INTEGER <<NN>>
+}
+
+entity "vinculos" as vinculos {
+  <b>PK</b> id : UUID
+  <b>FK</b> cuidador_id : UUID <<NN>>
+  <b>FK</b> paciente_id : UUID <<NN>>
+  --
+  estado : TEXT <<NN>>
+  parentesco : TEXT
+  permisos : JSONB <<NN>>
+  solicitado_por : TEXT <<NN>>
+  creado_en : TIMESTAMPTZ <<NN>>
+  resuelto_en : TIMESTAMPTZ
+}
+
+pacientes ||--o{ medicamentos : "sigue"
+pacientes ||--o{ tomas : "registra"
+medicamentos ||--o{ tomas : "genera"
+pacientes ||--o{ vinculos : "autoriza"
+cuidadores ||--o{ vinculos : "acompana"
+
+note bottom of tomas
+  <b>UNIQUE (medicamento_id, programada_originalmente_para)</b>
+  Impide que la agenda de un dia se duplique si dos
+  peticiones la generan a la vez. El adaptador usa
+  ON CONFLICT DO NOTHING para que ese choque no
+  se convierta en un error para el usuario.
+
+  <b>CHECK</b> estado IN (PENDIENTE, POSPUESTA, TOMADA, OMITIDA)
+  <b>CHECK</b> origen_del_registro IN (PACIENTE, CUIDADOR, SISTEMA)
+
+  Todas las claves foraneas son ON DELETE CASCADE.
+end note
+
+note right of vinculos
+  <b>UNIQUE (cuidador_id, paciente_id)</b>
+  Una sola relacion por pareja.
+
+  <b>CHECK</b> estado IN (PENDIENTE, ACEPTADO,
+                    RECHAZADO, REVOCADO)
+
+  <b>permisos</b> es JSONB porque el conjunto de
+  permisos puede crecer sin migrar la tabla.
+end note
+
+note left of medicamentos
+  <b>horarios</b> es TEXT[]: un mismo tratamiento
+  puede tener varias tomas al dia. En el MVP
+  anterior era una sola columna TIME, lo que
+  obligaba a duplicar el medicamento por cada
+  horario.
+
+  <b>dosis</b> se guarda separada en cantidad y
+  unidad. Como texto libre no se podia calcular
+  el consumo de inventario.
+end note
+
+note top of pacientes
+  <b>preferencias</b> (JSONB) guarda tamano de letra,
+  contraste, alertas y minutos de gracia. Vive en el
+  servidor para que acompanen al paciente en cualquier
+  dispositivo donde inicie sesion.
+end note
+
+@enduml

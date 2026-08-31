@@ -1,0 +1,286 @@
+@startuml clases-dominio
+' ============================================================
+'  Chronova — Diagrama de clases de la capa de dominio
+'  Refleja backend/src/domain/
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam roundcorner 6
+
+skinparam class {
+  BorderColor #0E6E62
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #DDEDE9
+  FontColor #101817
+  AttributeFontColor #4E5C59
+  BorderThickness 1.2
+}
+skinparam enum {
+  BorderColor #40606E
+  BackgroundColor #FFFFFF
+  HeaderBackgroundColor #DFE9ED
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam package {
+  BorderColor #C2CFCC
+  BackgroundColor #FBFCFC
+  FontColor #4E5C59
+}
+
+hide empty members
+
+' =================== ENTIDADES ===================
+
+
+  class Paciente {
+    + {readonly} id : Identificador
+    + {readonly} creadoEn : Date
+    - nombre : string
+    - email : Email
+    - telefono : Telefono
+    - fechaDeNacimiento : Date
+    - contrasenaCifrada : string
+    - preferencias : PreferenciasDeAccesibilidad
+    - activo : boolean
+    --
+    + {static} registrar(datos) : Paciente
+    + edadEn(fecha) : number
+    + esAdultoMayorEn(fecha) : boolean
+    + actualizarPerfil(cambios)
+    + cambiarPreferencias(prefs)
+    + cambiarContrasena(hash)
+    + desactivar()
+  }
+
+  class Cuidador {
+    + {readonly} id : Identificador
+    + {readonly} creadoEn : Date
+    - nombre : string
+    - email : Email
+    - telefono : Telefono
+    - contrasenaCifrada : string
+    - rol : string
+    - activo : boolean
+    --
+    + {static} registrar(datos) : Cuidador
+    + actualizarPerfil(cambios)
+    + cambiarContrasena(hash)
+    + desactivar()
+  }
+
+  class Medicamento {
+    + {readonly} id : Identificador
+    + {readonly} pacienteId : Identificador
+    - nombre : string
+    - dosis : Dosis
+    - frecuencia : Frecuencia
+    - horarios : Hora[]
+    - fechaInicio : Date
+    - fechaFin : Date
+    - instrucciones : string
+    - stock : Stock
+    - activo : boolean
+    --
+    + {static} crear(datos) : Medicamento
+    + estaVigenteEn(fecha) : boolean
+    + <b>horariosDelDia(fecha)</b> : Hora[]
+    + registrarConsumoDeUnaDosis()
+    + reabastecer(unidades)
+    + definirUmbralDeAlerta(umbral)
+    + actualizar(cambios)
+    + suspender()
+    + perteneceA(pacienteId) : boolean
+  }
+
+  class Toma {
+    + {readonly} id : Identificador
+    + {readonly} medicamentoId : Identificador
+    + {readonly} pacienteId : Identificador
+    + {readonly} programadaOriginalmentePara : Date
+    - programadaPara : Date
+    - estado : EstadoDeToma
+    - resueltaEn : Date
+    - origenDelRegistro : OrigenDeRegistro
+    - registradaPorId : Identificador
+    - observaciones : string
+    - vecesPospuesta : number
+    --
+    + {static} programar(datos) : Toma
+    + <b>confirmar(datos)</b>
+    + <b>omitir(datos)</b>
+    + <b>posponer(minutos, ahora)</b>
+    + cerrarPorFaltaDeRespuesta(ahora)
+    + puntualidad(tolerancia) : Puntualidad
+    + minutosDeDesfase() : number
+    + estaVencidaEn(ahora, gracia) : boolean
+  }
+
+  class Vinculo {
+    + {readonly} id : Identificador
+    + {readonly} cuidadorId : Identificador
+    + {readonly} pacienteId : Identificador
+    + {readonly} solicitadoPor : Origen
+    - estado : EstadoDeVinculo
+    - parentesco : string
+    - permisos : PermisosDelCuidador
+    - resueltoEn : Date
+    --
+    + {static} solicitar(datos) : Vinculo
+    + aceptar(ahora)
+    + rechazar(ahora)
+    + revocar(ahora)
+    + cambiarPermisos(nuevos)
+    + <b>autorizar(permiso)</b> : boolean
+  }
+
+' =================== VALUE OBJECTS ===================
+
+
+  class Dosis <<VO>> {
+    + {readonly} cantidad : number
+    + {readonly} unidad : UnidadDeDosis
+    --
+    + {static} desde(cantidad, unidad) : Dosis
+    + descripcion : string
+    + <b>unidadesConsumidasPorToma</b> : number
+  }
+
+  class Stock <<VO>> {
+    + {readonly} unidadesDisponibles : number
+    + {readonly} umbralDeAlerta : number
+    --
+    + {static} desde(unidades, umbral) : Stock
+    + {static} sinControl() : Stock
+    + <b>necesitaReabastecimiento</b> : boolean
+    + estaAgotado : boolean
+    + descontar(unidades) : Stock
+    + reabastecer(unidades) : Stock
+  }
+
+  class Frecuencia <<VO>> {
+    + {readonly} tipo : TipoDeFrecuencia
+    + {readonly} diasDeLaSemana : number[]
+    + {readonly} intervaloEnDias : number
+    --
+    + {static} diaria() : Frecuencia
+    + {static} diasDeLaSemana(dias) : Frecuencia
+    + {static} cadaNDias(n) : Frecuencia
+    + <b>aplicaEn(fecha, inicio)</b> : boolean
+  }
+
+  class PreferenciasDeAccesibilidad <<VO>> {
+    + {readonly} tamanoDeLetra : TamanoDeLetra
+    + {readonly} altoContraste : boolean
+    + {readonly} alertasSonoras : boolean
+    + {readonly} alertasVibracion : boolean
+    + {readonly} minutosDeGracia : number
+  }
+
+  class Hora <<VO>> {
+    + {readonly} horas : number
+    + {readonly} minutos : number
+    --
+    + {static} desde(texto) : Hora
+    + enLaFecha(fecha) : Date
+  }
+
+  class Email <<VO>> {
+    + {readonly} valor : string
+    + {static} desde(valor) : Email
+  }
+
+  class Identificador <<VO>> {
+    + {readonly} valor : string
+    + {static} desde(valor) : Identificador
+    + esIgualA(otro) : boolean
+  }
+
+' =================== SERVICIO DE DOMINIO ===================
+
+class ResumenDeAdherencia <<servicio de dominio>> {
+  + {readonly} totalProgramadas : number
+  + {readonly} tomadas : number
+  + {readonly} omitidas : number
+  + {readonly} pendientes : number
+  --
+  + {static} <b>calcular(tomas, tolerancia)</b>
+  + porcentaje : number
+  + nivel : NivelDeAdherencia
+  + requiereAtencionDelCuidador : boolean
+}
+
+' =================== ENUMERACIONES ===================
+
+enum EstadoDeToma {
+  PENDIENTE
+  POSPUESTA
+  TOMADA
+  OMITIDA
+}
+
+enum EstadoDeVinculo {
+  PENDIENTE
+  ACEPTADO
+  RECHAZADO
+  REVOCADO
+}
+
+enum NivelDeAdherencia {
+  BUENA
+  REGULAR
+  BAJA
+  SIN_DATOS
+}
+
+' =================== RELACIONES ===================
+
+Paciente "1" *-- "1" PreferenciasDeAccesibilidad
+Paciente "1" o-- "0..*" Medicamento : sigue >
+Medicamento "1" *-- "1" Dosis
+Medicamento "1" *-- "1" Stock
+Medicamento "1" *-- "1" Frecuencia
+Medicamento "1" *-- "1..12" Hora : horarios
+Medicamento "1" o-- "0..*" Toma : genera >
+Paciente "1" o-- "0..*" Toma : registra >
+
+Paciente "1" -- "0..*" Vinculo
+Cuidador "1" -- "0..*" Vinculo : acompana a >
+
+Toma ..> EstadoDeToma
+Vinculo ..> EstadoDeVinculo
+ResumenDeAdherencia ..> NivelDeAdherencia
+ResumenDeAdherencia ..> Toma : calcula sobre >
+
+Paciente ..> Email
+Cuidador ..> Email
+Paciente ..> Identificador
+
+note top of ResumenDeAdherencia
+  <b>adherencia = tomadas / (tomadas + omitidas)</b>
+  Las tomas pendientes no cuentan: todavia
+  se pueden confirmar.
+  BUENA >= 80%   REGULAR >= 50%   BAJA < 50%
+end note
+
+note bottom of Toma
+  <b>programadaOriginalmentePara</b> nunca cambia.
+  La puntualidad se mide contra esa hora, no
+  contra la corrida por los aplazamientos: de lo
+  contrario posponer tres veces haria que toda
+  toma pareciera puntual.
+end note
+
+note right of Stock
+  Inmutable: descontar() y
+  reabastecer() devuelven un
+  Stock nuevo.
+end note
+
+@enduml
