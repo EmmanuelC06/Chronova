@@ -1,0 +1,6 @@
+export * from './errores.js';
+export * from './Identificador.js';
+export * from './Email.js';
+export * from './Telefono.js';
+export * from './Hora.js';
+export * from './fechas.js';

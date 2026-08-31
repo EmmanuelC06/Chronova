@@ -1,0 +1,62 @@
+import 'dotenv/config';
+
+export type ModoDePersistencia = 'memory' | 'postgres';
+
+export interface Entorno {
+  puerto: number;
+  entornoDeEjecucion: 'development' | 'production' | 'test';
+  jwtSecreto: string;
+  jwtDuracion: string;
+  persistencia: ModoDePersistencia;
+  urlDeBaseDeDatos: string;
+  baseDeDatosConSsl: boolean;
+  ventanaDeToleranciaEnMinutos: number;
+}
+
+function leerNumero(valor: string | undefined, porDefecto: number): number {
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero > 0 ? numero : porDefecto;
+}
+
+/**
+ * Lee y valida la configuracion una sola vez, al arrancar.
+ *
+ * Si falta algo critico, el servidor no levanta y dice exactamente que
+ * falta. Es preferible fallar al iniciar que descubrir a las 3 semanas
+ * que los tokens se estaban firmando con la clave de ejemplo.
+ */
+export function cargarEntorno(): Entorno {
+  const entornoDeEjecucion = (process.env.NODE_ENV ?? 'development') as Entorno['entornoDeEjecucion'];
+  const persistencia = (process.env.PERSISTENCE ?? 'memory') as ModoDePersistencia;
+
+  if (persistencia !== 'memory' && persistencia !== 'postgres') {
+    throw new Error(`PERSISTENCE debe ser "memory" o "postgres", no "${persistencia}".`);
+  }
+
+  const jwtSecreto = process.env.JWT_SECRET ?? '';
+  if (jwtSecreto.length < 16) {
+    throw new Error(
+      'Falta JWT_SECRET o es demasiado corto (minimo 16 caracteres). ' +
+        'Copia el archivo .env.example a .env y completa el valor.',
+    );
+  }
+  if (entornoDeEjecucion === 'production' && jwtSecreto.includes('cambia-esta-clave')) {
+    throw new Error('Estas usando el JWT_SECRET de ejemplo en produccion. Cambialo.');
+  }
+
+  const urlDeBaseDeDatos = process.env.DATABASE_URL ?? '';
+  if (persistencia === 'postgres' && urlDeBaseDeDatos.length === 0) {
+    throw new Error('PERSISTENCE=postgres requiere que definas DATABASE_URL en el archivo .env.');
+  }
+
+  return {
+    puerto: leerNumero(process.env.PORT, 4000),
+    entornoDeEjecucion,
+    jwtSecreto,
+    jwtDuracion: process.env.JWT_EXPIRES_IN ?? '7d',
+    persistencia,
+    urlDeBaseDeDatos,
+    baseDeDatosConSsl: process.env.DATABASE_SSL === 'true',
+    ventanaDeToleranciaEnMinutos: leerNumero(process.env.VENTANA_TOLERANCIA_MINUTOS, 60),
+  };
+}

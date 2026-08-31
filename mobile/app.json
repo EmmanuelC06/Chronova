@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Chronova",
+    "slug": "chronova",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "chronova",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.chronova.app",
+      "adaptiveIcon": { "backgroundColor": "#0E6E62" },
+      "permissions": ["SCHEDULE_EXACT_ALARM", "POST_NOTIFICATIONS", "VIBRATE"]
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.chronova.app"
+    },
+    "plugins": ["expo-router", "expo-notifications"],
+    "extra": {
+      "apiUrl": "http://192.168.1.10:4000"
+    }
+  }
+}

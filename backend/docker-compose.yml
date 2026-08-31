@@ -1,0 +1,23 @@
+# Levanta una base de datos PostgreSQL lista para Chronova:
+#   docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: chronova-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chronova
+      POSTGRES_PASSWORD: chronova
+      POSTGRES_DB: chronova
+    ports:
+      - "5432:5432"
+    volumes:
+      - chronova_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chronova"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  chronova_pgdata:
