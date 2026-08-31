@@ -156,30 +156,69 @@ La app abre en la pantalla de ingreso. Toca "Crear una cuenta", elige "Sigo un t
 
 ## Parte 3: base de datos real (PostgreSQL)
 
-Con `memory` los datos se borran cada vez que reinicias el servidor. Para que persistan:
+Con `memory` los datos se borran cada vez que reinicias el servidor. Para que persistan hay tres caminos. **Elige uno solo.**
 
-### Opción A: con Docker (más fácil)
+> Nada de esto es obligatorio para desarrollar. Con `PERSISTENCE=memory` la aplicación funciona completa. Lo único que ganas aquí es que los datos sobrevivan al reiniciar.
+
+### Opción A: PostgreSQL en la nube — recomendada, no instalas nada
+
+[Neon](https://neon.tech) ofrece PostgreSQL gratis y basta con copiar una línea. Es la opción con menos fricción, y además es la misma configuración que usarás cuando despliegues.
+
+1. Entra a [neon.tech](https://neon.tech) y crea una cuenta (puedes entrar con GitHub).
+2. Crea un proyecto llamado `chronova`.
+3. Copia la **connection string** que te muestra. Se ve así:
+
+   ```
+   postgresql://usuario:clave@ep-algo-123.us-east-2.aws.neon.tech/neondb?sslmode=require
+   ```
+
+4. En `backend/.env`:
+
+   ```
+   PERSISTENCE=postgres
+   DATABASE_URL=pega-aqui-la-cadena-de-neon
+   DATABASE_SSL=true
+   ```
+
+Ventaja adicional para un proyecto en pareja: ambos integrantes pueden conectarse a la misma base de datos desde sus computadores. [Supabase](https://supabase.com) funciona igual si prefieres esa.
+
+### Opción B: PostgreSQL instalado en tu computador
+
+Descarga el instalador de [postgresql.org/download/windows](https://www.postgresql.org/download/windows/) (o el de tu sistema). Durante la instalación te pide una contraseña para el usuario `postgres`: **anótala**, la vas a necesitar enseguida.
+
+Al terminar, abre pgAdmin (viene incluido) y crea una base de datos llamada `chronova`. Luego en `backend/.env`:
+
+```
+PERSISTENCE=postgres
+DATABASE_URL=postgresql://postgres:TU_CONTRASEÑA@localhost:5432/chronova
+DATABASE_SSL=false
+```
+
+Si tu contraseña tiene caracteres como `@`, `#` o `/`, hay que codificarlos. Lo más simple es usar una contraseña solo de letras y números.
+
+### Opción C: con Docker
+
+Solo si ya tienes Docker Desktop instalado y funcionando.
 
 ```bash
 cd chronova/backend
 docker compose up -d
 ```
 
-Levanta PostgreSQL configurado y listo.
+Y en `.env` basta con `PERSISTENCE=postgres`: el resto de valores por defecto ya coinciden con lo que levanta `docker-compose.yml`.
 
-### Opción B: PostgreSQL instalado en tu máquina
+> **Si sale este error:**
+>
+> ```
+> unable to get image 'postgres:16-alpine': error during connect:
+> open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified
+> ```
+>
+> Docker está instalado pero **el motor no está corriendo**. Abre Docker Desktop desde el menú inicio y espera a que el ícono de la ballena indique *Engine running*; luego repite el comando. Si `docker --version` responde que el comando no se reconoce, Docker no está instalado: usa la opción A, que es más rápida que instalarlo.
 
-Crea una base de datos llamada `chronova` y ajusta `DATABASE_URL` en el `.env` con tu usuario y contraseña.
+### Después, con cualquiera de las tres
 
-### Después, con cualquiera de las dos
-
-Cambia en `.env`:
-
-```
-PERSISTENCE=postgres
-```
-
-Y ejecuta:
+Ejecuta:
 
 ```bash
 npm run db:migrate    # crea las tablas
@@ -238,7 +277,15 @@ Pusiste `postgres` pero la línea `DATABASE_URL` está vacía o comentada.
 
 ### "ECONNREFUSED" al hacer `db:migrate`
 
-PostgreSQL no está corriendo. Con Docker: `docker compose up -d` y espera unos segundos.
+PostgreSQL no está aceptando conexiones. Con Docker, verifica que el contenedor esté arriba (`docker ps`). Con PostgreSQL instalado en Windows, revisa que el servicio `postgresql-x64-16` esté iniciado en Servicios. Con Neon, revisa que copiaste la cadena completa, incluyendo `?sslmode=require`.
+
+### "open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified"
+
+Es un error de Docker, no de Chronova: el motor no está corriendo. Abre Docker Desktop y espera a que diga *Engine running*. Si Docker no está instalado, usa la opción A de la Parte 3 (Neon), que toma menos tiempo que instalarlo.
+
+### "password authentication failed for user postgres"
+
+La contraseña en `DATABASE_URL` no coincide con la que pusiste al instalar PostgreSQL. Si tiene caracteres especiales (`@`, `#`, `/`, `:`), son los que rompen la cadena de conexión: lo más simple es cambiarla por una de solo letras y números desde pgAdmin.
 
 ### `npm install` falla
 

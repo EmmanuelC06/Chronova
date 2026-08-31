@@ -77,14 +77,25 @@ export class ObtenerAgendaDelDia {
       hasta: finDelDia,
     });
 
-    const nuevas = await this.materializarTomasFaltantes(
+    const candidatas = this.calcularTomasFaltantes(
       medicamentosActivos,
       yaProgramadas,
       dia,
       pacienteId,
     );
 
-    const todas = [...yaProgramadas, ...nuevas];
+    // Si hubo que crear tomas, se vuelve a leer el dia completo en vez de
+    // asumir que se insertaron todas. Otra peticion simultanea pudo haber
+    // creado algunas primero, y en ese caso las suyas son las buenas: las
+    // nuestras se descartaron y no existen en la base de datos.
+    let todas = yaProgramadas;
+    if (candidatas.length > 0) {
+      await this.tomas.programarSiNoExisten(candidatas);
+      todas = await this.tomas.listarPorPacienteEnRango(pacienteId, {
+        desde: dia,
+        hasta: finDelDia,
+      });
+    }
     const porMedicamento = new Map(medicamentosActivos.map((m) => [m.id.valor, m]));
 
     const elementos: ElementoDeAgenda[] = todas
@@ -114,14 +125,15 @@ export class ObtenerAgendaDelDia {
   }
 
   /**
-   * Crea las tomas del dia que aun no existen en la base de datos.
+   * Calcula que tomas del dia faltan por crear, comparando lo que exige
+   * la agenda de cada medicamento con lo que ya hay guardado.
    */
-  private async materializarTomasFaltantes(
+  private calcularTomasFaltantes(
     medicamentos: readonly Medicamento[],
     existentes: readonly Toma[],
     dia: Date,
     pacienteId: Identificador,
-  ): Promise<Toma[]> {
+  ): Toma[] {
     // Clave: medicamento + hora original. Asi una toma pospuesta sigue
     // "ocupando" su casilla y no se vuelve a generar.
     const clavesExistentes = new Set(
@@ -150,7 +162,6 @@ export class ObtenerAgendaDelDia {
       }
     }
 
-    if (nuevas.length > 0) await this.tomas.guardarVarias(nuevas);
     return nuevas;
   }
 }

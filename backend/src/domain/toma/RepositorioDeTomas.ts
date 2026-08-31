@@ -15,6 +15,21 @@ export interface RepositorioDeTomas {
   guardarVarias(tomas: readonly Toma[]): Promise<void>;
   buscarPorId(id: Identificador): Promise<Toma | null>;
 
+  /**
+   * Programa tomas nuevas, ignorando en silencio las que ya existan para
+   * el mismo medicamento y la misma hora original.
+   *
+   * Existe aparte de `guardarVarias` por una razon concreta: dos
+   * peticiones simultaneas pueden intentar generar la agenda del mismo
+   * dia a la vez (la app consulta al abrir y al refrescar). Una gana y
+   * la otra choca. Que ese choque sea normal y no un error es una
+   * decision que le corresponde al adaptador de persistencia, no al
+   * caso de uso.
+   *
+   * @returns cuantas tomas se insertaron realmente.
+   */
+  programarSiNoExisten(tomas: readonly Toma[]): Promise<number>;
+
   /** Todas las tomas de un paciente dentro de un rango, ordenadas por hora. */
   listarPorPacienteEnRango(pacienteId: Identificador, rango: RangoDeFechas): Promise<Toma[]>;
 

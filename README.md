@@ -71,26 +71,25 @@ Crea una paciente con tres medicamentos y su hija como cuidadora. Las credencial
 
 ## Con base de datos real
 
-```bash
-cd backend
-docker compose up -d          # levanta PostgreSQL
-```
-
-Cambia en `backend/.env`:
+Sirve cualquier PostgreSQL. La vía con menos fricción es una base gratuita en la nube: crea un proyecto en [Neon](https://neon.tech) o [Supabase](https://supabase.com), copia la connection string y ponla en `backend/.env`:
 
 ```
 PERSISTENCE=postgres
+DATABASE_URL=postgresql://usuario:clave@host/neondb?sslmode=require
+DATABASE_SSL=true
 ```
 
-Y crea las tablas:
+Si prefieres una base local, tienes dos opciones: instalar PostgreSQL en tu máquina, o levantarlo con Docker (`docker compose up -d` dentro de `backend/`, solo si ya tienes Docker Desktop corriendo). En ambos casos `DATABASE_SSL=false`.
+
+Luego, con cualquiera de las tres:
 
 ```bash
-npm run db:migrate
-npm run db:seed               # opcional
+npm run db:migrate            # crea las tablas
+npm run db:seed               # datos de ejemplo, opcional
 npm run dev
 ```
 
-Si no quieres usar Docker, sirve cualquier PostgreSQL: solo ajusta `DATABASE_URL`. Para desplegar gratis, [Neon](https://neon.tech) o [Supabase](https://supabase.com) funcionan sin cambios (pon `DATABASE_SSL=true`).
+Los tres caminos están explicados paso a paso, con sus errores típicos, en [docs/GUIA-DE-INICIO.md](docs/GUIA-DE-INICIO.md#parte-3-base-de-datos-real-postgresql).
 
 ---
 

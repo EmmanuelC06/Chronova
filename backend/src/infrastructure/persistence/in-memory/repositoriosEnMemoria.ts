@@ -133,6 +133,27 @@ export class RepositorioDeTomasEnMemoria implements RepositorioDeTomas {
     for (const toma of tomas) this.datos.set(toma.id.valor, toma.aPlano());
   }
 
+  async programarSiNoExisten(tomas: readonly Toma[]): Promise<number> {
+    // Equivalente al UNIQUE (medicamento_id, programada_originalmente_para)
+    // del esquema de PostgreSQL.
+    const ocupadas = new Set(
+      [...this.datos.values()].map(
+        (t) => `${t.medicamentoId}@${t.programadaOriginalmentePara}`,
+      ),
+    );
+
+    let insertadas = 0;
+    for (const toma of tomas) {
+      const plano = toma.aPlano();
+      const clave = `${plano.medicamentoId}@${plano.programadaOriginalmentePara}`;
+      if (ocupadas.has(clave)) continue;
+      this.datos.set(plano.id, plano);
+      ocupadas.add(clave);
+      insertadas += 1;
+    }
+    return insertadas;
+  }
+
   async buscarPorId(id: Identificador): Promise<Toma | null> {
     const plano = this.datos.get(id.valor);
     return plano ? Toma.desdePlano(plano) : null;

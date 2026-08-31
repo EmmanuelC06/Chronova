@@ -211,6 +211,32 @@ describe('Agenda del dia', () => {
     expect(agenda.elementos).toHaveLength(2);
   });
 
+  it('dos consultas simultaneas no duplican la agenda ni fallan', async () => {
+    // Caso real: la app pide la agenda al abrir y un refresco automatico
+    // la pide otra vez casi al mismo tiempo. Ambas ven el dia vacio y
+    // ambas intentan crear las mismas tomas.
+    const paciente = await crearPacienteDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const consulta = () =>
+      app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+        solicitante: paciente.solicitante,
+        pacienteId: paciente.id,
+        fecha: HOY,
+      });
+
+    const resultados = await Promise.all([consulta(), consulta(), consulta()]);
+
+    // Ninguna falla y todas ven exactamente la misma agenda.
+    for (const agenda of resultados) {
+      expect(agenda.elementos).toHaveLength(2);
+    }
+    const identificadores = resultados.map((a) =>
+      a.elementos.map((e) => e.tomaId).sort().join(','),
+    );
+    expect(new Set(identificadores).size).toBe(1);
+  });
+
   it('posponer una toma no genera un duplicado en la siguiente consulta', async () => {
     const paciente = await crearPacienteDePrueba(app);
     await registrarLosartan(paciente.solicitante, paciente.id);

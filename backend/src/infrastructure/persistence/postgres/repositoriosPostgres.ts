@@ -327,6 +327,50 @@ export class RepositorioDeTomasPostgres implements RepositorioDeTomas {
     }
   }
 
+  async programarSiNoExisten(tomas: readonly Toma[]): Promise<number> {
+    if (tomas.length === 0) return 0;
+
+    const cliente = await this.pool.connect();
+    let insertadas = 0;
+    try {
+      await cliente.query('BEGIN');
+      for (const toma of tomas) {
+        const t = toma.aPlano();
+        // La restriccion UNIQUE (medicamento_id, programada_originalmente_para)
+        // es la que hace de arbitro si dos peticiones llegan a la vez.
+        // DO NOTHING convierte ese choque en un no-evento en lugar de un error.
+        const { rowCount } = await cliente.query(
+          `INSERT INTO tomas
+             (id, medicamento_id, paciente_id, programada_para, programada_originalmente_para,
+              estado, resuelta_en, origen_del_registro, registrada_por_id, observaciones, veces_pospuesta)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+           ON CONFLICT (medicamento_id, programada_originalmente_para) DO NOTHING`,
+          [
+            t.id,
+            t.medicamentoId,
+            t.pacienteId,
+            t.programadaPara,
+            t.programadaOriginalmentePara,
+            t.estado,
+            t.resueltaEn,
+            t.origenDelRegistro,
+            t.registradaPorId,
+            t.observaciones,
+            t.vecesPospuesta,
+          ],
+        );
+        insertadas += rowCount ?? 0;
+      }
+      await cliente.query('COMMIT');
+    } catch (error) {
+      await cliente.query('ROLLBACK');
+      throw error;
+    } finally {
+      cliente.release();
+    }
+    return insertadas;
+  }
+
   async buscarPorId(id: Identificador): Promise<Toma | null> {
     const { rows } = await this.pool.query('SELECT * FROM tomas WHERE id = $1', [id.valor]);
     return rows[0] ? this.aEntidad(rows[0]) : null;
