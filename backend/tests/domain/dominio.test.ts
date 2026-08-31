@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { Email } from '../../src/domain/shared/Email.js';
+import { FechaLocal } from '../../src/domain/shared/FechaLocal.js';
+import { ZonaHoraria } from '../../src/domain/shared/ZonaHoraria.js';
 import { Hora } from '../../src/domain/shared/Hora.js';
 import { Identificador } from '../../src/domain/shared/Identificador.js';
 import { Telefono } from '../../src/domain/shared/Telefono.js';
@@ -80,29 +82,29 @@ describe('Stock', () => {
 
 // =================================================================
 describe('Frecuencia', () => {
-  const lunes = new Date('2026-08-31T00:00:00'); // 31/08/2026 es lunes
+  const lunes = FechaLocal.desde('2026-08-31'); // 31/08/2026 es lunes
 
   it('la frecuencia diaria aplica siempre desde el inicio', () => {
     expect(Frecuencia.diaria().aplicaEn(lunes, lunes)).toBe(true);
   });
 
   it('no aplica antes de que empiece el tratamiento', () => {
-    const manana = new Date('2026-09-01T00:00:00');
+    const manana = FechaLocal.desde('2026-09-01');
     expect(Frecuencia.diaria().aplicaEn(lunes, manana)).toBe(false);
   });
 
   it('los dias de la semana solo aplican en los dias elegidos', () => {
     const frecuencia = Frecuencia.diasDeLaSemana([1, 4]); // lunes y jueves
     expect(frecuencia.aplicaEn(lunes, lunes)).toBe(true);
-    expect(frecuencia.aplicaEn(new Date('2026-09-01T00:00:00'), lunes)).toBe(false); // martes
-    expect(frecuencia.aplicaEn(new Date('2026-09-03T00:00:00'), lunes)).toBe(true); // jueves
+    expect(frecuencia.aplicaEn(FechaLocal.desde('2026-09-01'), lunes)).toBe(false); // martes
+    expect(frecuencia.aplicaEn(FechaLocal.desde('2026-09-03'), lunes)).toBe(true); // jueves
   });
 
   it('cada N dias cuenta desde el inicio del tratamiento', () => {
     const cada3 = Frecuencia.cadaNDias(3);
     expect(cada3.aplicaEn(lunes, lunes)).toBe(true);
-    expect(cada3.aplicaEn(new Date('2026-09-02T00:00:00'), lunes)).toBe(false);
-    expect(cada3.aplicaEn(new Date('2026-09-03T00:00:00'), lunes)).toBe(true);
+    expect(cada3.aplicaEn(FechaLocal.desde('2026-09-02'), lunes)).toBe(false);
+    expect(cada3.aplicaEn(FechaLocal.desde('2026-09-03'), lunes)).toBe(true);
   });
 
   it('cada 1 dia es exactamente lo mismo que diaria', () => {
@@ -122,7 +124,7 @@ describe('Medicamento', () => {
       dosis: Dosis.desde(1, 'tableta'),
       frecuencia: Frecuencia.diaria(),
       horarios: [Hora.desde('20:00'), Hora.desde('08:00')],
-      fechaInicio: ahora,
+      fechaInicio: FechaLocal.desde('2026-08-31'),
       stock: Stock.desde(10, 3),
       ahora,
       ...extras,
@@ -143,13 +145,13 @@ describe('Medicamento', () => {
   });
 
   it('no permite que el tratamiento termine antes de empezar', () => {
-    expect(() => crear({ fechaFin: new Date('2026-08-01T00:00:00') })).toThrow(/anterior/);
+    expect(() => crear({ fechaFin: FechaLocal.desde('2026-08-01') })).toThrow(/anterior/);
   });
 
   it('devuelve los horarios del dia cuando corresponde', () => {
     const medicamento = crear({ frecuencia: Frecuencia.diasDeLaSemana([1]) });
-    expect(medicamento.horariosDelDia(new Date('2026-08-31T00:00:00'))).toHaveLength(2); // lunes
-    expect(medicamento.horariosDelDia(new Date('2026-09-01T00:00:00'))).toHaveLength(0); // martes
+    expect(medicamento.horariosDelDia(FechaLocal.desde('2026-08-31'))).toHaveLength(2); // lunes
+    expect(medicamento.horariosDelDia(FechaLocal.desde('2026-09-01'))).toHaveLength(0); // martes
   });
 
   it('descuenta inventario al registrar una toma', () => {
@@ -162,7 +164,7 @@ describe('Medicamento', () => {
     const medicamento = crear();
     medicamento.suspender();
     expect(medicamento.activo).toBe(false);
-    expect(medicamento.horariosDelDia(ahora)).toHaveLength(0);
+    expect(medicamento.horariosDelDia(FechaLocal.desde('2026-08-31'))).toHaveLength(0);
     expect(() => medicamento.actualizar({ nombre: 'Otro' })).toThrow(ErrorDeReglaDeNegocio);
   });
 

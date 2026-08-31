@@ -35,6 +35,7 @@ entity "pacientes" as pacientes {
   telefono : TEXT
   fecha_de_nacimiento : DATE
   contrasena_cifrada : TEXT <<NN>>
+  zona_horaria : TEXT <<NN>>
   preferencias : JSONB <<NN>>
   activo : BOOLEAN <<NN>>
   creado_en : TIMESTAMPTZ <<NN>>
@@ -141,6 +142,10 @@ note left of medicamentos
   <b>dosis</b> se guarda separada en cantidad y
   unidad. Como texto libre no se podia calcular
   el consumo de inventario.
+
+  <b>fecha_inicio</b> y <b>fecha_fin</b> son DATE, no
+  TIMESTAMP: son dias del calendario, no instantes.
+  Un dia no se desplaza al cambiar de huso horario.
 end note
 
 note top of pacientes
@@ -148,6 +153,12 @@ note top of pacientes
   contraste, alertas y minutos de gracia. Vive en el
   servidor para que acompanen al paciente en cualquier
   dispositivo donde inicie sesion.
+
+  <b>zona_horaria</b> (IANA, "America/Bogota") es lo que da
+  sentido a los horarios: "las 8:00" son las 8 donde vive
+  el paciente, no donde este el servidor. Se guarda el
+  nombre y no un desfase fijo porque el desfase cambia
+  con el horario de verano.
 end note
 
 @enduml

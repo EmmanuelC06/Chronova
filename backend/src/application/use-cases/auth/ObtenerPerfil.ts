@@ -14,6 +14,7 @@ export interface PerfilDeUsuario {
   creadoEn: string;
   /** Solo para pacientes. */
   edad?: number | null;
+  zonaHoraria?: string;
   preferencias?: Record<string, unknown>;
   /** Solo para cuidadores. */
   rol?: string | null;
@@ -40,7 +41,10 @@ export class ObtenerPerfil {
         telefono: paciente.telefono?.valor ?? null,
         tipo: 'PACIENTE',
         creadoEn: paciente.creadoEn.toISOString(),
-        edad: paciente.edadEn(this.reloj.ahora()),
+        // La edad se calcula sobre el dia del calendario del paciente,
+        // no sobre el del servidor.
+        edad: paciente.edadEn(paciente.zonaHoraria.fechaLocalDe(this.reloj.ahora())),
+        zonaHoraria: paciente.zonaHoraria.valor,
         preferencias: paciente.preferencias.toJSON(),
       };
     }

@@ -18,12 +18,16 @@ import type { EntornoDePrueba } from '../ayudas.js';
  */
 
 const HOY = '2026-08-31'; // lunes
-const MANANA_7AM = new Date('2026-08-31T07:00:00');
+// Todos los instantes se escriben en UTC (sufijo Z) para que las pruebas
+// den el mismo resultado sin importar el reloj de la maquina que las corre.
+// Las pacientes de prueba viven en America/Bogota, que va 5 horas detras:
+// las 12:00Z son las 07:00 de la manana para ellas.
+const MANANA_7AM_EN_BOGOTA = new Date('2026-08-31T12:00:00Z');
 
 let app: EntornoDePrueba;
 
 beforeEach(() => {
-  app = montarAplicacion(MANANA_7AM);
+  app = montarAplicacion(MANANA_7AM_EN_BOGOTA);
 });
 
 // =================================================================
@@ -266,6 +270,55 @@ describe('Agenda del dia', () => {
     );
   });
 
+  it('agenda las tomas en la hora de pared del paciente, no en la del servidor', async () => {
+    // Esta es la prueba del error que motivo todo el arreglo.
+    const paciente = await crearPacienteDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      fecha: HOY,
+    });
+
+    // La paciente ve "08:00", que es lo que escribio.
+    expect(agenda.elementos[0]?.horaProgramada).toBe('08:00');
+    expect(agenda.zonaHoraria).toBe('America/Bogota');
+
+    // Y el instante guardado son las 13:00Z, porque Colombia va 5 horas
+    // detras. Antes se guardaba 08:00Z, que alla son las 3 de la manana.
+    expect(agenda.elementos[0]?.programadaPara).toBe('2026-08-31T13:00:00.000Z');
+    expect(agenda.elementos[1]?.programadaPara).toBe('2026-09-01T01:00:00.000Z');
+  });
+
+  it('dos pacientes en husos distintos reciben instantes distintos', async () => {
+    const enBogota = await crearPacienteDePrueba(app, 'rosa@test.com', 'America/Bogota');
+    const enMadrid = await crearPacienteDePrueba(app, 'carmen@test.com', 'Europe/Madrid');
+
+    for (const paciente of [enBogota, enMadrid]) {
+      await registrarLosartan(paciente.solicitante, paciente.id);
+    }
+
+    const agendaBogota = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: enBogota.solicitante,
+      pacienteId: enBogota.id,
+      fecha: HOY,
+    });
+    const agendaMadrid = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: enMadrid.solicitante,
+      pacienteId: enMadrid.id,
+      fecha: HOY,
+    });
+
+    // Ambas ven "08:00" en su pantalla...
+    expect(agendaBogota.elementos[0]?.horaProgramada).toBe('08:00');
+    expect(agendaMadrid.elementos[0]?.horaProgramada).toBe('08:00');
+
+    // ...pero son dos momentos distintos del dia, con 7 horas de diferencia.
+    expect(agendaBogota.elementos[0]?.programadaPara).toBe('2026-08-31T13:00:00.000Z');
+    expect(agendaMadrid.elementos[0]?.programadaPara).toBe('2026-08-31T06:00:00.000Z');
+  });
+
   it('respeta la frecuencia por dias de la semana', async () => {
     const paciente = await crearPacienteDePrueba(app);
 
@@ -449,8 +502,9 @@ describe('Cierre automatico de tomas sin respuesta', () => {
       fecha: HOY,
     });
 
-    // Son las 8:00 + 121 minutos, y el margen por defecto son 120.
-    app.reloj.mover(new Date('2026-08-31T10:01:00'));
+    // La toma de las 08:00 de la paciente ocurre a las 13:00Z. Su margen
+    // de gracia son 120 minutos, asi que vence a las 15:00Z.
+    app.reloj.mover(new Date('2026-08-31T15:01:00Z'));
     const resultado = await app.contenedor.casosDeUso.cerrarTomasVencidas.ejecutar();
 
     expect(resultado.tomasCerradas).toBe(1); // la de las 20:00 aun no vence
@@ -471,7 +525,8 @@ describe('Cierre automatico de tomas sin respuesta', () => {
       fecha: HOY,
     });
 
-    app.reloj.mover(new Date('2026-08-31T09:00:00'));
+    // Una hora despues de la toma de las 08:00 (13:00Z): dentro del margen.
+    app.reloj.mover(new Date('2026-08-31T14:00:00Z'));
     const resultado = await app.contenedor.casosDeUso.cerrarTomasVencidas.ejecutar();
     expect(resultado.tomasCerradas).toBe(0);
   });

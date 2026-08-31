@@ -1,4 +1,6 @@
 import { Email } from '../../../domain/shared/Email.js';
+import { FechaLocal } from '../../../domain/shared/FechaLocal.js';
+import { ZonaHoraria } from '../../../domain/shared/ZonaHoraria.js';
 import { Telefono } from '../../../domain/shared/Telefono.js';
 import { ErrorDeConflicto } from '../../../domain/shared/errores.js';
 import { Paciente } from '../../../domain/paciente/Paciente.js';
@@ -17,6 +19,8 @@ export interface ComandoRegistrarPaciente {
   contrasena: string;
   telefono?: string | null;
   fechaDeNacimiento?: string | null;
+  /** Nombre IANA que envia el telefono, por ejemplo "America/Bogota". */
+  zonaHoraria?: string | null;
   preferencias?: {
     tamanoDeLetra?: string;
     altoContraste?: boolean;
@@ -61,17 +65,26 @@ export class RegistrarPaciente {
       throw new ErrorDeConflicto('Ya existe una cuenta registrada con ese correo electronico.');
     }
 
+    // La zona horaria se toma del telefono al registrarse. Si no llega
+    // o no es valida, se cae en la del proyecto (Colombia).
+    const zonaHoraria = ZonaHoraria.desdeOPorDefecto(comando.zonaHoraria);
+    const ahora = this.reloj.ahora();
+
     const paciente = Paciente.registrar({
       id: this.ids.nuevo(),
       nombre: comando.nombre,
       email,
       telefono: Telefono.opcional(comando.telefono),
-      fechaDeNacimiento: comando.fechaDeNacimiento ? new Date(comando.fechaDeNacimiento) : null,
+      fechaDeNacimiento: comando.fechaDeNacimiento
+        ? FechaLocal.desde(comando.fechaDeNacimiento)
+        : null,
       contrasenaCifrada: await this.cifrador.cifrar(comando.contrasena),
+      zonaHoraria,
       preferencias: comando.preferencias
         ? PreferenciasDeAccesibilidad.desde(comando.preferencias)
         : PreferenciasDeAccesibilidad.porDefecto(),
-      ahora: this.reloj.ahora(),
+      ahora,
+      hoy: zonaHoraria.fechaLocalDe(ahora),
     });
 
     await this.pacientes.guardar(paciente);

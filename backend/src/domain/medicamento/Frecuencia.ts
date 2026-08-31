@@ -1,5 +1,5 @@
 import { ErrorDeValidacion } from '../shared/errores.js';
-import { diasEntre } from '../shared/fechas.js';
+import type { FechaLocal } from '../shared/FechaLocal.js';
 
 export type TipoDeFrecuencia = 'DIARIA' | 'DIAS_DE_LA_SEMANA' | 'CADA_N_DIAS';
 
@@ -65,19 +65,25 @@ export class Frecuencia {
 
   /**
    * Regla central: ¿este medicamento se toma en esta fecha?
+   *
+   * Trabaja con dias del calendario, no con instantes. Asi la respuesta
+   * es la misma sin importar en que zona horaria corra el servidor: el
+   * lunes es lunes en Bogota y en Tokio.
+   *
    * @param fecha        Dia que se esta consultando.
    * @param fechaInicio  Dia en que arranco el tratamiento.
    */
-  aplicaEn(fecha: Date, fechaInicio: Date): boolean {
-    if (diasEntre(fechaInicio, fecha) < 0) return false; // aun no empieza
+  aplicaEn(fecha: FechaLocal, fechaInicio: FechaLocal): boolean {
+    const transcurridos = fechaInicio.diasHasta(fecha);
+    if (transcurridos < 0) return false; // aun no empieza
 
     switch (this.tipo) {
       case 'DIARIA':
         return true;
       case 'DIAS_DE_LA_SEMANA':
-        return this.diasDeLaSemana.includes(fecha.getDay());
+        return this.diasDeLaSemana.includes(fecha.diaDeLaSemana);
       case 'CADA_N_DIAS':
-        return diasEntre(fechaInicio, fecha) % this.intervaloEnDias === 0;
+        return transcurridos % this.intervaloEnDias === 0;
     }
   }
 

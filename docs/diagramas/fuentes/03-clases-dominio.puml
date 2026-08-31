@@ -45,8 +45,9 @@ hide empty members
     - nombre : string
     - email : Email
     - telefono : Telefono
-    - fechaDeNacimiento : Date
+    - fechaDeNacimiento : FechaLocal
     - contrasenaCifrada : string
+    - zonaHoraria : ZonaHoraria
     - preferencias : PreferenciasDeAccesibilidad
     - activo : boolean
     --
@@ -82,8 +83,8 @@ hide empty members
     - dosis : Dosis
     - frecuencia : Frecuencia
     - horarios : Hora[]
-    - fechaInicio : Date
-    - fechaFin : Date
+    - fechaInicio : FechaLocal
+    - fechaFin : FechaLocal
     - instrucciones : string
     - stock : Stock
     - activo : boolean
@@ -188,7 +189,28 @@ hide empty members
     + {readonly} minutos : number
     --
     + {static} desde(texto) : Hora
-    + enLaFecha(fecha) : Date
+    + minutosDesdeMedianoche : number
+  }
+
+  class FechaLocal <<VO>> {
+    + {readonly} anio : number
+    + {readonly} mes : number
+    + {readonly} dia : number
+    --
+    + {static} desde(texto) : FechaLocal
+    + diaDeLaSemana : number
+    + sumarDias(n) : FechaLocal
+    + diasHasta(otra) : number
+  }
+
+  class ZonaHoraria <<VO>> {
+    + {readonly} valor : string
+    --
+    + {static} desde(valor) : ZonaHoraria
+    + <b>instanteDe(fecha, hora)</b> : Date
+    + <b>fechaLocalDe(instante)</b> : FechaLocal
+    + horaDePareDe(instante) : string
+    + inicioDelDia(fecha) : Date
   }
 
   class Email <<VO>> {
@@ -242,6 +264,9 @@ enum NivelDeAdherencia {
 ' =================== RELACIONES ===================
 
 Paciente "1" *-- "1" PreferenciasDeAccesibilidad
+Paciente "1" *-- "1" ZonaHoraria
+Medicamento "1" *-- "1..2" FechaLocal : inicio / fin
+ZonaHoraria ..> FechaLocal : traduce con >
 Paciente "1" o-- "0..*" Medicamento : sigue >
 Medicamento "1" *-- "1" Dosis
 Medicamento "1" *-- "1" Stock
@@ -267,6 +292,14 @@ note top of ResumenDeAdherencia
   Las tomas pendientes no cuentan: todavia
   se pueden confirmar.
   BUENA >= 80%   REGULAR >= 50%   BAJA < 50%
+end note
+
+note bottom of ZonaHoraria
+  Traduce entre la <b>hora de pared</b> del paciente
+  ("las 8 de la manana") y el <b>instante</b> que se
+  guarda y dispara la alarma. Sin ella, un servidor
+  en UTC agendaba la pastilla de las 08:00 de una
+  paciente colombiana a las 03:00 de la madrugada.
 end note
 
 note bottom of Toma

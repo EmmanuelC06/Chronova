@@ -29,6 +29,8 @@ export interface ApiDeChronova {
     contrasena: string;
     telefono?: string | null;
     fechaDeNacimiento?: string | null;
+    /** Zona horaria del telefono. Es la que dara sentido a sus horarios. */
+    zonaHoraria?: string | null;
   }): Promise<Sesion>;
 
   registrarCuidador(datos: {

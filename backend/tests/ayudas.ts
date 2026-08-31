@@ -51,7 +51,9 @@ export interface EntornoDePrueba {
   notificador: NotificadorEnConsola;
 }
 
-export function montarAplicacion(fechaInicial = new Date('2026-08-31T07:00:00')): EntornoDePrueba {
+export function montarAplicacion(
+  fechaInicial = new Date('2026-08-31T12:00:00Z'),
+): EntornoDePrueba {
   const reloj = new RelojFijo(fechaInicial);
   const notificador = new NotificadorEnConsola();
 
@@ -84,12 +86,14 @@ export function comoCuidador(id: string): Solicitante {
 export async function crearPacienteDePrueba(
   entorno: EntornoDePrueba,
   email = 'rosa@test.com',
+  zonaHoraria = 'America/Bogota',
 ): Promise<{ id: string; solicitante: Solicitante }> {
   const resultado = await entorno.contenedor.casosDeUso.registrarPaciente.ejecutar({
     nombre: 'Rosa Valencia',
     email,
     contrasena: 'contrasena-segura',
     fechaDeNacimiento: '1952-04-18',
+    zonaHoraria,
   });
   return { id: resultado.usuario.id, solicitante: comoPaciente(resultado.usuario.id) };
 }

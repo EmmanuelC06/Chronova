@@ -1,7 +1,7 @@
 import { Identificador } from '../shared/Identificador.js';
 import { Hora } from '../shared/Hora.js';
+import { FechaLocal } from '../shared/FechaLocal.js';
 import { ErrorDeReglaDeNegocio, ErrorDeValidacion } from '../shared/errores.js';
-import { aMedianoche, diasEntre } from '../shared/fechas.js';
 import { Dosis } from './Dosis.js';
 import { Frecuencia } from './Frecuencia.js';
 import { Stock } from './Stock.js';
@@ -14,6 +14,7 @@ export interface MedicamentoPlano {
   dosis: { cantidad: number; unidad: string };
   frecuencia: { tipo: string; diasDeLaSemana: number[]; intervaloEnDias: number };
   horarios: string[];
+  /** Dia del calendario, formato AAAA-MM-DD. Sin hora y sin zona. */
   fechaInicio: string;
   fechaFin: string | null;
   instrucciones: string | null;
@@ -30,8 +31,8 @@ export interface DatosParaCrearMedicamento {
   dosis: Dosis;
   frecuencia: Frecuencia;
   horarios: readonly Hora[];
-  fechaInicio: Date;
-  fechaFin?: Date | null;
+  fechaInicio: FechaLocal;
+  fechaFin?: FechaLocal | null;
   instrucciones?: string | null;
   stock?: Stock;
   ahora: Date;
@@ -56,8 +57,8 @@ export class Medicamento {
     private _dosis: Dosis,
     private _frecuencia: Frecuencia,
     private _horarios: readonly Hora[],
-    private _fechaInicio: Date,
-    private _fechaFin: Date | null,
+    private _fechaInicio: FechaLocal,
+    private _fechaFin: FechaLocal | null,
     private _instrucciones: string | null,
     private _stock: Stock,
     private _activo: boolean,
@@ -72,10 +73,10 @@ export class Medicamento {
   static crear(datos: DatosParaCrearMedicamento): Medicamento {
     const nombre = Medicamento.validarNombre(datos.nombre);
     const horarios = Medicamento.validarHorarios(datos.horarios);
-    const fechaInicio = aMedianoche(datos.fechaInicio);
-    const fechaFin = datos.fechaFin ? aMedianoche(datos.fechaFin) : null;
+    const fechaInicio = datos.fechaInicio;
+    const fechaFin = datos.fechaFin ?? null;
 
-    if (fechaFin && diasEntre(fechaInicio, fechaFin) < 0) {
+    if (fechaFin && fechaFin.esAnteriorA(fechaInicio)) {
       throw new ErrorDeValidacion(
         'La fecha de finalizacion no puede ser anterior a la de inicio.',
         'fechaFin',
@@ -115,8 +116,8 @@ export class Medicamento {
       Dosis.desde(plano.dosis.cantidad, plano.dosis.unidad),
       frecuencia,
       plano.horarios.map((h) => Hora.desde(h)),
-      new Date(plano.fechaInicio),
-      plano.fechaFin ? new Date(plano.fechaFin) : null,
+      FechaLocal.desde(plano.fechaInicio),
+      plano.fechaFin ? FechaLocal.desde(plano.fechaFin) : null,
       plano.instrucciones,
       Stock.desde(plano.stock.unidadesDisponibles, plano.stock.umbralDeAlerta),
       plano.activo,
@@ -137,8 +138,8 @@ export class Medicamento {
         intervaloEnDias: this._frecuencia.intervaloEnDias,
       },
       horarios: this._horarios.map((h) => h.toString()),
-      fechaInicio: this._fechaInicio.toISOString(),
-      fechaFin: this._fechaFin ? this._fechaFin.toISOString() : null,
+      fechaInicio: this._fechaInicio.toString(),
+      fechaFin: this._fechaFin ? this._fechaFin.toString() : null,
       instrucciones: this._instrucciones,
       stock: {
         unidadesDisponibles: this._stock.unidadesDisponibles,
@@ -166,11 +167,11 @@ export class Medicamento {
   get horarios(): readonly Hora[] {
     return this._horarios;
   }
-  get fechaInicio(): Date {
-    return new Date(this._fechaInicio);
+  get fechaInicio(): FechaLocal {
+    return this._fechaInicio;
   }
-  get fechaFin(): Date | null {
-    return this._fechaFin ? new Date(this._fechaFin) : null;
+  get fechaFin(): FechaLocal | null {
+    return this._fechaFin;
   }
   get instrucciones(): string | null {
     return this._instrucciones;
@@ -189,19 +190,19 @@ export class Medicamento {
   // Reglas de negocio
   // --------------------------------------------------------------
 
-  /** ¿El tratamiento sigue en curso en esa fecha? */
-  estaVigenteEn(fecha: Date): boolean {
+  /** ¿El tratamiento sigue en curso en ese dia? */
+  estaVigenteEn(fecha: FechaLocal): boolean {
     if (!this._activo) return false;
-    if (diasEntre(this._fechaInicio, fecha) < 0) return false;
-    if (this._fechaFin && diasEntre(fecha, this._fechaFin) < 0) return false;
+    if (fecha.esAnteriorA(this._fechaInicio)) return false;
+    if (this._fechaFin && fecha.esPosteriorA(this._fechaFin)) return false;
     return true;
   }
 
   /**
-   * Horarios en los que toca tomar este medicamento en la fecha dada.
+   * Horarios en los que toca tomar este medicamento en el dia dado.
    * Devuelve lista vacia si ese dia no corresponde.
    */
-  horariosDelDia(fecha: Date): readonly Hora[] {
+  horariosDelDia(fecha: FechaLocal): readonly Hora[] {
     if (!this.estaVigenteEn(fecha)) return [];
     if (!this._frecuencia.aplicaEn(fecha, this._fechaInicio)) return [];
     return this._horarios;
@@ -230,7 +231,7 @@ export class Medicamento {
     dosis?: Dosis;
     frecuencia?: Frecuencia;
     horarios?: readonly Hora[];
-    fechaFin?: Date | null;
+    fechaFin?: FechaLocal | null;
     instrucciones?: string | null;
   }): void {
     if (!this._activo) {
@@ -245,8 +246,8 @@ export class Medicamento {
       this._horarios = Medicamento.validarHorarios(cambios.horarios);
     }
     if (cambios.fechaFin !== undefined) {
-      const fin = cambios.fechaFin ? aMedianoche(cambios.fechaFin) : null;
-      if (fin && diasEntre(this._fechaInicio, fin) < 0) {
+      const fin = cambios.fechaFin ?? null;
+      if (fin && fin.esAnteriorA(this._fechaInicio)) {
         throw new ErrorDeValidacion(
           'La fecha de finalizacion no puede ser anterior a la de inicio.',
           'fechaFin',

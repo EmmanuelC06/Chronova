@@ -4,3 +4,5 @@ export * from './Email.js';
 export * from './Telefono.js';
 export * from './Hora.js';
 export * from './fechas.js';
+export * from './FechaLocal.js';
+export * from './ZonaHoraria.js';

@@ -1,4 +1,5 @@
 import { Hora } from '../../../domain/shared/Hora.js';
+import { FechaLocal } from '../../../domain/shared/FechaLocal.js';
 import { Identificador } from '../../../domain/shared/Identificador.js';
 import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
 import { Dosis } from '../../../domain/medicamento/Dosis.js';
@@ -51,7 +52,7 @@ export class ActualizarMedicamento {
           ? undefined
           : comando.fechaFin === null
             ? null
-            : new Date(comando.fechaFin),
+            : FechaLocal.desde(comando.fechaFin),
       instrucciones: comando.instrucciones,
     });
 

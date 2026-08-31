@@ -1,6 +1,8 @@
 import { Email } from '../shared/Email.js';
 import { Identificador } from '../shared/Identificador.js';
 import { Telefono } from '../shared/Telefono.js';
+import { ZonaHoraria } from '../shared/ZonaHoraria.js';
+import { FechaLocal } from '../shared/FechaLocal.js';
 import { ErrorDeValidacion } from '../shared/errores.js';
 import { PreferenciasDeAccesibilidad } from './PreferenciasDeAccesibilidad.js';
 
@@ -11,6 +13,8 @@ export interface PacientePlano {
   telefono: string | null;
   fechaDeNacimiento: string | null;
   contrasenaCifrada: string;
+  /** Nombre IANA, por ejemplo "America/Bogota". */
+  zonaHoraria: string;
   preferencias: {
     tamanoDeLetra: string;
     altoContraste: boolean;
@@ -35,8 +39,9 @@ export class Paciente {
     private _nombre: string,
     private _email: Email,
     private _telefono: Telefono | null,
-    private _fechaDeNacimiento: Date | null,
+    private _fechaDeNacimiento: FechaLocal | null,
     private _contrasenaCifrada: string,
+    private _zonaHoraria: ZonaHoraria,
     private _preferencias: PreferenciasDeAccesibilidad,
     private _activo: boolean,
     readonly creadoEn: Date,
@@ -47,18 +52,22 @@ export class Paciente {
     nombre: string;
     email: Email;
     telefono?: Telefono | null;
-    fechaDeNacimiento?: Date | null;
+    fechaDeNacimiento?: FechaLocal | null;
     contrasenaCifrada: string;
+    zonaHoraria?: ZonaHoraria;
     preferencias?: PreferenciasDeAccesibilidad;
     ahora: Date;
+    /** Dia de hoy en la zona del paciente, para validar la fecha de nacimiento. */
+    hoy: FechaLocal;
   }): Paciente {
     return new Paciente(
       datos.id,
       Paciente.validarNombre(datos.nombre),
       datos.email,
       datos.telefono ?? null,
-      Paciente.validarFechaDeNacimiento(datos.fechaDeNacimiento ?? null, datos.ahora),
+      Paciente.validarFechaDeNacimiento(datos.fechaDeNacimiento ?? null, datos.hoy),
       datos.contrasenaCifrada,
+      datos.zonaHoraria ?? ZonaHoraria.porDefecto(),
       datos.preferencias ?? PreferenciasDeAccesibilidad.porDefecto(),
       true,
       datos.ahora,
@@ -71,8 +80,9 @@ export class Paciente {
       plano.nombre,
       Email.desde(plano.email),
       plano.telefono ? Telefono.desde(plano.telefono) : null,
-      plano.fechaDeNacimiento ? new Date(plano.fechaDeNacimiento) : null,
+      plano.fechaDeNacimiento ? FechaLocal.desde(plano.fechaDeNacimiento) : null,
       plano.contrasenaCifrada,
+      ZonaHoraria.desdeOPorDefecto(plano.zonaHoraria),
       PreferenciasDeAccesibilidad.desde(plano.preferencias),
       plano.activo,
       new Date(plano.creadoEn),
@@ -86,9 +96,10 @@ export class Paciente {
       email: this._email.valor,
       telefono: this._telefono ? this._telefono.valor : null,
       fechaDeNacimiento: this._fechaDeNacimiento
-        ? this._fechaDeNacimiento.toISOString()
+        ? this._fechaDeNacimiento.toString()
         : null,
       contrasenaCifrada: this._contrasenaCifrada,
+      zonaHoraria: this._zonaHoraria.valor,
       preferencias: this._preferencias.toJSON(),
       activo: this._activo,
       creadoEn: this.creadoEn.toISOString(),
@@ -106,11 +117,14 @@ export class Paciente {
   get telefono(): Telefono | null {
     return this._telefono;
   }
-  get fechaDeNacimiento(): Date | null {
-    return this._fechaDeNacimiento ? new Date(this._fechaDeNacimiento) : null;
+  get fechaDeNacimiento(): FechaLocal | null {
+    return this._fechaDeNacimiento;
   }
   get contrasenaCifrada(): string {
     return this._contrasenaCifrada;
+  }
+  get zonaHoraria(): ZonaHoraria {
+    return this._zonaHoraria;
   }
   get preferencias(): PreferenciasDeAccesibilidad {
     return this._preferencias;
@@ -119,20 +133,26 @@ export class Paciente {
     return this._activo;
   }
 
-  /** Edad cumplida. Se usa para adaptar la interfaz por defecto. */
-  edadEn(fecha: Date): number | null {
-    if (!this._fechaDeNacimiento) return null;
-    let edad = fecha.getFullYear() - this._fechaDeNacimiento.getFullYear();
-    const mes = fecha.getMonth() - this._fechaDeNacimiento.getMonth();
-    if (mes < 0 || (mes === 0 && fecha.getDate() < this._fechaDeNacimiento.getDate())) {
-      edad -= 1;
-    }
+  /**
+   * Edad cumplida en un dia dado.
+   *
+   * Recibe el dia del calendario del paciente, no un instante: la edad
+   * de alguien no cambia porque el servidor este en otro huso horario.
+   */
+  edadEn(hoy: FechaLocal): number | null {
+    const nacimiento = this._fechaDeNacimiento;
+    if (!nacimiento) return null;
+
+    let edad = hoy.anio - nacimiento.anio;
+    const aunNoCumple =
+      hoy.mes < nacimiento.mes || (hoy.mes === nacimiento.mes && hoy.dia < nacimiento.dia);
+    if (aunNoCumple) edad -= 1;
     return edad;
   }
 
   /** Regla del proyecto: el publico objetivo son adultos mayores. */
-  esAdultoMayorEn(fecha: Date): boolean {
-    const edad = this.edadEn(fecha);
+  esAdultoMayorEn(hoy: FechaLocal): boolean {
+    const edad = this.edadEn(hoy);
     return edad !== null && edad >= 60;
   }
 
@@ -141,8 +161,8 @@ export class Paciente {
   actualizarPerfil(cambios: {
     nombre?: string;
     telefono?: Telefono | null;
-    fechaDeNacimiento?: Date | null;
-    ahora: Date;
+    fechaDeNacimiento?: FechaLocal | null;
+    ahora: FechaLocal;
   }): void {
     if (cambios.nombre !== undefined) this._nombre = Paciente.validarNombre(cambios.nombre);
     if (cambios.telefono !== undefined) this._telefono = cambios.telefono;
@@ -156,6 +176,16 @@ export class Paciente {
 
   cambiarPreferencias(preferencias: PreferenciasDeAccesibilidad): void {
     this._preferencias = preferencias;
+  }
+
+  /**
+   * Cambia la zona horaria del paciente.
+   *
+   * Importa cuando alguien viaja o se muda: sus horarios deben seguir
+   * significando la hora de pared donde esta, no donde estaba.
+   */
+  cambiarZonaHoraria(zona: ZonaHoraria): void {
+    this._zonaHoraria = zona;
   }
 
   cambiarContrasena(nuevaContrasenaCifrada: string): void {
@@ -182,19 +212,18 @@ export class Paciente {
     return limpio;
   }
 
-  private static validarFechaDeNacimiento(fecha: Date | null, ahora: Date): Date | null {
+  private static validarFechaDeNacimiento(
+    fecha: FechaLocal | null,
+    hoy: FechaLocal,
+  ): FechaLocal | null {
     if (fecha === null) return null;
-    if (Number.isNaN(fecha.getTime())) {
-      throw new ErrorDeValidacion('La fecha de nacimiento no es valida.', 'fechaDeNacimiento');
-    }
-    if (fecha.getTime() > ahora.getTime()) {
+    if (fecha.esPosteriorA(hoy)) {
       throw new ErrorDeValidacion(
         'La fecha de nacimiento no puede estar en el futuro.',
         'fechaDeNacimiento',
       );
     }
-    const anos = ahora.getFullYear() - fecha.getFullYear();
-    if (anos > 120) {
+    if (hoy.anio - fecha.anio > 120) {
       throw new ErrorDeValidacion('La fecha de nacimiento no es plausible.', 'fechaDeNacimiento');
     }
     return fecha;

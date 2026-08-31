@@ -1,4 +1,5 @@
 import { Hora } from '../../../domain/shared/Hora.js';
+import { FechaLocal } from '../../../domain/shared/FechaLocal.js';
 import { Identificador } from '../../../domain/shared/Identificador.js';
 import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
 import { Dosis } from '../../../domain/medicamento/Dosis.js';
@@ -66,8 +67,12 @@ export class RegistrarMedicamento {
       dosis: Dosis.desde(comando.dosis.cantidad, comando.dosis.unidad),
       frecuencia: construirFrecuencia(comando.frecuencia),
       horarios: comando.horarios.map((h) => Hora.desde(h)),
-      fechaInicio: comando.fechaInicio ? new Date(comando.fechaInicio) : ahora,
-      fechaFin: comando.fechaFin ? new Date(comando.fechaFin) : null,
+      // Si no se indica fecha de inicio, es "hoy" para el paciente,
+      // que no tiene por que ser hoy para el servidor.
+      fechaInicio: comando.fechaInicio
+        ? FechaLocal.desde(comando.fechaInicio)
+        : paciente.zonaHoraria.fechaLocalDe(ahora),
+      fechaFin: comando.fechaFin ? FechaLocal.desde(comando.fechaFin) : null,
       instrucciones: comando.instrucciones ?? null,
       stock: comando.stock
         ? Stock.desde(comando.stock.unidadesDisponibles, comando.stock.umbralDeAlerta)

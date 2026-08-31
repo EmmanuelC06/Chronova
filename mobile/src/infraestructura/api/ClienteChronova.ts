@@ -30,6 +30,21 @@ import type { ApiDeChronova } from '../../dominio/puertos';
 const URL_POR_DEFECTO = 'http://localhost:4000';
 const TIEMPO_MAXIMO_MS = 15_000;
 
+/**
+ * Zona horaria del telefono, en nomenclatura IANA.
+ *
+ * Intl viene con el motor de JavaScript, asi que no hace falta ninguna
+ * libreria. Si el dispositivo no la reporta, se deja que el servidor
+ * decida (usara la del proyecto, America/Bogota).
+ */
+function zonaHorariaDelDispositivo(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
+}
+
 function resolverUrlBase(): string {
   const configurada = (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl;
   return (configurada ?? URL_POR_DEFECTO).replace(/\/$/, '');
@@ -54,8 +69,14 @@ export class ClienteChronova implements ApiDeChronova {
     contrasena: string;
     telefono?: string | null;
     fechaDeNacimiento?: string | null;
+    zonaHoraria?: string | null;
   }): Promise<Sesion> {
-    return this.pedir<Sesion>('POST', '/api/auth/registro/paciente', datos);
+    return this.pedir<Sesion>('POST', '/api/auth/registro/paciente', {
+      ...datos,
+      // Si la pantalla no la indica, se toma la del telefono. Es lo que
+      // hace que "las 8 de la manana" signifique las 8 donde vive.
+      zonaHoraria: datos.zonaHoraria ?? zonaHorariaDelDispositivo(),
+    });
   }
 
   registrarCuidador(datos: {

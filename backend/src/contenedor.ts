@@ -171,13 +171,21 @@ export function construirContenedor(
     obtenerAgendaDelDia: new ObtenerAgendaDelDia(
       medicamentos,
       tomas,
+      pacientes,
       politica,
       ids,
       reloj,
       tolerancia,
     ),
     registrarToma: new RegistrarToma(tomas, medicamentos, politica, reloj, notificador),
-    consultarHistorial: new ConsultarHistorial(tomas, medicamentos, politica, reloj, tolerancia),
+    consultarHistorial: new ConsultarHistorial(
+      tomas,
+      medicamentos,
+      pacientes,
+      politica,
+      reloj,
+      tolerancia,
+    ),
     cerrarTomasVencidas: new CerrarTomasVencidas(
       tomas,
       pacientes,

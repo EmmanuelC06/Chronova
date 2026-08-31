@@ -27,6 +27,9 @@ export const esquemaDeRegistroDePaciente = z.object({
   contrasena: z.string().min(1, 'La contrasena es obligatoria.'),
   telefono: z.string().nullish(),
   fechaDeNacimiento: FECHA.nullish(),
+  // La app envia la zona del telefono. Si no llega, el dominio usa
+  // America/Bogota, que es el contexto del proyecto.
+  zonaHoraria: z.string().max(64).nullish(),
   preferencias: z
     .object({
       tamanoDeLetra: z.enum(['NORMAL', 'GRANDE', 'MUY_GRANDE']).optional(),

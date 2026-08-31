@@ -29,6 +29,7 @@ interface ValorDeSesion {
     contrasena: string;
     telefono?: string | null;
     fechaDeNacimiento?: string | null;
+    zonaHoraria?: string | null;
   }): Promise<void>;
   registrarCuidador(datos: {
     nombre: string;

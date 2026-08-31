@@ -76,6 +76,8 @@ Las reglas que serían ciertas aunque Chronova fuera una libreta de papel.
 
 | Archivo | Regla que protege |
 |---|---|
+| `shared/FechaLocal.ts` | Un día del calendario no es un instante: no se desplaza entre husos |
+| `shared/ZonaHoraria.ts` | "Las 8 de la mañana" son las 8 donde vive el paciente |
 | `medicamento/Frecuencia.ts` | ¿Toca este medicamento hoy? |
 | `medicamento/Stock.ts` | El inventario nunca baja de cero; avisa al llegar al umbral |
 | `medicamento/Medicamento.ts` | No puede haber horarios repetidos; un medicamento suspendido no genera agenda |
@@ -135,13 +137,32 @@ Eso solo es posible porque el dominio nunca supo que existía una base de datos.
 
 ### Prueba 2: las pruebas corren en milisegundos
 
-Las 71 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
+Las 87 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
 
 Con la arquitectura del MVP anterior, donde la lógica vivía dentro de las rutas de Express y hablaba directamente con PostgreSQL, cada prueba habría necesitado una base de datos levantada, datos sembrados y limpieza posterior. En la práctica, eso significa que nadie escribe pruebas.
 
 ### Prueba 3: el tiempo se puede manipular
 
 Para probar "¿qué pasa si el paciente no confirma la toma en dos horas?" no hay que esperar dos horas: se inyecta un `RelojFijo` y se mueve. Mira `backend/tests/use-cases/casosDeUso.test.ts`, la prueba del cierre automático.
+
+### Prueba 4: el resultado no depende del reloj del servidor
+
+La suite completa se ejecuta bajo seis zonas horarias distintas —de Kiritimati (UTC+14) a Anchorage (UTC−9)— y da exactamente el mismo resultado:
+
+```bash
+TZ=UTC              npm test    # 87 passed
+TZ=America/Bogota   npm test    # 87 passed
+TZ=Asia/Tokyo       npm test    # 87 passed
+```
+
+Esto no era así al principio. El dominio usaba objetos `Date` para representar días del calendario, y un `Date` siempre es un instante que se lee en la zona del proceso. La consecuencia: con el servidor en UTC, la pastilla de las 08:00 de una paciente colombiana se agendaba a las 03:00 de su madrugada.
+
+La corrección fue conceptual, no un parche: separar dos ideas que estaban mezcladas.
+
+- **`FechaLocal`** es un día del calendario. No tiene hora, así que no puede desplazarse.
+- **`ZonaHoraria`** traduce entre la *hora de pared* del paciente y el *instante* que se guarda y dispara la alarma.
+
+Con esas dos piezas, el dominio dejó de tener opinión sobre dónde corre el servidor.
 
 ---
 

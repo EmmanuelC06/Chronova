@@ -1,7 +1,10 @@
+import { FechaLocal } from '../../../domain/shared/FechaLocal.js';
 import { Identificador } from '../../../domain/shared/Identificador.js';
-import { aMedianoche, sumarDias } from '../../../domain/shared/fechas.js';
+import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
+import type { ZonaHoraria } from '../../../domain/shared/ZonaHoraria.js';
 import type { RepositorioDeMedicamentos } from '../../../domain/medicamento/RepositorioDeMedicamentos.js';
-import type { EstadoDeToma, Puntualidad } from '../../../domain/toma/Toma.js';
+import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
+import type { EstadoDeToma, Puntualidad, Toma } from '../../../domain/toma/Toma.js';
 import type { RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
 import { ResumenDeAdherencia } from '../../../domain/toma/ResumenDeAdherencia.js';
 import type { Reloj } from '../../ports/Reloj.js';
@@ -32,6 +35,8 @@ export interface RegistroDeHistorial {
 export interface Historial {
   desde: string;
   hasta: string;
+  /** Zona en la que estan expresadas las fechas de este historial. */
+  zonaHoraria: string;
   registros: RegistroDeHistorial[];
   resumen: ReturnType<ResumenDeAdherencia['toJSON']>;
   /** Adherencia dia a dia, para dibujar la grafica de evolucion. */
@@ -50,6 +55,7 @@ export class ConsultarHistorial {
   constructor(
     private readonly tomas: RepositorioDeTomas,
     private readonly medicamentos: RepositorioDeMedicamentos,
+    private readonly pacientes: RepositorioDePacientes,
     private readonly politica: PoliticaDeAcceso,
     private readonly reloj: Reloj,
     private readonly ventanaDeToleranciaEnMinutos: number,
@@ -63,18 +69,25 @@ export class ConsultarHistorial {
       'puedeVerHistorial',
     );
 
-    const ahora = this.reloj.ahora();
-    const hasta = sumarDias(
-      aMedianoche(consulta.hasta ? new Date(`${consulta.hasta}T00:00:00`) : ahora),
-      1,
-    );
-    const desde = aMedianoche(
-      consulta.desde
-        ? new Date(`${consulta.desde}T00:00:00`)
-        : sumarDias(ahora, -DIAS_POR_DEFECTO),
-    );
+    const paciente = await this.pacientes.buscarPorId(pacienteId);
+    if (!paciente) throw new ErrorNoEncontrado('el paciente', consulta.pacienteId);
 
-    let tomas = await this.tomas.listarPorPacienteEnRango(pacienteId, { desde, hasta });
+    const zona = paciente.zonaHoraria;
+    const hoy = zona.fechaLocalDe(this.reloj.ahora());
+
+    // El periodo se define en dias del calendario del paciente y solo
+    // despues se traduce a instantes para consultar la base de datos.
+    const diaFinal = consulta.hasta ? FechaLocal.desde(consulta.hasta) : hoy;
+    const diaInicial = consulta.desde
+      ? FechaLocal.desde(consulta.desde)
+      : hoy.sumarDias(-DIAS_POR_DEFECTO);
+
+    const rango = {
+      desde: zona.inicioDelDia(diaInicial),
+      hasta: zona.inicioDelDia(diaFinal.sumarDias(1)),
+    };
+
+    let tomas = await this.tomas.listarPorPacienteEnRango(pacienteId, rango);
     if (consulta.medicamentoId) {
       const filtro = consulta.medicamentoId;
       tomas = tomas.filter((t) => t.medicamentoId.valor === filtro);
@@ -99,25 +112,35 @@ export class ConsultarHistorial {
       .sort((a, b) => b.programadaPara.localeCompare(a.programadaPara));
 
     return {
-      desde: desde.toISOString().slice(0, 10),
-      hasta: sumarDias(hasta, -1).toISOString().slice(0, 10),
+      desde: diaInicial.toString(),
+      hasta: diaFinal.toString(),
+      zonaHoraria: zona.valor,
       registros,
       resumen: ResumenDeAdherencia.calcular(tomas, this.ventanaDeToleranciaEnMinutos).toJSON(),
-      porDia: agruparPorDia(registros),
+      porDia: agruparPorDia(tomas, zona),
     };
   }
 }
 
+/**
+ * Agrupa las tomas por dia del calendario DEL PACIENTE.
+ *
+ * Antes se cortaba la cadena ISO por los primeros diez caracteres, que
+ * es el dia en UTC. Para una paciente en Colombia, su toma de las 20:00
+ * cae a la 01:00 UTC del dia siguiente, asi que aparecia contada en el
+ * dia equivocado y la grafica de adherencia mentia.
+ */
 function agruparPorDia(
-  registros: readonly RegistroDeHistorial[],
+  tomas: readonly Toma[],
+  zona: ZonaHoraria,
 ): { fecha: string; tomadas: number; omitidas: number; porcentaje: number }[] {
   const acumulado = new Map<string, { tomadas: number; omitidas: number }>();
 
-  for (const registro of registros) {
-    const fecha = registro.programadaPara.slice(0, 10);
+  for (const toma of tomas) {
+    const fecha = zona.fechaLocalDe(toma.programadaOriginalmentePara).toString();
     const actual = acumulado.get(fecha) ?? { tomadas: 0, omitidas: 0 };
-    if (registro.estado === 'TOMADA') actual.tomadas += 1;
-    else if (registro.estado === 'OMITIDA') actual.omitidas += 1;
+    if (toma.estado === 'TOMADA') actual.tomadas += 1;
+    else if (toma.estado === 'OMITIDA') actual.omitidas += 1;
     acumulado.set(fecha, actual);
   }
 

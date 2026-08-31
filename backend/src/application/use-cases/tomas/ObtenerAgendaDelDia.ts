@@ -1,7 +1,10 @@
+import { FechaLocal } from '../../../domain/shared/FechaLocal.js';
 import { Identificador } from '../../../domain/shared/Identificador.js';
-import { aMedianoche, sumarDias } from '../../../domain/shared/fechas.js';
+import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
+import type { ZonaHoraria } from '../../../domain/shared/ZonaHoraria.js';
 import type { Medicamento } from '../../../domain/medicamento/Medicamento.js';
 import type { RepositorioDeMedicamentos } from '../../../domain/medicamento/RepositorioDeMedicamentos.js';
+import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
 import { Toma } from '../../../domain/toma/Toma.js';
 import type { EstadoDeToma } from '../../../domain/toma/Toma.js';
 import type { RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
@@ -13,7 +16,7 @@ import type { PoliticaDeAcceso, Solicitante } from '../../services/PoliticaDeAcc
 export interface ConsultaAgendaDelDia {
   solicitante: Solicitante;
   pacienteId: string;
-  /** Fecha en formato YYYY-MM-DD. Por defecto, hoy. */
+  /** Fecha en formato YYYY-MM-DD. Por defecto, hoy en la zona del paciente. */
   fecha?: string;
 }
 
@@ -33,6 +36,8 @@ export interface ElementoDeAgenda {
 
 export interface AgendaDelDia {
   fecha: string;
+  /** Zona en la que estan expresadas las horas de esta agenda. */
+  zonaHoraria: string;
   elementos: ElementoDeAgenda[];
   resumen: ReturnType<ResumenDeAdherencia['toJSON']>;
 }
@@ -45,6 +50,12 @@ export interface AgendaDelDia {
  * lo que el paciente ve y confirma son eventos concretos. Este caso de
  * uso "materializa" ese patron en tomas reales.
  *
+ * Todo el razonamiento de calendario ocurre en la ZONA DEL PACIENTE:
+ * que dia es hoy, que horarios tocan, y en que instante exacto cae cada
+ * uno. "Las 8 de la manana" son las 8 donde vive el paciente, no donde
+ * este el servidor. Sin esto, un servidor en UTC programaba la pastilla
+ * de las 8:00 de una paciente colombiana a las 3:00 de la madrugada.
+ *
  * La operacion es IDEMPOTENTE: si se consulta la agenda diez veces el
  * mismo dia, las tomas se crean una sola vez. Se comprueba contra la
  * hora original de cada toma, de modo que aplazar una no genera un
@@ -54,6 +65,7 @@ export class ObtenerAgendaDelDia {
   constructor(
     private readonly medicamentos: RepositorioDeMedicamentos,
     private readonly tomas: RepositorioDeTomas,
+    private readonly pacientes: RepositorioDePacientes,
     private readonly politica: PoliticaDeAcceso,
     private readonly ids: GeneradorDeIds,
     private readonly reloj: Reloj,
@@ -68,19 +80,28 @@ export class ObtenerAgendaDelDia {
       'puedeVerHistorial',
     );
 
-    const dia = aMedianoche(consulta.fecha ? new Date(`${consulta.fecha}T00:00:00`) : this.reloj.ahora());
-    const finDelDia = sumarDias(dia, 1);
+    const paciente = await this.pacientes.buscarPorId(pacienteId);
+    if (!paciente) throw new ErrorNoEncontrado('el paciente', consulta.pacienteId);
+
+    const zona = paciente.zonaHoraria;
+    const dia = consulta.fecha
+      ? FechaLocal.desde(consulta.fecha)
+      : zona.fechaLocalDe(this.reloj.ahora());
+
+    // El dia del paciente, convertido a instantes, para acotar la consulta.
+    const rango = {
+      desde: zona.inicioDelDia(dia),
+      hasta: zona.inicioDelDia(dia.sumarDias(1)),
+    };
 
     const medicamentosActivos = await this.medicamentos.listarPorPaciente(pacienteId, false);
-    const yaProgramadas = await this.tomas.listarPorPacienteEnRango(pacienteId, {
-      desde: dia,
-      hasta: finDelDia,
-    });
+    const yaProgramadas = await this.tomas.listarPorPacienteEnRango(pacienteId, rango);
 
     const candidatas = this.calcularTomasFaltantes(
       medicamentosActivos,
       yaProgramadas,
       dia,
+      zona,
       pacienteId,
     );
 
@@ -91,11 +112,9 @@ export class ObtenerAgendaDelDia {
     let todas = yaProgramadas;
     if (candidatas.length > 0) {
       await this.tomas.programarSiNoExisten(candidatas);
-      todas = await this.tomas.listarPorPacienteEnRango(pacienteId, {
-        desde: dia,
-        hasta: finDelDia,
-      });
+      todas = await this.tomas.listarPorPacienteEnRango(pacienteId, rango);
     }
+
     const porMedicamento = new Map(medicamentosActivos.map((m) => [m.id.valor, m]));
 
     const elementos: ElementoDeAgenda[] = todas
@@ -107,7 +126,8 @@ export class ObtenerAgendaDelDia {
           nombreDelMedicamento: medicamento?.nombre ?? 'Medicamento suspendido',
           dosis: medicamento?.dosis.descripcion ?? '',
           instrucciones: medicamento?.instrucciones ?? null,
-          horaProgramada: formatearHora(toma.programadaPara),
+          // La hora se devuelve tal como la vera el paciente.
+          horaProgramada: zona.horaDePareDe(toma.programadaPara),
           programadaPara: toma.programadaPara.toISOString(),
           estado: toma.estado,
           vecesPospuesta: toma.vecesPospuesta,
@@ -118,7 +138,8 @@ export class ObtenerAgendaDelDia {
       .sort((a, b) => a.programadaPara.localeCompare(b.programadaPara));
 
     return {
-      fecha: dia.toISOString().slice(0, 10),
+      fecha: dia.toString(),
+      zonaHoraria: zona.valor,
       elementos,
       resumen: ResumenDeAdherencia.calcular(todas, this.ventanaDeToleranciaEnMinutos).toJSON(),
     };
@@ -131,7 +152,8 @@ export class ObtenerAgendaDelDia {
   private calcularTomasFaltantes(
     medicamentos: readonly Medicamento[],
     existentes: readonly Toma[],
-    dia: Date,
+    dia: FechaLocal,
+    zona: ZonaHoraria,
     pacienteId: Identificador,
   ): Toma[] {
     // Clave: medicamento + hora original. Asi una toma pospuesta sigue
@@ -146,7 +168,9 @@ export class ObtenerAgendaDelDia {
 
     for (const medicamento of medicamentos) {
       for (const hora of medicamento.horariosDelDia(dia)) {
-        const instante = hora.enLaFecha(dia);
+        // Aqui ocurre la traduccion: "08:00 del 1 de septiembre, en
+        // America/Bogota" se convierte en el instante 13:00 UTC.
+        const instante = zona.instanteDe(dia, hora);
         const clave = `${medicamento.id.valor}@${instante.toISOString()}`;
         if (clavesExistentes.has(clave)) continue;
 
@@ -164,8 +188,4 @@ export class ObtenerAgendaDelDia {
 
     return nuevas;
   }
-}
-
-function formatearHora(fecha: Date): string {
-  return `${String(fecha.getHours()).padStart(2, '0')}:${String(fecha.getMinutes()).padStart(2, '0')}`;
 }

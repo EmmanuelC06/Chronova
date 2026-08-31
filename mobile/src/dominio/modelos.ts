@@ -43,6 +43,8 @@ export interface Perfil extends UsuarioAutenticado {
   telefono: string | null;
   creadoEn: string;
   edad?: number | null;
+  /** Zona horaria IANA del paciente, por ejemplo "America/Bogota". */
+  zonaHoraria?: string;
   preferencias?: Preferencias;
   rol?: string | null;
 }
@@ -106,6 +108,8 @@ export interface ResumenDeAdherencia {
 
 export interface AgendaDelDia {
   fecha: string;
+  /** Zona en la que estan expresadas las horas de esta agenda. */
+  zonaHoraria: string;
   elementos: ElementoDeAgenda[];
   resumen: ResumenDeAdherencia;
 }
@@ -126,6 +130,7 @@ export interface RegistroDeHistorial {
 export interface Historial {
   desde: string;
   hasta: string;
+  zonaHoraria: string;
   registros: RegistroDeHistorial[];
   resumen: ResumenDeAdherencia;
   porDia: { fecha: string; tomadas: number; omitidas: number; porcentaje: number }[];

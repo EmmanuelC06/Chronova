@@ -28,6 +28,21 @@ function aFechaIso(valor: Date | string | null): string | null {
   return valor instanceof Date ? valor.toISOString() : new Date(valor).toISOString();
 }
 
+/**
+ * Convierte una columna DATE a AAAA-MM-DD sin pasar por la zona horaria
+ * del proceso.
+ *
+ * El driver de PostgreSQL entrega las columnas DATE como un Date puesto
+ * a medianoche LOCAL del servidor. Llamar a toISOString() sobre eso
+ * desplaza el dia: en un servidor al oeste de Greenwich, el 18 de abril
+ * se convertia en el 17. Aqui se leen los componentes tal cual.
+ */
+function aDiaCalendario(valor: Date | string | null): string | null {
+  if (valor === null || valor === undefined) return null;
+  if (typeof valor === 'string') return valor.slice(0, 10);
+  return `${valor.getFullYear()}-${String(valor.getMonth() + 1).padStart(2, '0')}-${String(valor.getDate()).padStart(2, '0')}`;
+}
+
 // =================================================================
 // Pacientes
 // =================================================================
@@ -39,13 +54,15 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
     const p = paciente.aPlano();
     await this.pool.query(
       `INSERT INTO pacientes
-         (id, nombre, email, telefono, fecha_de_nacimiento, contrasena_cifrada, preferencias, activo, creado_en)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+         (id, nombre, email, telefono, fecha_de_nacimiento, contrasena_cifrada,
+          zona_horaria, preferencias, activo, creado_en)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        ON CONFLICT (id) DO UPDATE SET
          nombre = EXCLUDED.nombre,
          telefono = EXCLUDED.telefono,
          fecha_de_nacimiento = EXCLUDED.fecha_de_nacimiento,
          contrasena_cifrada = EXCLUDED.contrasena_cifrada,
+         zona_horaria = EXCLUDED.zona_horaria,
          preferencias = EXCLUDED.preferencias,
          activo = EXCLUDED.activo`,
       [
@@ -55,6 +72,7 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
         p.telefono,
         p.fechaDeNacimiento,
         p.contrasenaCifrada,
+        p.zonaHoraria,
         JSON.stringify(p.preferencias),
         p.activo,
         p.creadoEn,
@@ -95,8 +113,9 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
       nombre: fila.nombre,
       email: fila.email,
       telefono: fila.telefono,
-      fechaDeNacimiento: aFechaIso(fila.fecha_de_nacimiento),
+      fechaDeNacimiento: aDiaCalendario(fila.fecha_de_nacimiento),
       contrasenaCifrada: fila.contrasena_cifrada,
+      zonaHoraria: fila.zona_horaria ?? 'America/Bogota',
       preferencias: fila.preferencias ?? {},
       activo: fila.activo,
       creadoEn: aFechaIso(fila.creado_en)!,
@@ -256,8 +275,8 @@ export class RepositorioDeMedicamentosPostgres implements RepositorioDeMedicamen
         intervaloEnDias: Number(fila.frecuencia_intervalo),
       },
       horarios: fila.horarios ?? [],
-      fechaInicio: aFechaIso(fila.fecha_inicio)!,
-      fechaFin: aFechaIso(fila.fecha_fin),
+      fechaInicio: aDiaCalendario(fila.fecha_inicio)!,
+      fechaFin: aDiaCalendario(fila.fecha_fin),
       instrucciones: fila.instrucciones,
       stock: {
         unidadesDisponibles: Number(fila.stock_unidades),

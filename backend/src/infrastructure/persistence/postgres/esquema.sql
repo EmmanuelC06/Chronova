@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS pacientes (
   telefono             TEXT,
   fecha_de_nacimiento  DATE,
   contrasena_cifrada   TEXT        NOT NULL,
+  -- Zona horaria IANA del paciente. Es la que da sentido a sus horarios:
+  -- "las 8:00" significa las 8 donde vive el, no donde este el servidor.
+  zona_horaria         TEXT        NOT NULL DEFAULT 'America/Bogota',
   preferencias         JSONB       NOT NULL DEFAULT '{}'::jsonb,
   activo               BOOLEAN     NOT NULL DEFAULT TRUE,
   creado_en            TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -94,3 +97,14 @@ CREATE TABLE IF NOT EXISTS vinculos (
 
 CREATE INDEX IF NOT EXISTS idx_vinculos_cuidador ON vinculos(cuidador_id);
 CREATE INDEX IF NOT EXISTS idx_vinculos_paciente ON vinculos(paciente_id);
+
+-- =============================================================
+--  Alteraciones para bases de datos que ya existian
+--
+--  Se ejecutan sin dano si la columna ya esta. Mientras el
+--  proyecto no incorpore una herramienta de migraciones, este
+--  es el mecanismo para evolucionar el esquema sin perder datos.
+-- =============================================================
+
+ALTER TABLE pacientes
+  ADD COLUMN IF NOT EXISTS zona_horaria TEXT NOT NULL DEFAULT 'America/Bogota';
