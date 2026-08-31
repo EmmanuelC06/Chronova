@@ -125,6 +125,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | [docs/API.md](docs/API.md) | Todos los endpoints con ejemplos listos para copiar |
 | [docs/DEL-MVP-A-CHRONOVA.md](docs/DEL-MVP-A-CHRONOVA.md) | Qué cambió respecto a MedAlerta y por qué |
 | [docs/diagramas/](docs/diagramas/) | Los 8 diagramas UML, en PNG, SVG y fuente editable |
+| [docs/Chronova-Requerimientos.docx](docs/Chronova-Requerimientos.docx) | Actores, cronograma y los 48 requerimientos, listo para el entregable |
 | [docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md](docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md) | Subir el proyecto a GitHub y traer cambios sin credenciales |
 
 ---
