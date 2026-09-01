@@ -70,7 +70,7 @@ git commit
 
 ```bash
 cd backend
-npm test          # las 99 pruebas deben pasar
+npm test          # las 104 pruebas deben pasar
 npm run typecheck # no debe imprimir nada
 ```
 

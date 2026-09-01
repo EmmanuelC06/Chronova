@@ -14,7 +14,7 @@ MedAlerta cumplió su función: demostró que la idea era viable y sirvió para 
 | Lenguaje | JavaScript | TypeScript en modo estricto |
 | Servidor | Un `server.js` de 710 líneas | ~45 archivos con una responsabilidad cada uno |
 | Consultas SQL | Repartidas por todo el servidor | Concentradas en una sola carpeta |
-| Pruebas | 15 scripts manuales de `curl` | 99 pruebas automáticas en < 2 s |
+| Pruebas | 15 scripts manuales de `curl` | 104 pruebas automáticas en < 2 s |
 | Correr sin base de datos | Imposible | `PERSISTENCE=memory` |
 | Adherencia | Log suelto sin estado | Entidad `Toma` con ciclo de vida y puntualidad |
 | Consentimiento | El cuidador se agregaba pacientes solo | El paciente aprueba y puede revocar |

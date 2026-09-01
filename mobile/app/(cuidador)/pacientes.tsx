@@ -157,7 +157,16 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
   const nivel = ESTILO_POR_NIVEL[paciente.adherencia.nivel];
 
   return (
-    <Tarjeta colorDeBorde={pendiente ? colores.textoSuave : nivel.color}>
+    <Tarjeta
+      colorDeBorde={pendiente ? colores.textoSuave : nivel.color}
+      // Mientras la solicitud no se acepte no hay nada que abrir, y una
+      // tarjeta que se hunde al tocarla y no lleva a ningun lado se lee
+      // como que la app fallo.
+      onPress={
+        pendiente ? undefined : () => router.push(`/paciente/${paciente.pacienteId}`)
+      }
+      descripcionAccesible={`Ver el tratamiento de ${paciente.nombre}`}
+    >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Texto variante="subtitulo" negrita>
           {paciente.nombre}
@@ -200,6 +209,10 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
 
           <Texto variante="pequeno" color={colores.textoSuave}>
             Ultima actividad: {tiempoRelativo(paciente.ultimaActividad)}
+          </Texto>
+
+          <Texto variante="pequeno" negrita color={colores.primario}>
+            Toca para ver el detalle →
           </Texto>
         </>
       )}

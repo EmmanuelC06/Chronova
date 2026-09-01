@@ -3,7 +3,11 @@ import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 
 import type { AgendaDelDia, Preferencias } from '../../dominio/modelos';
-import type { ProgramadorDeAlarmas, RegistroDePush } from '../../dominio/puertos';
+import type {
+  DatosDeNotificacion,
+  ProgramadorDeAlarmas,
+  RegistroDePush,
+} from '../../dominio/puertos';
 
 /**
  * ADAPTADOR de notificaciones con expo-notifications.
@@ -121,6 +125,35 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
     }
   }
 
+  /**
+   * Escucha los toques sobre una notificacion.
+   *
+   * Nota sobre el tipo: `data` viaja como JSON libre, asi que llega como
+   * un objeto sin forma garantizada. Se normaliza aqui, en el borde, para
+   * que ninguna pantalla tenga que desconfiar de el.
+   */
+  alTocarNotificacion(manejador: (datos: DatosDeNotificacion) => void): () => void {
+    try {
+      const suscripcion = Notifications.addNotificationResponseReceivedListener((respuesta) => {
+        manejador(normalizar(respuesta.notification.request.content.data));
+      });
+      return () => suscripcion.remove();
+    } catch {
+      // En web, o sin soporte de notificaciones: no hay nada que escuchar.
+      return () => {};
+    }
+  }
+
+  async notificacionQueAbrioLaApp(): Promise<DatosDeNotificacion | null> {
+    try {
+      const respuesta = await Notifications.getLastNotificationResponseAsync();
+      if (!respuesta) return null;
+      return normalizar(respuesta.notification.request.content.data);
+    } catch {
+      return null;
+    }
+  }
+
   // ---------------------------------------------------------------
   // Puerto ProgramadorDeAlarmas
   // ---------------------------------------------------------------
@@ -168,4 +201,19 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
       // Nada que hacer.
     }
   }
+}
+
+/** Se queda solo con los campos conocidos, y solo si son cadenas. */
+function normalizar(data: unknown): DatosDeNotificacion {
+  if (typeof data !== 'object' || data === null) return {};
+  const bruto = data as Record<string, unknown>;
+  const texto = (clave: string): string | undefined =>
+    typeof bruto[clave] === 'string' ? (bruto[clave] as string) : undefined;
+
+  return {
+    tipo: texto('tipo'),
+    pacienteId: texto('pacienteId'),
+    tomaId: texto('tomaId'),
+    medicamentoId: texto('medicamentoId'),
+  };
 }

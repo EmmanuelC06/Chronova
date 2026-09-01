@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { NavegacionPorNotificaciones } from '../src/ui/contexto/NavegacionPorNotificaciones';
 import { ProveedorDeSesion } from '../src/ui/contexto/SesionContexto';
 import { colores } from '../src/ui/tema';
 
@@ -17,6 +18,7 @@ export default function LayoutRaiz() {
     <SafeAreaProvider>
       <ProveedorDeSesion>
         <StatusBar style="dark" />
+        <NavegacionPorNotificaciones />
         <Stack
           screenOptions={{
             headerStyle: { backgroundColor: colores.superficie },

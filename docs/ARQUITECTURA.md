@@ -127,7 +127,7 @@ Todo lo que se puede reemplazar.
 
 ---
 
-## 5. Por qué esto importa: tres pruebas concretas
+## 5. Por qué esto importa: seis pruebas concretas
 
 ### Prueba 1: la aplicación corre sin base de datos
 
@@ -137,7 +137,7 @@ Eso solo es posible porque el dominio nunca supo que existía una base de datos.
 
 ### Prueba 2: las pruebas corren en milisegundos
 
-Las 99 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
+Las 104 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
 
 Con la arquitectura del MVP anterior, donde la lógica vivía dentro de las rutas de Express y hablaba directamente con PostgreSQL, cada prueba habría necesitado una base de datos levantada, datos sembrados y limpieza posterior. En la práctica, eso significa que nadie escribe pruebas.
 
@@ -158,9 +158,9 @@ Y como los adaptadores cumplen el mismo contrato, se pueden combinar: `NOTIFICAC
 La suite completa se ejecuta bajo seis zonas horarias distintas —de Kiritimati (UTC+14) a Anchorage (UTC−9)— y da exactamente el mismo resultado:
 
 ```bash
-TZ=UTC              npm test    # 99 passed
-TZ=America/Bogota   npm test    # 99 passed
-TZ=Asia/Tokyo       npm test    # 99 passed
+TZ=UTC              npm test    # 104 passed
+TZ=America/Bogota   npm test    # 104 passed
+TZ=Asia/Tokyo       npm test    # 104 passed
 ```
 
 Esto no era así al principio. El dominio usaba objetos `Date` para representar días del calendario, y un `Date` siempre es un instante que se lee en la zona del proceso. La consecuencia: con el servidor en UTC, la pastilla de las 08:00 de una paciente colombiana se agendaba a las 03:00 de su madrugada.
@@ -171,6 +171,14 @@ La corrección fue conceptual, no un parche: separar dos ideas que estaban mezcl
 - **`ZonaHoraria`** traduce entre la *hora de pared* del paciente y el *instante* que se guarda y dispara la alarma.
 
 Con esas dos piezas, el dominio dejó de tener opinión sobre dónde corre el servidor.
+
+### Prueba 6: una pantalla nueva sin una línea de servidor
+
+La pantalla de detalle del paciente —donde el cuidador ve la agenda del día, el tratamiento y las tomas que se saltaron— se añadió **sin modificar un solo archivo de `backend/src/`**. Se puede comprobar en el historial de Git: el único archivo del backend que cambió en ese commit fue el de pruebas.
+
+No fue suerte. Los casos de uso `ObtenerAgendaDelDia`, `ListarMedicamentos` y `ConsultarHistorial` ya recibían un `pacienteId`, y ya pasaban por `PoliticaDeAcceso` antes de devolver nada. Estaban escritos desde el principio pensando en que quien pregunta puede no ser el dueño de los datos.
+
+Vale la pena señalar dónde vive esa decisión. La pantalla esconde el botón de confirmar cuando el cuidador no tiene el permiso, pero **eso es cortesía, no seguridad**: esconder un botón no impide llamar al endpoint. Lo que de verdad protege la información clínica es que el servidor se niegue, y por eso las pruebas de ese permiso están en `backend/tests/`, no en la app.
 
 ---
 

@@ -27,6 +27,7 @@ interface ValorDeSesion {
   preferencias: Preferencias;
   api: ApiDeChronova;
   alarmas: ProgramadorDeAlarmas;
+  push: RegistroDePush;
   iniciarSesion(email: string, contrasena: string, tipo?: TipoDeUsuario): Promise<void>;
   registrarPaciente(datos: {
     nombre: string;
@@ -213,6 +214,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       preferencias,
       api,
       alarmas,
+      push,
       iniciarSesion,
       registrarPaciente,
       registrarCuidador,
@@ -226,6 +228,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       preferencias,
       api,
       alarmas,
+      push,
       iniciarSesion,
       registrarPaciente,
       registrarCuidador,

@@ -100,7 +100,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Arranca el servidor y se recarga solo al guardar cambios |
-| `npm test` | Ejecuta las 99 pruebas automáticas |
+| `npm test` | Ejecuta las 104 pruebas automáticas |
 | `npm run typecheck` | Revisa que no haya errores de tipos |
 | `npm run build` | Compila para producción |
 | `npm run db:migrate` | Crea las tablas en PostgreSQL |
@@ -125,7 +125,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | [docs/API.md](docs/API.md) | Todos los endpoints con ejemplos listos para copiar |
 | [docs/DEL-MVP-A-CHRONOVA.md](docs/DEL-MVP-A-CHRONOVA.md) | Qué cambió respecto a MedAlerta y por qué |
 | [docs/diagramas/](docs/diagramas/) | Los 8 diagramas UML, en PNG, SVG y fuente editable |
-| [docs/Chronova-Requerimientos.docx](docs/Chronova-Requerimientos.docx) | Actores, cronograma y los 30 requerimientos funcionales y 22 no funcionales, listo para el entregable |
+| [docs/Chronova-Requerimientos.docx](docs/Chronova-Requerimientos.docx) | Actores, cronograma y los 32 requerimientos funcionales y 22 no funcionales, listo para el entregable |
 | [docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md](docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md) | Subir el proyecto a GitHub y traer cambios sin credenciales |
 
 ---
@@ -145,8 +145,9 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 
 ## Estado del proyecto
 
-- Backend completo, con 99 pruebas automáticas en verde.
+- Backend completo, con 104 pruebas automáticas en verde.
 - App móvil con las pantallas principales conectadas a la API.
 - Las horas se manejan en la zona horaria de cada paciente, no en la del servidor. Verificado con la suite completa bajo seis relojes distintos, de UTC+14 a UTC−9.
 - Notificaciones push al teléfono del cuidador, con baja automática de dispositivos desinstalados. Requiere `eas init` en `mobile/` y `NOTIFICACIONES=push` en el `.env`. Para recibirlas en un teléfono real hace falta un *development build*: desde el SDK 53, Expo Go no admite push remoto. Ver la Parte 5 de la [guía de inicio](docs/GUIA-DE-INICIO.md).
-- Pendiente: pantalla de detalle del paciente para el cuidador, edición de medicamentos desde la app, recuperación de contraseña, y pruebas de usabilidad con adultos mayores reales.
+- El cuidador puede abrir a cada paciente y ver su agenda del día, su tratamiento y las tomas que se saltó; y tocar una notificación lo lleva directo a ese paciente. Se añadió sin modificar ningún archivo de `backend/src/`.
+- Pendiente: edición de medicamentos desde la app, recuperación de contraseña, renovación de sesión, y pruebas de usabilidad con adultos mayores reales.

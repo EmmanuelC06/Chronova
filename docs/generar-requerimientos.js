@@ -116,6 +116,8 @@ const RF = [
   ['RF-28', 'El sistema debe notificar al cuidador autorizado cuando su paciente pierde una o más tomas.', 'Sistema', 'Alta', 'NotificadorExpoPush'],
   ['RF-29', 'El sistema debe permitir registrar el teléfono de una persona para recibir notificaciones remotas.', 'Ambos', 'Media', 'RegistrarDispositivo'],
   ['RF-30', 'El sistema debe dar de baja el teléfono al cerrar sesión, y también cuando el servicio informe que la aplicación fue desinstalada.', 'Ambos', 'Media', 'OlvidarDispositivo'],
+  ['RF-31', 'El sistema debe permitir al cuidador autorizado consultar el detalle de un paciente: su agenda del día, su tratamiento vigente y las tomas que no realizó.', 'Cuidador', 'Alta', 'ObtenerAgendaDelDia'],
+  ['RF-32', 'La aplicación debe abrir directamente la información del paciente al que se refiere una notificación cuando el cuidador la toca.', 'Sistema', 'Media', 'NavegacionPorNotificaciones'],
 ];
 
 const RNF = [
@@ -129,13 +131,13 @@ const RNF = [
   ['RNF-08', 'Seguridad', 'El inicio de sesión no revelará si un correo está registrado, ni por el mensaje ni por el tiempo de respuesta.', 'Prueba automatizada que compara ambos mensajes de error. Verificado.'],
   ['RNF-09', 'Seguridad', 'Las sesiones se gestionarán con tokens firmados y expiración máxima de siete días.', 'Inspección del servicio de tokens y de la configuración. Verificado.'],
   ['RNF-10', 'Seguridad', 'Todas las consultas a la base de datos usarán parámetros, nunca concatenación de texto.', 'Revisión del único archivo que contiene SQL. Verificado.'],
-  ['RNF-11', 'Privacidad', 'Un cuidador solo accederá a los datos de un paciente que haya aceptado el vínculo, y únicamente a lo que este le autorice.', 'Siete pruebas automatizadas de control de acceso y consentimiento. Verificado.'],
+  ['RNF-11', 'Privacidad', 'Un cuidador solo accederá a los datos de un paciente que haya aceptado el vínculo, y únicamente a lo que este le autorice.', 'Doce pruebas automatizadas de control de acceso y consentimiento. Verificado.'],
   ['RNF-12', 'Rendimiento', 'La agenda del día responderá en menos de 200 ms bajo carga normal.', 'Medido entre 20 y 75 ms con 25 peticiones simultáneas contra PostgreSQL 16. Verificado.'],
   ['RNF-13', 'Fiabilidad', 'La generación de la agenda será idempotente: consultarla varias veces no duplicará tomas.', '25 peticiones simultáneas: cero duplicados y cero errores. Verificado.'],
   ['RNF-14', 'Disponibilidad', 'Las alarmas de toma sonarán aunque el dispositivo no tenga conexión a internet.', 'Las alarmas se programan localmente en el teléfono. Verificado por diseño.'],
   ['RNF-15', 'Portabilidad', 'El comportamiento del sistema no dependerá de la zona horaria en que corra el servidor.', 'La suite completa se ejecuta con idéntico resultado bajo seis husos, de UTC+14 a UTC−9. Verificado.'],
   ['RNF-16', 'Mantenibilidad', 'El núcleo de reglas de negocio no dependerá de ninguna librería externa.', 'Cero importaciones externas en el directorio del dominio. Verificado.'],
-  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '99 pruebas en menos de dos segundos. Verificado.'],
+  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '104 pruebas en menos de dos segundos. Verificado.'],
   ['RNF-18', 'Mantenibilidad', 'Toda consulta SQL residirá en un único archivo del proyecto.', 'Inspección del directorio de persistencia. Verificado.'],
   ['RNF-19', 'Portabilidad', 'El mecanismo de persistencia será intercambiable sin modificar el dominio ni los casos de uso.', 'La aplicación funciona completa en memoria o con PostgreSQL cambiando una variable. Verificado.'],
   ['RNF-20', 'Compatibilidad', 'La aplicación móvil funcionará sobre Android mediante Expo y el servidor sobre Node.js 20 o superior.', 'Ejecución en dispositivo y verificación de tipos y compilación. Verificado.'],
@@ -205,7 +207,7 @@ const doc = new Document({
         ['ID', 'Requerimiento', 'Actor', 'Prioridad', 'Implementado en'],
         RF, { centrar: [0, 3], mono: [4], size: 18 }),
       new Paragraph({ spacing: { after: 200 } }),
-      p('Los treinta requerimientos están implementados y verificados. La entrega efectiva del RF-28 en un teléfono real depende de configurar el identificador de proyecto de Expo, que es un paso de despliegue y no de desarrollo: la lógica de envío, el reparto por lotes y la baja de dispositivos desinstalados están cubiertos por pruebas automatizadas.'),
+      p('Los treinta y dos requerimientos están implementados y verificados. Corresponde precisar el alcance del RF-28: la lógica de envío, el reparto por lotes y la baja de dispositivos desinstalados están cubiertas por pruebas automatizadas, y el adaptador se ejerció contra el servicio real. La entrega en un teléfono depende de dos pasos de despliegue ajenos al desarrollo: configurar el identificador de proyecto de Expo y generar una compilación de desarrollo, ya que desde la versión 53 del SDK la aplicación Expo Go no admite notificaciones remotas.'),
 
       h1('6.  Requerimientos no funcionales'),
       p('Describen cómo debe comportarse el sistema. Se presta especial atención a la accesibilidad, porque la revisión de literatura del proyecto identifica la experiencia de usuario como el principal factor de abandono de las aplicaciones de salud entre adultos mayores; y a la portabilidad y la mantenibilidad, que son las que justifican la arquitectura elegida.'),

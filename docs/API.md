@@ -205,6 +205,8 @@ Suma unidades al inventario. `nuevoUmbralDeAlerta` es opcional.
 
 ## Tomas
 
+> **Cuando quien consulta es un cuidador.** `GET /api/medicamentos`, `GET /api/tomas/agenda` y `GET /api/tomas/historial` aceptan `pacienteId` y exigen el permiso `puedeVerHistorial`; `POST /api/tomas/:id/registro` exige `puedeRegistrarTomas`. Sin vínculo aceptado responden `403 NO_AUTORIZADO` con el mismo mensaje exista o no ese paciente, para no revelar quién está registrado. Son las tres consultas que alimentan la pantalla de detalle del paciente en la app.
+
 ### `GET /api/tomas/agenda`
 
 Parámetros opcionales: `fecha` (`AAAA-MM-DD`, por defecto hoy) y `pacienteId`.

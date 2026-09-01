@@ -758,6 +758,141 @@ describe('Preferencias de accesibilidad', () => {
   });
 });
 
+// =================================================================
+describe('Lo que un cuidador puede ver de su paciente', () => {
+  /**
+   * Estas pruebas cubren exactamente las tres consultas que hace la
+   * pantalla de detalle del paciente en la aplicacion movil: la agenda
+   * del dia, la lista de medicamentos y el historial.
+   *
+   * Se prueban aqui, en el servidor, y no en la pantalla, porque es
+   * aqui donde vive la seguridad. Una pantalla puede esconder un boton;
+   * eso no impide que alguien llame al endpoint directamente. Lo unico
+   * que de verdad protege los datos de salud de Rosa es que el servidor
+   * se niegue, y eso es lo que se verifica.
+   */
+
+  /** Deja un paciente con un medicamento y un cuidador ya aceptado. */
+  async function pacienteAcompanado(permisos?: Record<string, boolean>) {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+
+    // Cuando la invitacion la hace el paciente, el vinculo nace aceptado:
+    // no hay a quien pedirle permiso, ya lo dio quien manda.
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+
+    if (permisos) {
+      await app.contenedor.casosDeUso.cambiarPermisosDelVinculo.ejecutar({
+        solicitante: paciente.solicitante,
+        vinculoId: vinculo.id,
+        permisos,
+      });
+    }
+
+    return { paciente, cuidador, vinculo };
+  }
+
+  it('ve la agenda del dia y el historial, no solo el porcentaje', async () => {
+    const { paciente, cuidador } = await pacienteAcompanado();
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: cuidador.solicitante,
+      pacienteId: paciente.id,
+    });
+    const historial = await app.contenedor.casosDeUso.consultarHistorial.ejecutar({
+      solicitante: cuidador.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // Losartan tiene dos horarios: 08:00 y 20:00.
+    expect(agenda.elementos).toHaveLength(2);
+    expect(agenda.elementos.map((e) => e.horaProgramada)).toEqual(['08:00', '20:00']);
+    expect(historial.registros.length).toBeGreaterThan(0);
+  });
+
+  it('un cuidador sin vinculo no ve nada de ese paciente', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+    const extrano = await crearCuidadorDePrueba(app, 'extrano@test.com');
+
+    await expect(
+      app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+        solicitante: extrano.solicitante,
+        pacienteId: paciente.id,
+      }),
+    ).rejects.toThrow(/No tienes acceso/);
+
+    await expect(
+      app.contenedor.casosDeUso.consultarHistorial.ejecutar({
+        solicitante: extrano.solicitante,
+        pacienteId: paciente.id,
+      }),
+    ).rejects.toThrow(/No tienes acceso/);
+  });
+
+  it('si el paciente le quita el permiso de ver, deja de ver', async () => {
+    const { paciente, cuidador } = await pacienteAcompanado({ puedeVerHistorial: false });
+
+    await expect(
+      app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+        solicitante: cuidador.solicitante,
+        pacienteId: paciente.id,
+      }),
+    ).rejects.toThrow(/no te ha concedido permiso/);
+  });
+
+  it('sin permiso para registrar tomas, mirar si, tocar no', async () => {
+    const { paciente, cuidador } = await pacienteAcompanado();
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: cuidador.solicitante,
+      pacienteId: paciente.id,
+    });
+    const primera = agenda.elementos[0];
+    expect(primera).toBeDefined();
+
+    await expect(
+      app.contenedor.casosDeUso.registrarToma.ejecutar({
+        solicitante: cuidador.solicitante,
+        tomaId: primera!.tomaId,
+        accion: 'CONFIRMAR',
+      }),
+    ).rejects.toThrow(/no te ha concedido permiso/);
+  });
+
+  it('con permiso puede confirmar, y queda claro que la registro el cuidador', async () => {
+    const { paciente, cuidador } = await pacienteAcompanado({ puedeRegistrarTomas: true });
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: cuidador.solicitante,
+      pacienteId: paciente.id,
+    });
+    const primera = agenda.elementos[0]!;
+
+    await app.contenedor.casosDeUso.registrarToma.ejecutar({
+      solicitante: cuidador.solicitante,
+      tomaId: primera.tomaId,
+      accion: 'CONFIRMAR',
+    });
+
+    const historial = await app.contenedor.casosDeUso.consultarHistorial.ejecutar({
+      solicitante: cuidador.solicitante,
+      pacienteId: paciente.id,
+    });
+    const registro = historial.registros.find((r) => r.tomaId === primera.tomaId);
+
+    expect(registro?.estado).toBe('TOMADA');
+    // La distincion importa: una adherencia sostenida por el cuidador no
+    // es lo mismo que una adherencia autonoma. Mezclarlas falsearia la
+    // unica medida que este proyecto pretende mejorar.
+    expect(registro?.registradaPor).toBe('CUIDADOR');
+  });
+});
+
 // -----------------------------------------------------------------
 // Ayuda local
 // -----------------------------------------------------------------

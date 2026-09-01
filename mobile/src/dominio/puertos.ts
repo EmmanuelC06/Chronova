@@ -98,6 +98,42 @@ export interface RegistroDePush {
   /** Devuelve null si no hay permiso o el dispositivo no lo soporta. */
   obtenerToken(): Promise<string | null>;
   plataforma(): 'android' | 'ios' | 'web';
+
+  /**
+   * Avisa cuando la persona TOCA una notificacion, no cuando llega.
+   *
+   * Devuelve una funcion para cancelar la suscripcion, porque dejar
+   * escuchas vivas despues de desmontar el componente es la forma
+   * habitual de acabar navegando dos veces al mismo sitio.
+   */
+  alTocarNotificacion(manejador: (datos: DatosDeNotificacion) => void): () => void;
+
+  /**
+   * Notificacion que abrio la aplicacion cuando estaba cerrada del todo.
+   *
+   * Hace falta ademas de la escucha anterior: si el sistema mato la app y
+   * el usuario la reabre tocando el aviso, para cuando la escucha se
+   * registra el toque ya ocurrio y no lo veria nadie.
+   */
+  notificacionQueAbrioLaApp(): Promise<DatosDeNotificacion | null>;
+}
+
+/**
+ * Datos que viajan dentro de una notificacion.
+ *
+ * Los envia el servidor en el campo `data` del aviso, o los pone la
+ * propia app al programar una alarma local. Todos son opcionales a
+ * proposito: una notificacion vieja, de una version anterior de la app,
+ * no debe romper nada al tocarla.
+ */
+export interface DatosDeNotificacion {
+  /** TOMA_PERDIDA, STOCK_BAJO, SOLICITUD_DE_VINCULO... */
+  tipo?: string;
+  /** Presente en los avisos dirigidos a un cuidador. */
+  pacienteId?: string;
+  /** Presente en las alarmas locales del paciente. */
+  tomaId?: string;
+  medicamentoId?: string;
 }
 
 /** Programa las alarmas locales del telefono. */
