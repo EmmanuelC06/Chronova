@@ -28,13 +28,15 @@
     ],
     "extra": {
       "apiUrl": "http://192.168.1.10:4000",
+      "router": {},
       "eas": {
-        "projectId": "PON-AQUI-EL-ID-DE-TU-PROYECTO-EAS"
+        "projectId": "e0863e2f-ccb1-4db2-af1d-07e835cab14c"
       }
     },
     "notification": {
       "color": "#0E6E62",
       "androidMode": "default"
-    }
+    },
+    "owner": "emmanuelcv"
   }
 }

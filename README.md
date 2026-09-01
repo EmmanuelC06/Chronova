@@ -148,5 +148,5 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 - Backend completo, con 99 pruebas automáticas en verde.
 - App móvil con las pantallas principales conectadas a la API.
 - Las horas se manejan en la zona horaria de cada paciente, no en la del servidor. Verificado con la suite completa bajo seis relojes distintos, de UTC+14 a UTC−9.
-- Notificaciones push al teléfono del cuidador, con baja automática de dispositivos desinstalados. Requiere poner el `projectId` de EAS en `mobile/app.json` y `NOTIFICACIONES=push` en el `.env`.
+- Notificaciones push al teléfono del cuidador, con baja automática de dispositivos desinstalados. Requiere `eas init` en `mobile/` y `NOTIFICACIONES=push` en el `.env`. Para recibirlas en un teléfono real hace falta un *development build*: desde el SDK 53, Expo Go no admite push remoto. Ver la Parte 5 de la [guía de inicio](docs/GUIA-DE-INICIO.md).
 - Pendiente: pantalla de detalle del paciente para el cuidador, edición de medicamentos desde la app, recuperación de contraseña, y pruebas de usabilidad con adultos mayores reales.

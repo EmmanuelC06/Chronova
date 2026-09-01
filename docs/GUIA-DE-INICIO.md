@@ -254,6 +254,62 @@ No debe imprimir nada. Si imprime errores, hay problemas de tipos en el código.
 
 ---
 
+## Parte 5: notificaciones push (opcional)
+
+Conviene separar dos cosas que suenan igual pero no lo son:
+
+- **Alarmas locales.** Las programa el propio teléfono a partir de la agenda del día. Son las del paciente ("es hora de tu Losartán") y **funcionan sin configurar nada**, incluso sin internet. Son las importantes: un recordatorio de medicamento no puede depender de la cobertura.
+- **Notificaciones push.** Las envía el servidor cuando pasa algo que ese teléfono no puede saber solo, sobre todo "el paciente al que acompañas no confirmó una toma". Son para el cuidador, y sí necesitan configuración.
+
+Esta parte trata solo de las segundas. Si no la haces, la app funciona igual: el aviso queda registrado en la consola del servidor en lugar de llegar al teléfono.
+
+### 5.1 Obtener el identificador del proyecto
+
+Crea una cuenta gratuita en [expo.dev](https://expo.dev). Luego:
+
+```bash
+npm install -g eas-cli
+cd chronova/mobile
+eas init
+```
+
+El comando pide iniciar sesión y escribe el `projectId` dentro de `mobile/app.json`, en `extra.eas.projectId`.
+
+> Si responde `Project already linked` seguido de `Invalid UUID appId`, es que el campo `extra.eas.projectId` ya existe con un valor que no es un identificador real. Bórralo de `app.json` y vuelve a ejecutar `eas init`.
+
+### 5.2 Activar el envío en el servidor
+
+En `backend/.env`:
+
+```
+NOTIFICACIONES=push
+```
+
+Los tres valores posibles son `consola` (solo imprime, es el de por defecto), `push` (solo envía) y `ambos` (hace las dos cosas, útil mientras pruebas).
+
+### 5.3 La limitación que hay que conocer
+
+**Desde el SDK 53, la app Expo Go no admite notificaciones push remotas.** Este proyecto usa SDK 53, así que aunque completes los dos pasos anteriores, abrir Chronova dentro de Expo Go no va a obtener un token.
+
+Eso no rompe nada: la app escribe un aviso en la consola, devuelve `null` y sigue funcionando con sus alarmas locales. Pero el cuidador no recibirá nada en el teléfono.
+
+Para que lleguen de verdad hace falta un **development build**, que es un APK propio de Chronova en lugar de Expo Go:
+
+```bash
+cd chronova/mobile
+eas build --profile development --platform android
+```
+
+Corre en los servidores de Expo (capa gratuita), tarda entre 15 y 40 minutos, y al terminar da un enlace para descargar el APK e instalarlo en un Android real.
+
+### 5.4 Comprobar sin teléfono
+
+No hace falta un celular para verificar que el envío funciona. Con `NOTIFICACIONES=ambos`, cualquier aviso queda impreso en la consola del servidor con su destinatario, su título y su cuerpo, y a continuación el resultado del envío real.
+
+Es la forma de comprobar el comportamiento que más importa: **si el servicio de Expo no responde, el aviso se pierde pero la operación no falla**. Las tomas vencidas se cierran igual. Eso está cubierto por las pruebas automatizadas de `backend/tests/use-cases/notificaciones.test.ts`, que sustituyen el servicio de Expo por un cliente falso para poder provocar caídas y desinstalaciones a voluntad.
+
+---
+
 ## Problemas comunes
 
 ### "No pudimos conectarnos con el servidor" en la app
