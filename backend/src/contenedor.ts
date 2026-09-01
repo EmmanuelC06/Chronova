@@ -9,6 +9,8 @@ import { ObtenerPerfil } from './application/use-cases/auth/ObtenerPerfil.js';
 import { RegistrarCuidador } from './application/use-cases/auth/RegistrarCuidador.js';
 import { RegistrarPaciente } from './application/use-cases/auth/RegistrarPaciente.js';
 import { CambiarPermisosDelVinculo } from './application/use-cases/cuidadores/CambiarPermisosDelVinculo.js';
+import { OlvidarDispositivo } from './application/use-cases/dispositivos/OlvidarDispositivo.js';
+import { RegistrarDispositivo } from './application/use-cases/dispositivos/RegistrarDispositivo.js';
 import { ListarCuidadoresDelPaciente } from './application/use-cases/cuidadores/ListarCuidadoresDelPaciente.js';
 import { ListarPacientesDelCuidador } from './application/use-cases/cuidadores/ListarPacientesDelCuidador.js';
 import { ResponderSolicitudDeVinculo } from './application/use-cases/cuidadores/ResponderSolicitudDeVinculo.js';
@@ -24,6 +26,7 @@ import { ObtenerAgendaDelDia } from './application/use-cases/tomas/ObtenerAgenda
 import { RegistrarToma } from './application/use-cases/tomas/RegistrarToma.js';
 
 import type { RepositorioDeCuidadores } from './domain/cuidador/RepositorioDeCuidadores.js';
+import type { RepositorioDeDispositivos } from './domain/dispositivo/RepositorioDeDispositivos.js';
 import type { RepositorioDeMedicamentos } from './domain/medicamento/RepositorioDeMedicamentos.js';
 import type { RepositorioDePacientes } from './domain/paciente/RepositorioDePacientes.js';
 import type { RepositorioDeTomas } from './domain/toma/RepositorioDeTomas.js';
@@ -31,6 +34,7 @@ import type { RepositorioDeVinculos } from './domain/vinculo/RepositorioDeVincul
 
 import {
   RepositorioDeCuidadoresEnMemoria,
+  RepositorioDeDispositivosEnMemoria,
   RepositorioDeMedicamentosEnMemoria,
   RepositorioDePacientesEnMemoria,
   RepositorioDeTomasEnMemoria,
@@ -38,6 +42,7 @@ import {
 } from './infrastructure/persistence/in-memory/repositoriosEnMemoria.js';
 import {
   RepositorioDeCuidadoresPostgres,
+  RepositorioDeDispositivosPostgres,
   RepositorioDeMedicamentosPostgres,
   RepositorioDePacientesPostgres,
   RepositorioDeTomasPostgres,
@@ -47,7 +52,10 @@ import { crearPool } from './infrastructure/persistence/postgres/pool.js';
 import { CifradorBcrypt } from './infrastructure/security/CifradorBcrypt.js';
 import { ServicioDeTokensJwt } from './infrastructure/security/ServicioDeTokensJwt.js';
 import { GeneradorDeIdsUuid } from './infrastructure/system/GeneradorDeIdsUuid.js';
-import { NotificadorEnConsola } from './infrastructure/system/NotificadorEnConsola.js';
+import { ClienteDeExpoHttp } from './infrastructure/notificaciones/ClienteDeExpo.js';
+import { NotificadorCompuesto } from './infrastructure/notificaciones/NotificadorCompuesto.js';
+import { NotificadorEnConsola } from './infrastructure/notificaciones/NotificadorEnConsola.js';
+import { NotificadorExpoPush } from './infrastructure/notificaciones/NotificadorExpoPush.js';
 import { RelojDelSistema } from './infrastructure/system/RelojDelSistema.js';
 
 import type { CifradorDeContrasenas } from './application/ports/CifradorDeContrasenas.js';
@@ -84,6 +92,9 @@ export interface Contenedor {
     cambiarPermisosDelVinculo: CambiarPermisosDelVinculo;
     listarPacientesDelCuidador: ListarPacientesDelCuidador;
     listarCuidadoresDelPaciente: ListarCuidadoresDelPaciente;
+
+    registrarDispositivo: RegistrarDispositivo;
+    olvidarDispositivo: OlvidarDispositivo;
   };
   cerrar(): Promise<void>;
 }
@@ -100,6 +111,7 @@ export interface DependenciasOpcionales {
     medicamentos: RepositorioDeMedicamentos;
     tomas: RepositorioDeTomas;
     vinculos: RepositorioDeVinculos;
+    dispositivos: RepositorioDeDispositivos;
   };
 }
 
@@ -122,7 +134,6 @@ export function construirContenedor(
   const reloj = opcionales.reloj ?? new RelojDelSistema();
   const ids = opcionales.ids ?? new GeneradorDeIdsUuid();
   const cifrador = opcionales.cifrador ?? new CifradorBcrypt();
-  const notificador = opcionales.notificador ?? new NotificadorEnConsola();
   const tokens = new ServicioDeTokensJwt(entorno.jwtSecreto, entorno.jwtDuracion);
 
   // --- Adaptadores de persistencia ---
@@ -138,6 +149,7 @@ export function construirContenedor(
         medicamentos: new RepositorioDeMedicamentosPostgres(pool),
         tomas: new RepositorioDeTomasPostgres(pool),
         vinculos: new RepositorioDeVinculosPostgres(pool),
+        dispositivos: new RepositorioDeDispositivosPostgres(pool),
       };
     } else {
       repositorios = {
@@ -146,13 +158,19 @@ export function construirContenedor(
         medicamentos: new RepositorioDeMedicamentosEnMemoria(),
         tomas: new RepositorioDeTomasEnMemoria(),
         vinculos: new RepositorioDeVinculosEnMemoria(),
+        dispositivos: new RepositorioDeDispositivosEnMemoria(),
       };
     }
   }
 
-  const { pacientes, cuidadores, medicamentos, tomas, vinculos } = repositorios;
+  const { pacientes, cuidadores, medicamentos, tomas, vinculos, dispositivos } = repositorios;
   const politica = new PoliticaDeAcceso(vinculos);
   const tolerancia = entorno.ventanaDeToleranciaEnMinutos;
+
+  // --- Notificaciones ---
+  // Se elige aqui, y solo aqui, como salen los avisos al mundo. El
+  // dominio y los casos de uso solo conocen el puerto Notificador.
+  const notificador = opcionales.notificador ?? construirNotificador(entorno, dispositivos, reloj);
 
   // --- Casos de uso ---
   const casosDeUso: Contenedor['casosDeUso'] = {
@@ -213,6 +231,9 @@ export function construirContenedor(
       tolerancia,
     ),
     listarCuidadoresDelPaciente: new ListarCuidadoresDelPaciente(vinculos, cuidadores),
+
+    registrarDispositivo: new RegistrarDispositivo(dispositivos, ids, reloj),
+    olvidarDispositivo: new OlvidarDispositivo(dispositivos),
   };
 
   return {
@@ -224,4 +245,31 @@ export function construirContenedor(
       if (pool) await pool.end();
     },
   };
+}
+
+
+/**
+ * Decide como se entregan los avisos segun la configuracion.
+ *
+ * En desarrollo basta la consola. En produccion interesa el envio real
+ * y, normalmente, tambien el registro en consola para poder auditar que
+ * se envio. El modo "ambos" usa el patron Composite: un notificador que
+ * contiene otros y cumple la misma interfaz.
+ */
+function construirNotificador(
+  entorno: Entorno,
+  dispositivos: RepositorioDeDispositivos,
+  reloj: Reloj,
+): Notificador {
+  const consola = new NotificadorEnConsola();
+
+  if (entorno.notificaciones === 'consola') return consola;
+
+  const push = new NotificadorExpoPush(
+    dispositivos,
+    new ClienteDeExpoHttp(entorno.expoTokenDeAcceso),
+    reloj,
+  );
+
+  return entorno.notificaciones === 'push' ? push : new NotificadorCompuesto(push, consola);
 }

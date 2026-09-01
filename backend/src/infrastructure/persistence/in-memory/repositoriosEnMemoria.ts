@@ -12,6 +12,10 @@ import type { RepositorioDePacientes } from '../../../domain/paciente/Repositori
 import { Toma } from '../../../domain/toma/Toma.js';
 import type { TomaPlana } from '../../../domain/toma/Toma.js';
 import type { RangoDeFechas, RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
+import { Dispositivo } from '../../../domain/dispositivo/Dispositivo.js';
+import type { DispositivoPlano } from '../../../domain/dispositivo/Dispositivo.js';
+import type { RepositorioDeDispositivos } from '../../../domain/dispositivo/RepositorioDeDispositivos.js';
+import type { TokenDeDispositivo } from '../../../domain/dispositivo/TokenDeDispositivo.js';
 import { Vinculo } from '../../../domain/vinculo/Vinculo.js';
 import type { VinculoPlano } from '../../../domain/vinculo/Vinculo.js';
 import type { RepositorioDeVinculos } from '../../../domain/vinculo/RepositorioDeVinculos.js';
@@ -243,5 +247,28 @@ export class RepositorioDeVinculosEnMemoria implements RepositorioDeVinculos {
     return [...this.datos.values()]
       .filter((v) => v.pacienteId === pacienteId.valor)
       .map((v) => Vinculo.desdePlano(v));
+  }
+}
+
+export class RepositorioDeDispositivosEnMemoria implements RepositorioDeDispositivos {
+  private readonly datos = new Map<string, DispositivoPlano>();
+
+  async guardar(dispositivo: Dispositivo): Promise<void> {
+    this.datos.set(dispositivo.token.valor, dispositivo.aPlano());
+  }
+
+  async buscarPorToken(token: TokenDeDispositivo): Promise<Dispositivo | null> {
+    const plano = this.datos.get(token.valor);
+    return plano ? Dispositivo.desdePlano(plano) : null;
+  }
+
+  async listarPorPropietario(propietarioId: Identificador): Promise<Dispositivo[]> {
+    return [...this.datos.values()]
+      .filter((d) => d.propietarioId === propietarioId.valor)
+      .map((d) => Dispositivo.desdePlano(d));
+  }
+
+  async eliminarPorToken(token: TokenDeDispositivo): Promise<void> {
+    this.datos.delete(token.valor);
   }
 }

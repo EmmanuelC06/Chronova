@@ -5,13 +5,14 @@ import { Identificador } from '../src/domain/shared/Identificador.js';
 import type { Solicitante } from '../src/application/services/PoliticaDeAcceso.js';
 import {
   RepositorioDeCuidadoresEnMemoria,
+  RepositorioDeDispositivosEnMemoria,
   RepositorioDeMedicamentosEnMemoria,
   RepositorioDePacientesEnMemoria,
   RepositorioDeTomasEnMemoria,
   RepositorioDeVinculosEnMemoria,
 } from '../src/infrastructure/persistence/in-memory/repositoriosEnMemoria.js';
 import { GeneradorDeIdsSecuencial } from '../src/infrastructure/system/GeneradorDeIdsUuid.js';
-import { NotificadorEnConsola } from '../src/infrastructure/system/NotificadorEnConsola.js';
+import { NotificadorEnConsola } from '../src/infrastructure/notificaciones/NotificadorEnConsola.js';
 import { RelojFijo } from '../src/infrastructure/system/RelojDelSistema.js';
 import type { CifradorDeContrasenas } from '../src/application/ports/CifradorDeContrasenas.js';
 
@@ -43,6 +44,8 @@ export const ENTORNO_DE_PRUEBA: Entorno = {
   urlDeBaseDeDatos: '',
   baseDeDatosConSsl: false,
   ventanaDeToleranciaEnMinutos: 60,
+  notificaciones: 'consola',
+  expoTokenDeAcceso: undefined,
 };
 
 export interface EntornoDePrueba {
@@ -68,6 +71,7 @@ export function montarAplicacion(
       medicamentos: new RepositorioDeMedicamentosEnMemoria(),
       tomas: new RepositorioDeTomasEnMemoria(),
       vinculos: new RepositorioDeVinculosEnMemoria(),
+      dispositivos: new RepositorioDeDispositivosEnMemoria(),
     },
   });
 

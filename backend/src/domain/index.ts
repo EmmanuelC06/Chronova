@@ -4,3 +4,4 @@ export * from './cuidador/index.js';
 export * from './medicamento/index.js';
 export * from './toma/index.js';
 export * from './vinculo/index.js';
+export * from './dispositivo/index.js';

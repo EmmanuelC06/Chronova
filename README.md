@@ -100,7 +100,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Arranca el servidor y se recarga solo al guardar cambios |
-| `npm test` | Ejecuta las 87 pruebas automáticas |
+| `npm test` | Ejecuta las 99 pruebas automáticas |
 | `npm run typecheck` | Revisa que no haya errores de tipos |
 | `npm run build` | Compila para producción |
 | `npm run db:migrate` | Crea las tablas en PostgreSQL |
@@ -125,7 +125,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | [docs/API.md](docs/API.md) | Todos los endpoints con ejemplos listos para copiar |
 | [docs/DEL-MVP-A-CHRONOVA.md](docs/DEL-MVP-A-CHRONOVA.md) | Qué cambió respecto a MedAlerta y por qué |
 | [docs/diagramas/](docs/diagramas/) | Los 8 diagramas UML, en PNG, SVG y fuente editable |
-| [docs/Chronova-Requerimientos.docx](docs/Chronova-Requerimientos.docx) | Actores, cronograma y los 48 requerimientos, listo para el entregable |
+| [docs/Chronova-Requerimientos.docx](docs/Chronova-Requerimientos.docx) | Actores, cronograma y los 30 requerimientos funcionales y 22 no funcionales, listo para el entregable |
 | [docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md](docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md) | Subir el proyecto a GitHub y traer cambios sin credenciales |
 
 ---
@@ -145,7 +145,8 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 
 ## Estado del proyecto
 
-- Backend completo, con 87 pruebas automáticas en verde.
+- Backend completo, con 99 pruebas automáticas en verde.
 - App móvil con las pantallas principales conectadas a la API.
 - Las horas se manejan en la zona horaria de cada paciente, no en la del servidor. Verificado con la suite completa bajo seis relojes distintos, de UTC+14 a UTC−9.
-- Pendiente: notificaciones push reales (hoy el aviso al cuidador solo se registra en consola), pantalla de detalle del paciente para el cuidador, edición de medicamentos desde la app, recuperación de contraseña, y pruebas de usabilidad con adultos mayores reales.
+- Notificaciones push al teléfono del cuidador, con baja automática de dispositivos desinstalados. Requiere poner el `projectId` de EAS en `mobile/app.json` y `NOTIFICACIONES=push` en el `.env`.
+- Pendiente: pantalla de detalle del paciente para el cuidador, edición de medicamentos desde la app, recuperación de contraseña, y pruebas de usabilidad con adultos mayores reales.

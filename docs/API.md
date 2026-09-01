@@ -108,6 +108,28 @@ Solo pacientes. Solo se envían los campos que cambian:
 | `alertasVibracion` | booleano |
 | `minutosDeGracia` | entero entre 15 y 720 |
 
+### `POST /api/auth/dispositivos`
+
+Registra este teléfono para recibir notificaciones. La app lo llama después de cada inicio de sesión, porque el token de Expo cambia si el usuario reinstala la aplicación o cambia de teléfono.
+
+```json
+{ "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", "plataforma": "android" }
+```
+
+`plataforma`: `android` · `ios` · `web`.
+
+Si el token ya estaba registrado a nombre de otra persona, se reasigna en lugar de duplicarse: el aparato es el mismo y enviarle dos veces produciría avisos repetidos.
+
+### `DELETE /api/auth/dispositivos`
+
+Da de baja el teléfono. La app lo llama al cerrar sesión, para que quien use ese teléfono después no siga viendo avisos sobre la salud de otra persona.
+
+```json
+{ "token": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]" }
+```
+
+Responde `{ "olvidado": true }` o `{ "olvidado": false }`. Devuelve lo mismo exista o no el token, para no revelar qué dispositivos están registrados.
+
 ---
 
 ## Medicamentos
@@ -343,3 +365,20 @@ Solo pacientes. Quién lo acompaña y con qué permisos. Las solicitudes pendien
 Cada 15 minutos el servidor cierra las tomas que nadie respondió, respetando los `minutosDeGracia` de cada paciente, y avisa a los cuidadores con `recibeAlertas`.
 
 No es un endpoint: se ejecuta desde `main.ts`. En un despliegue de producción convendría sacarlo a un proceso aparte (un cron) para que no se duplique si hay varias instancias del servidor.
+
+## Notificaciones
+
+Los avisos salen por el puerto `Notificador`, y la variable `NOTIFICACIONES` decide a dónde:
+
+| Valor | Qué hace |
+|---|---|
+| `consola` | Solo los registra en el log del servidor. Es el valor por defecto y basta para desarrollar |
+| `push` | Los envía como notificación al teléfono, vía Expo |
+| `ambos` | Las dos cosas |
+
+Con `push` o `ambos` conviene definir también `EXPO_ACCESS_TOKEN`, que se crea en el panel de Expo e impide que un tercero envíe notificaciones haciéndose pasar por Chronova.
+
+Dos comportamientos del adaptador que conviene conocer:
+
+- **Nunca interrumpe la operación en curso.** Si Expo está caído, la toma se registra igual y el aviso se pierde. Verificado con el servicio inaccesible: las tomas vencidas se cerraron correctamente y el fallo solo quedó en el log.
+- **Da de baja los tokens muertos.** Cuando alguien desinstala la app, Expo responde `DeviceNotRegistered` y el token se elimina, en lugar de reintentar indefinidamente.

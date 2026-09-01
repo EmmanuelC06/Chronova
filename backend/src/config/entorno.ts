@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 export type ModoDePersistencia = 'memory' | 'postgres';
+export type ModoDeNotificaciones = 'consola' | 'push' | 'ambos';
 
 export interface Entorno {
   puerto: number;
@@ -11,6 +12,8 @@ export interface Entorno {
   urlDeBaseDeDatos: string;
   baseDeDatosConSsl: boolean;
   ventanaDeToleranciaEnMinutos: number;
+  notificaciones: ModoDeNotificaciones;
+  expoTokenDeAcceso: string | undefined;
 }
 
 function leerNumero(valor: string | undefined, porDefecto: number): number {
@@ -49,6 +52,13 @@ export function cargarEntorno(): Entorno {
     throw new Error('PERSISTENCE=postgres requiere que definas DATABASE_URL en el archivo .env.');
   }
 
+  const notificaciones = (process.env.NOTIFICACIONES ?? 'consola') as ModoDeNotificaciones;
+  if (!['consola', 'push', 'ambos'].includes(notificaciones)) {
+    throw new Error(
+      `NOTIFICACIONES debe ser "consola", "push" o "ambos", no "${notificaciones}".`,
+    );
+  }
+
   return {
     puerto: leerNumero(process.env.PORT, 4000),
     entornoDeEjecucion,
@@ -58,5 +68,7 @@ export function cargarEntorno(): Entorno {
     urlDeBaseDeDatos,
     baseDeDatosConSsl: process.env.DATABASE_SSL === 'true',
     ventanaDeToleranciaEnMinutos: leerNumero(process.env.VENTANA_TOLERANCIA_MINUTOS, 60),
+    notificaciones,
+    expoTokenDeAcceso: process.env.EXPO_ACCESS_TOKEN || undefined,
   };
 }

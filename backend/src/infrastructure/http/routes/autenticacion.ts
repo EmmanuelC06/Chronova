@@ -3,6 +3,8 @@ import type { Contenedor } from '../../../contenedor.js';
 import { asincrono } from '../middlewares/asincrono.js';
 import { autenticar, exigirTipo, solicitanteDe } from '../middlewares/autenticacion.js';
 import {
+  esquemaDeBajaDeDispositivo,
+  esquemaDeDispositivo,
   esquemaDeInicioDeSesion,
   esquemaDePreferencias,
   esquemaDeRegistroDeCuidador,
@@ -77,6 +79,37 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
         ...datos,
       });
       respuesta.json(preferencias);
+    }),
+  );
+
+  // POST /api/auth/dispositivos
+  // La app lo llama tras iniciar sesion, para recibir notificaciones.
+  router.post(
+    '/dispositivos',
+    autenticar(tokens),
+    asincrono(async (peticion, respuesta) => {
+      const datos = esquemaDeDispositivo.parse(peticion.body);
+      const dispositivo = await casosDeUso.registrarDispositivo.ejecutar({
+        solicitante: solicitanteDe(peticion),
+        ...datos,
+      });
+      respuesta.status(201).json(dispositivo);
+    }),
+  );
+
+  // DELETE /api/auth/dispositivos
+  // La app lo llama al cerrar sesion, para que los avisos no sigan
+  // llegando a un telefono que ya no es de esa persona.
+  router.delete(
+    '/dispositivos',
+    autenticar(tokens),
+    asincrono(async (peticion, respuesta) => {
+      const datos = esquemaDeBajaDeDispositivo.parse(peticion.body);
+      const resultado = await casosDeUso.olvidarDispositivo.ejecutar({
+        solicitante: solicitanteDe(peticion),
+        ...datos,
+      });
+      respuesta.json(resultado);
     }),
   );
 

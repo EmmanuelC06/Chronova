@@ -109,7 +109,7 @@ Aquí también viven los **puertos**, en `application/ports/`:
 | `GeneradorDeIds` | "dame un id nuevo" | Para tener ids predecibles en las pruebas |
 | `CifradorDeContrasenas` | "cifra / verifica" | Para cambiar bcrypt por otro sin tocar nada más |
 | `ServicioDeTokens` | "emite / verifica sesión" | Para que el dominio no sepa qué es un JWT |
-| `Notificador` | "avisa esto a esta persona" | Hoy es la consola, mañana notificaciones push |
+| `Notificador` | "avisa esto a esta persona" | Consola, notificaciones push, o ambas: se elige en el contenedor |
 
 Los puertos de persistencia (`RepositorioDeMedicamentos`, etc.) están en el dominio, porque es el dominio quien define qué necesita.
 
@@ -137,7 +137,7 @@ Eso solo es posible porque el dominio nunca supo que existía una base de datos.
 
 ### Prueba 2: las pruebas corren en milisegundos
 
-Las 87 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
+Las 99 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
 
 Con la arquitectura del MVP anterior, donde la lógica vivía dentro de las rutas de Express y hablaba directamente con PostgreSQL, cada prueba habría necesitado una base de datos levantada, datos sembrados y limpieza posterior. En la práctica, eso significa que nadie escribe pruebas.
 
@@ -145,14 +145,22 @@ Con la arquitectura del MVP anterior, donde la lógica vivía dentro de las ruta
 
 Para probar "¿qué pasa si el paciente no confirma la toma en dos horas?" no hay que esperar dos horas: se inyecta un `RelojFijo` y se mueve. Mira `backend/tests/use-cases/casosDeUso.test.ts`, la prueba del cierre automático.
 
-### Prueba 4: el resultado no depende del reloj del servidor
+### Prueba 4: se añadieron notificaciones push sin tocar el dominio
+
+El puerto `Notificador` existía desde el primer día con un solo adaptador que escribía en consola. Añadir notificaciones reales consistió en escribir un adaptador nuevo (`NotificadorExpoPush`) y una línea en `contenedor.ts`.
+
+Ni una sola línea del dominio ni de los casos de uso cambió. `CerrarTomasVencidas` sigue diciendo «avisa esto a esta persona» sin saber que ahora eso llega a un teléfono.
+
+Y como los adaptadores cumplen el mismo contrato, se pueden combinar: `NOTIFICACIONES=ambos` usa un `NotificadorCompuesto` que contiene a los dos y cumple, él también, la misma interfaz.
+
+### Prueba 5: el resultado no depende del reloj del servidor
 
 La suite completa se ejecuta bajo seis zonas horarias distintas —de Kiritimati (UTC+14) a Anchorage (UTC−9)— y da exactamente el mismo resultado:
 
 ```bash
-TZ=UTC              npm test    # 87 passed
-TZ=America/Bogota   npm test    # 87 passed
-TZ=Asia/Tokyo       npm test    # 87 passed
+TZ=UTC              npm test    # 99 passed
+TZ=America/Bogota   npm test    # 99 passed
+TZ=Asia/Tokyo       npm test    # 99 passed
 ```
 
 Esto no era así al principio. El dominio usaba objetos `Date` para representar días del calendario, y un `Date` siempre es un instante que se lee en la zona del proceso. La consecuencia: con el servidor en UTC, la pastilla de las 08:00 de una paciente colombiana se agendaba a las 03:00 de su madrugada.

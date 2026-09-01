@@ -98,6 +98,26 @@ CREATE TABLE IF NOT EXISTS vinculos (
 CREATE INDEX IF NOT EXISTS idx_vinculos_cuidador ON vinculos(cuidador_id);
 CREATE INDEX IF NOT EXISTS idx_vinculos_paciente ON vinculos(paciente_id);
 
+CREATE TABLE IF NOT EXISTS dispositivos (
+  id                   UUID PRIMARY KEY,
+  -- Apunta a un paciente O a un cuidador, por lo que no lleva clave
+  -- foranea: PostgreSQL no permite una que referencie a dos tablas.
+  -- El precio es que la integridad de esta columna la cuida la
+  -- aplicacion; a cambio, no hacen falta dos tablas casi identicas.
+  propietario_id       UUID        NOT NULL,
+  tipo_de_propietario  TEXT        NOT NULL
+                       CHECK (tipo_de_propietario IN ('PACIENTE','CUIDADOR')),
+  -- El token identifica un aparato, no una persona. Es unico en todo el
+  -- sistema: si el telefono cambia de dueno, la fila se reasigna.
+  token                TEXT        NOT NULL UNIQUE,
+  plataforma           TEXT        NOT NULL CHECK (plataforma IN ('android','ios','web')),
+  registrado_en        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ultimo_uso_en        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_dispositivos_propietario
+  ON dispositivos(propietario_id);
+
 -- =============================================================
 --  Alteraciones para bases de datos que ya existian
 --

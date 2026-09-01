@@ -9,16 +9,32 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.chronova.app",
-      "adaptiveIcon": { "backgroundColor": "#0E6E62" },
-      "permissions": ["SCHEDULE_EXACT_ALARM", "POST_NOTIFICATIONS", "VIBRATE"]
+      "adaptiveIcon": {
+        "backgroundColor": "#0E6E62"
+      },
+      "permissions": [
+        "SCHEDULE_EXACT_ALARM",
+        "POST_NOTIFICATIONS",
+        "VIBRATE"
+      ]
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.chronova.app"
     },
-    "plugins": ["expo-router", "expo-notifications"],
+    "plugins": [
+      "expo-router",
+      "expo-notifications"
+    ],
     "extra": {
-      "apiUrl": "http://192.168.1.11:4000"
+      "apiUrl": "http://192.168.1.10:4000",
+      "eas": {
+        "projectId": "PON-AQUI-EL-ID-DE-TU-PROYECTO-EAS"
+      }
+    },
+    "notification": {
+      "color": "#0E6E62",
+      "androidMode": "default"
     }
   }
 }

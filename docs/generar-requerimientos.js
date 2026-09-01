@@ -113,7 +113,9 @@ const RF = [
   ['RF-25', 'El sistema debe permitir al paciente definir qué puede hacer cada cuidador con su información.', 'Paciente', 'Media', 'CambiarPermisosDelVinculo'],
   ['RF-26', 'El sistema debe presentar al cuidador un panel con la adherencia de sus pacientes, ordenado por prioridad de atención.', 'Cuidador', 'Alta', 'ListarPacientesDelCuidador'],
   ['RF-27', 'El sistema debe permitir al paciente consultar quiénes lo acompañan y con qué permisos.', 'Paciente', 'Media', 'ListarCuidadoresDelPaciente'],
-  ['RF-28', 'El sistema debe notificar al cuidador autorizado cuando su paciente pierde una o más tomas.', 'Sistema', 'Alta', 'CerrarTomasVencidas (parcial)'],
+  ['RF-28', 'El sistema debe notificar al cuidador autorizado cuando su paciente pierde una o más tomas.', 'Sistema', 'Alta', 'NotificadorExpoPush'],
+  ['RF-29', 'El sistema debe permitir registrar el teléfono de una persona para recibir notificaciones remotas.', 'Ambos', 'Media', 'RegistrarDispositivo'],
+  ['RF-30', 'El sistema debe dar de baja el teléfono al cerrar sesión, y también cuando el servicio informe que la aplicación fue desinstalada.', 'Ambos', 'Media', 'OlvidarDispositivo'],
 ];
 
 const RNF = [
@@ -133,10 +135,12 @@ const RNF = [
   ['RNF-14', 'Disponibilidad', 'Las alarmas de toma sonarán aunque el dispositivo no tenga conexión a internet.', 'Las alarmas se programan localmente en el teléfono. Verificado por diseño.'],
   ['RNF-15', 'Portabilidad', 'El comportamiento del sistema no dependerá de la zona horaria en que corra el servidor.', 'La suite completa se ejecuta con idéntico resultado bajo seis husos, de UTC+14 a UTC−9. Verificado.'],
   ['RNF-16', 'Mantenibilidad', 'El núcleo de reglas de negocio no dependerá de ninguna librería externa.', 'Cero importaciones externas en el directorio del dominio. Verificado.'],
-  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '87 pruebas en menos de dos segundos. Verificado.'],
+  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '99 pruebas en menos de dos segundos. Verificado.'],
   ['RNF-18', 'Mantenibilidad', 'Toda consulta SQL residirá en un único archivo del proyecto.', 'Inspección del directorio de persistencia. Verificado.'],
   ['RNF-19', 'Portabilidad', 'El mecanismo de persistencia será intercambiable sin modificar el dominio ni los casos de uso.', 'La aplicación funciona completa en memoria o con PostgreSQL cambiando una variable. Verificado.'],
   ['RNF-20', 'Compatibilidad', 'La aplicación móvil funcionará sobre Android mediante Expo y el servidor sobre Node.js 20 o superior.', 'Ejecución en dispositivo y verificación de tipos y compilación. Verificado.'],
+  ['RNF-21', 'Resiliencia', 'Un fallo del servicio de notificaciones no impedirá registrar ni cerrar una toma.', 'Verificado con el servicio inaccesible: las cuatro tomas vencidas se cerraron igual y el fallo solo quedó en el registro. Verificado.'],
+  ['RNF-22', 'Mantenibilidad', 'Los tokens de dispositivos que dejen de existir se darán de baja automáticamente, sin intervención manual.', 'Prueba automatizada del acuse DeviceNotRegistered. Verificado.'],
 ];
 
 const FASES = [
@@ -201,7 +205,7 @@ const doc = new Document({
         ['ID', 'Requerimiento', 'Actor', 'Prioridad', 'Implementado en'],
         RF, { centrar: [0, 3], mono: [4], size: 18 }),
       new Paragraph({ spacing: { after: 200 } }),
-      p('De los veintiocho requerimientos, veintisiete están implementados y verificados. El RF-28 está parcialmente resuelto: el sistema genera el aviso y lo registra, pero todavía no lo entrega como notificación al teléfono del cuidador; esa integración es el siguiente paso del desarrollo.'),
+      p('Los treinta requerimientos están implementados y verificados. La entrega efectiva del RF-28 en un teléfono real depende de configurar el identificador de proyecto de Expo, que es un paso de despliegue y no de desarrollo: la lógica de envío, el reparto por lotes y la baja de dispositivos desinstalados están cubiertos por pruebas automatizadas.'),
 
       h1('6.  Requerimientos no funcionales'),
       p('Describen cómo debe comportarse el sistema. Se presta especial atención a la accesibilidad, porque la revisión de literatura del proyecto identifica la experiencia de usuario como el principal factor de abandono de las aplicaciones de salud entre adultos mayores; y a la portabilidad y la mantenibilidad, que son las que justifican la arquitectura elegida.'),
@@ -213,7 +217,7 @@ const doc = new Document({
 
       h1('Trazabilidad'),
       p('Cada requerimiento funcional puede rastrearse hasta el archivo que lo implementa y hasta la prueba automatizada que lo verifica. Los nombres de la última columna corresponden a archivos TypeScript de los directorios de casos de uso y de dominio del backend, salvo AlarmasExpo, que pertenece a la aplicación móvil.'),
-      p('Las pruebas correspondientes se encuentran en los archivos dominio.test.ts, zonaHoraria.test.ts y casosDeUso.test.ts del directorio de pruebas del backend, y se ejecutan con el comando npm test.'),
+      p('Las pruebas correspondientes se encuentran en los archivos dominio.test.ts, zonaHoraria.test.ts, casosDeUso.test.ts y notificaciones.test.ts del directorio de pruebas del backend, y se ejecutan con el comando npm test.'),
     ],
   }],
 });

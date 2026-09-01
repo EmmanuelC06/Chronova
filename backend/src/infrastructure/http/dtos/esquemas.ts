@@ -134,3 +134,12 @@ export const esquemaDePermisos = z.object({
   puedeGestionarMedicamentos: z.boolean().optional(),
   recibeAlertas: z.boolean().optional(),
 });
+
+export const esquemaDeDispositivo = z.object({
+  token: z.string().min(1, 'El token del dispositivo es obligatorio.').max(200),
+  plataforma: z.enum(['android', 'ios', 'web']),
+});
+
+export const esquemaDeBajaDeDispositivo = z.object({
+  token: z.string().min(1, 'El token del dispositivo es obligatorio.').max(200),
+});

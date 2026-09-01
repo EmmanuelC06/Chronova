@@ -1,18 +1,28 @@
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 
 import type { AgendaDelDia, Preferencias } from '../../dominio/modelos';
-import type { ProgramadorDeAlarmas } from '../../dominio/puertos';
+import type { ProgramadorDeAlarmas, RegistroDePush } from '../../dominio/puertos';
 
 /**
- * ADAPTADOR: alarmas locales con expo-notifications.
+ * ADAPTADOR de notificaciones con expo-notifications.
  *
- * Son alarmas LOCALES, programadas en el propio telefono. La ventaja es
- * que suenan aunque no haya internet, que es justo lo que se necesita:
- * el recordatorio de un medicamento no puede depender de la cobertura.
+ * Cumple dos puertos porque el telefono es el mismo aparato para las dos
+ * cosas, pero conviene no confundirlas:
  *
- * El servidor sigue siendo la fuente de la verdad de la agenda; el
- * telefono solo refleja lo que ya sabe.
+ *  - ALARMAS LOCALES: las programa este telefono a partir de la agenda y
+ *    suenan aunque no haya internet. Son las del paciente, y por eso son
+ *    locales: el recordatorio de un medicamento no puede depender de la
+ *    cobertura.
+ *
+ *  - NOTIFICACIONES REMOTAS: las envia el servidor cuando ocurre algo
+ *    que este telefono no puede saber solo, como que el paciente al que
+ *    acompanas se salto una toma. Son sobre todo para el cuidador.
  */
+
+const CANAL_ANDROID = 'chronova-tomas';
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -22,11 +32,20 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export class AlarmasExpo implements ProgramadorDeAlarmas {
+export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
+  private canalPreparado = false;
+
+  // ---------------------------------------------------------------
+  // Permisos y canal
+  // ---------------------------------------------------------------
+
   async pedirPermiso(): Promise<boolean> {
     try {
+      await this.prepararCanal();
+
       const { status: actual } = await Notifications.getPermissionsAsync();
       if (actual === 'granted') return true;
+
       const { status } = await Notifications.requestPermissionsAsync();
       return status === 'granted';
     } catch {
@@ -34,8 +53,81 @@ export class AlarmasExpo implements ProgramadorDeAlarmas {
     }
   }
 
+  /**
+   * Android exige declarar un canal para que las notificaciones puedan
+   * sonar y vibrar. Sin el, llegan en silencio, que para una alarma de
+   * medicamento equivale a no llegar.
+   *
+   * El identificador debe coincidir con el que usa el servidor al enviar.
+   */
+  private async prepararCanal(): Promise<void> {
+    if (this.canalPreparado || Platform.OS !== 'android') return;
+
+    await Notifications.setNotificationChannelAsync(CANAL_ANDROID, {
+      name: 'Recordatorios de medicamentos',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 400, 200, 400],
+      lightColor: '#0E6E62',
+      sound: 'default',
+      bypassDnd: false,
+    });
+
+    this.canalPreparado = true;
+  }
+
+  // ---------------------------------------------------------------
+  // Puerto RegistroDePush
+  // ---------------------------------------------------------------
+
+  plataforma(): 'android' | 'ios' | 'web' {
+    if (Platform.OS === 'android') return 'android';
+    if (Platform.OS === 'ios') return 'ios';
+    return 'web';
+  }
+
+  /**
+   * Token que identifica a este telefono ante el servicio de Expo.
+   *
+   * Devuelve null en varios casos normales: si el usuario no concedio
+   * permiso, si se ejecuta en un emulador sin servicios de Google, o si
+   * el proyecto todavia no tiene identificador de EAS. Ninguno es un
+   * error: significa que esta persona no recibira avisos remotos, pero
+   * las alarmas locales siguen funcionando.
+   */
+  async obtenerToken(): Promise<string | null> {
+    try {
+      if (!(await this.pedirPermiso())) return null;
+
+      const idDeProyecto =
+        (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas
+          ?.projectId ?? Constants.easConfig?.projectId;
+
+      if (!idDeProyecto) {
+        console.warn(
+          '[push] Falta extra.eas.projectId en app.json: no se puede obtener el token. ' +
+            'Las alarmas locales siguen funcionando.',
+        );
+        return null;
+      }
+
+      const { data } = await Notifications.getExpoPushTokenAsync({ projectId: idDeProyecto });
+      return data ?? null;
+    } catch (error) {
+      console.warn(
+        '[push] No se pudo obtener el token del dispositivo:',
+        error instanceof Error ? error.message : error,
+      );
+      return null;
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Puerto ProgramadorDeAlarmas
+  // ---------------------------------------------------------------
+
   async sincronizar(agenda: AgendaDelDia, preferencias: Preferencias): Promise<void> {
     try {
+      await this.prepararCanal();
       await this.cancelarTodas();
 
       const ahora = Date.now();
@@ -59,6 +151,7 @@ export class AlarmasExpo implements ProgramadorDeAlarmas {
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,
             date: new Date(instante),
+            channelId: CANAL_ANDROID,
           },
         });
       }

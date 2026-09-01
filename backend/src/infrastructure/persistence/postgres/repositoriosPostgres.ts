@@ -9,6 +9,9 @@ import { Paciente } from '../../../domain/paciente/Paciente.js';
 import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
 import { Toma } from '../../../domain/toma/Toma.js';
 import type { RangoDeFechas, RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
+import { Dispositivo } from '../../../domain/dispositivo/Dispositivo.js';
+import type { RepositorioDeDispositivos } from '../../../domain/dispositivo/RepositorioDeDispositivos.js';
+import type { TokenDeDispositivo } from '../../../domain/dispositivo/TokenDeDispositivo.js';
 import { Vinculo } from '../../../domain/vinculo/Vinculo.js';
 import type { RepositorioDeVinculos } from '../../../domain/vinculo/RepositorioDeVinculos.js';
 
@@ -533,6 +536,70 @@ export class RepositorioDeVinculosPostgres implements RepositorioDeVinculos {
       solicitadoPor: fila.solicitado_por,
       creadoEn: aFechaIso(fila.creado_en)!,
       resueltoEn: aFechaIso(fila.resuelto_en),
+    });
+  }
+}
+
+// =================================================================
+// Dispositivos
+// =================================================================
+
+export class RepositorioDeDispositivosPostgres implements RepositorioDeDispositivos {
+  constructor(private readonly pool: pg.Pool) {}
+
+  async guardar(dispositivo: Dispositivo): Promise<void> {
+    const d = dispositivo.aPlano();
+    // El conflicto se resuelve por TOKEN, no por id: el mismo aparato
+    // puede cambiar de dueno y debe seguir siendo una sola fila.
+    await this.pool.query(
+      `INSERT INTO dispositivos
+         (id, propietario_id, tipo_de_propietario, token, plataforma, registrado_en, ultimo_uso_en)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (token) DO UPDATE SET
+         propietario_id = EXCLUDED.propietario_id,
+         tipo_de_propietario = EXCLUDED.tipo_de_propietario,
+         plataforma = EXCLUDED.plataforma,
+         ultimo_uso_en = EXCLUDED.ultimo_uso_en`,
+      [
+        d.id,
+        d.propietarioId,
+        d.tipoDePropietario,
+        d.token,
+        d.plataforma,
+        d.registradoEn,
+        d.ultimoUsoEn,
+      ],
+    );
+  }
+
+  async buscarPorToken(token: TokenDeDispositivo): Promise<Dispositivo | null> {
+    const { rows } = await this.pool.query('SELECT * FROM dispositivos WHERE token = $1', [
+      token.valor,
+    ]);
+    return rows[0] ? this.aEntidad(rows[0]) : null;
+  }
+
+  async listarPorPropietario(propietarioId: Identificador): Promise<Dispositivo[]> {
+    const { rows } = await this.pool.query(
+      'SELECT * FROM dispositivos WHERE propietario_id = $1 ORDER BY ultimo_uso_en DESC',
+      [propietarioId.valor],
+    );
+    return rows.map((fila) => this.aEntidad(fila));
+  }
+
+  async eliminarPorToken(token: TokenDeDispositivo): Promise<void> {
+    await this.pool.query('DELETE FROM dispositivos WHERE token = $1', [token.valor]);
+  }
+
+  private aEntidad(fila: Record<string, any>): Dispositivo {
+    return Dispositivo.desdePlano({
+      id: fila.id,
+      propietarioId: fila.propietario_id,
+      tipoDePropietario: fila.tipo_de_propietario,
+      token: fila.token,
+      plataforma: fila.plataforma,
+      registradoEn: aFechaIso(fila.registrado_en)!,
+      ultimoUsoEn: aFechaIso(fila.ultimo_uso_en)!,
     });
   }
 }

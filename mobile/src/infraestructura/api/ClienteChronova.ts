@@ -106,6 +106,18 @@ export class ClienteChronova implements ApiDeChronova {
   }
 
   // ---------------------------------------------------------------
+  // Dispositivo (notificaciones push)
+  // ---------------------------------------------------------------
+
+  registrarDispositivo(token: string, plataforma: string): Promise<unknown> {
+    return this.pedir('POST', '/api/auth/dispositivos', { token, plataforma });
+  }
+
+  olvidarDispositivo(token: string): Promise<unknown> {
+    return this.pedir('DELETE', '/api/auth/dispositivos', { token });
+  }
+
+  // ---------------------------------------------------------------
   // Medicamentos
   // ---------------------------------------------------------------
 
