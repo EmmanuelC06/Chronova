@@ -206,7 +206,7 @@ export default function Perfil() {
         <Texto color={colores.textoSuave}>{perfil?.email}</Texto>
         {perfil?.edad ? (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            {perfil.edad} anos
+            {perfil.edad} años
           </Texto>
         ) : null}
       </Tarjeta>

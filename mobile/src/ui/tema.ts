@@ -12,7 +12,7 @@ import type { TamanoDeLetra } from '../dominio/modelos';
  *    un 45% mas desde las preferencias del paciente.
  *  - Contraste alto: los 20 pares texto/fondo de esta paleta se
  *    comprobaron con la formula de la WCAG y ninguno baja de 4.5:1;
- *    ocho llegan a 7:1 (AAA).
+ *    nueve llegan a 7:1 (AAA).
  *  - Zonas tactiles de 64 px de alto minimo, muy por encima de los 44 px
  *    recomendados, porque el temblor y la artritis son comunes a esta
  *    edad.
@@ -55,9 +55,17 @@ export const colores = {
   textoTenue: '#67737D',
   textoInverso: '#FFFFFF',
 
-  primario: '#0B5563',
-  primarioOscuro: '#083F4A',
-  primarioSuave: '#E3EFF2',
+  /**
+   * El teal EXACTO de la palabra "Chronova" del logo, muestreado del
+   * archivo. No es un color parecido: es el mismo, de modo que la marca
+   * y la interfaz nunca se desafinan.
+   *
+   * Contraste comprobado: 7.38:1 sobre el fondo y 7.80:1 sobre las
+   * tarjetas, los dos en AAA.
+   */
+  primario: '#185A66',
+  primarioOscuro: '#0D4049',
+  primarioSuave: '#E1EFF2',
 
   exito: '#16704F',
   exitoSuave: '#DFF1E9',

@@ -10,7 +10,8 @@
     "android": {
       "package": "com.chronova.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0E6E62"
+        "foregroundImage": "./assets/icono-adaptativo.png",
+        "backgroundColor": "#FFFFFF"
       },
       "permissions": [
         "SCHEDULE_EXACT_ALARM",
@@ -34,9 +35,19 @@
       }
     },
     "notification": {
-      "color": "#0E6E62",
+      "icon": "./assets/icono-de-notificacion.png",
+      "color": "#185A66",
       "androidMode": "default"
     },
-    "owner": "emmanuelcv"
+    "owner": "emmanuelcv",
+    "icon": "./assets/icono.png",
+    "splash": {
+      "image": "./assets/pantalla-de-inicio.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F7F9FA"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
   }
 }

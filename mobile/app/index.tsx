@@ -2,6 +2,7 @@ import { Redirect } from 'expo-router';
 import { View } from 'react-native';
 
 import { Cargando } from '../src/ui/componentes/basicos';
+import { Logo } from '../src/ui/componentes/Logo';
 import { useSesion } from '../src/ui/contexto/SesionContexto';
 import { colores } from '../src/ui/tema';
 
@@ -25,6 +26,7 @@ export default function Entrada() {
           backgroundColor: colores.fondo,
         }}
       >
+        <Logo />
         <Cargando mensaje="Abriendo Chronova..." />
       </View>
     );

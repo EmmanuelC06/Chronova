@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
 import { Aviso, Boton, Campo, Texto } from '../../src/ui/componentes/basicos';
+import { Logo } from '../../src/ui/componentes/Logo';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { colores, espacio } from '../../src/ui/tema';
 
@@ -63,11 +64,9 @@ export default function Ingresar() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={{ gap: espacio.sm, marginBottom: espacio.md }}>
-          <Texto variante="titulo" negrita centrado>
-            Chronova
-          </Texto>
+          <Logo />
           <Texto centrado color={colores.textoSuave}>
-            Tu tratamiento, a tiempo y acompanado.
+            Tu tratamiento, a tiempo y acompañado.
           </Texto>
         </View>
 

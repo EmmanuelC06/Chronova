@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
 import { Aviso, Boton, Campo, Texto } from '../../src/ui/componentes/basicos';
+import { Logo } from '../../src/ui/componentes/Logo';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { colores, espacio } from '../../src/ui/tema';
 
@@ -102,7 +103,9 @@ export default function Recuperar() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        <Texto variante="subtitulo" peso="semi">
+        <Logo variante="emblema" alto={48} />
+
+        <Texto variante="subtitulo" peso="semi" centrado>
           Recuperar tu contrasena
         </Texto>
 

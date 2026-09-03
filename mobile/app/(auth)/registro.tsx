@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
 import { Aviso, Boton, Campo, Texto } from '../../src/ui/componentes/basicos';
+import { Logo } from '../../src/ui/componentes/Logo';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { ALTO_TACTIL_MINIMO, colores, espacio, radio } from '../../src/ui/tema';
 
@@ -83,7 +84,9 @@ export default function Registro() {
         contentContainerStyle={{ padding: espacio.lg, gap: espacio.lg }}
         keyboardShouldPersistTaps="handled"
       >
-        <Texto variante="titulo" negrita>
+        <Logo variante="emblema" alto={48} />
+
+        <Texto variante="titulo" peso="negrita" centrado>
           Crear cuenta
         </Texto>
 
