@@ -100,7 +100,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Arranca el servidor y se recarga solo al guardar cambios |
-| `npm test` | Ejecuta las 146 pruebas automáticas |
+| `npm test` | Ejecuta las 166 pruebas automáticas |
 | `npm run typecheck` | Revisa que no haya errores de tipos |
 | `npm run build` | Compila para producción |
 | `npm run db:migrate` | Crea las tablas en PostgreSQL |
@@ -147,7 +147,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 
 ## Estado del proyecto
 
-- Backend completo, con 146 pruebas automáticas en verde.
+- Backend completo, con 166 pruebas automáticas en verde.
 - App móvil con las pantallas principales conectadas a la API.
 - Las horas se manejan en la zona horaria de cada paciente, no en la del servidor. Verificado con la suite completa bajo seis relojes distintos, de UTC+14 a UTC−9.
 - Notificaciones push al teléfono del cuidador, **verificadas de extremo a extremo sobre un Android real**: el servidor detecta la toma vencida, el aviso llega al teléfono y al tocarlo se abre la información de esa paciente. Con baja automática de los dispositivos donde se desinstaló la aplicación.

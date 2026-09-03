@@ -165,8 +165,8 @@ note right of SAL
   Los repositorios en memoria cumplen los mismos
   puertos que los de PostgreSQL. Por eso la
   aplicacion corre entera sin base de datos
-  (PERSISTENCE=memory) y las 146 pruebas terminan
-  en menos de 3 segundos.
+  (PERSISTENCE=memory) y las 166 pruebas terminan
+  en menos de 4 segundos.
 
   Cada puerto tiene una pareja: uno real y uno de
   consola. <b>NotificadorCompuesto</b> es el mismo puerto

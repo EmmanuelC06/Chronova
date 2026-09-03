@@ -10,7 +10,7 @@ Lo que está bien no se repite aquí; hay una sección al final con lo que se re
 
 ## Estado
 
-Los defectos marcados **[CORREGIDO]** se arreglaron con una prueba automatizada que los fija para que no vuelvan. La suite pasó de 104 a 146 pruebas.
+Los defectos marcados **[CORREGIDO]** se arreglaron con una prueba automatizada que los fija para que no vuelvan. La suite pasó de 104 a 166 pruebas.
 
 | Corregidos | Pendientes |
 |---|---|
@@ -298,7 +298,7 @@ Para que no se toque por error, y porque también es parte del resultado de la r
 - **Autenticación y autorización:** los ocho casos de uso que tocan datos del paciente llaman a `PoliticaDeAcceso` con el permiso correcto. Verificado sin token (401), tipo equivocado (403) y cuidador sin vínculo (403).
 - **RNF-16 (cero dependencias externas en el dominio):** comprobado archivo por archivo en los 38 del dominio. Cierto.
 - **RNF-18 (todo el SQL en un archivo):** cierto para las consultas. Matiz honesto: el DDL vive en `esquema.sql`.
-- **RNF-15 (seis husos):** 146 pruebas en verde bajo los seis, de Kiritimati (UTC+14) a Anchorage (UTC−9). Cierto, y vuelto a comprobar tras el trabajo de sesiones.
+- **RNF-15 (seis husos):** 166 pruebas en verde bajo los seis, de Kiritimati (UTC+14) a Anchorage (UTC−9). Cierto, y vuelto a comprobar tras la segunda revisión.
 - **Prueba 6 de ARQUITECTURA:** cierta y verificable con `git show`. En ese commit no cambió ningún archivo de `backend/src/`.
 - **Notificador de Expo:** nunca lanza, reparte en lotes de 100, da de baja los tokens muertos, y el compuesto aísla cada destino.
 - **API.md:** los 23 endpoints documentados existen con ese método y esa ruta, y no falta ninguno.
@@ -307,8 +307,60 @@ Para que no se toque por error, y porque también es parte del resultado de la r
 
 ---
 
+# Segunda revisión — 3 de septiembre
+
+Una revisión general de todas las funcionalidades, ya con el proyecto completo. Se hizo **ejecutando**, no leyendo: con el servidor levantado en memoria y peticiones reales. Todo lo que sigue viene con la respuesta HTTP que lo demostró.
+
+El hallazgo de fondo no es ninguno de los defectos por separado, sino por qué ninguno se había visto: **las 146 pruebas de entonces llamaban a los casos de uso directamente y no pasaban ni una vez por la capa HTTP.** El enrutado, la lectura de los parámetros de la URL, el parseo del cuerpo y la traducción de errores a códigos no los tocaba nadie. Ahí estaban casi todos.
+
+## Lo que se corrigió
+
+| # | Qué pasaba | Cómo se comprobó |
+|---|---|---|
+| R-1 **[CORREGIDO]** | **El panel del cuidador ignoraba `puedeVerHistorial`.** Cuando la paciente apagaba «ver mi tratamiento», `/medicamentos`, `/tomas/agenda` y `/tomas/historial` respondían 403 y `GET /api/cuidadores/pacientes` seguía devolviendo su adherencia, cuántos medicamentos toma y cuándo confirmó la última. Era el único caso de uso que leía datos clínicos **sin pasar por `PoliticaDeAcceso`** — exactamente lo que esa clase existe para evitar, según su propio comentario. La paciente creía haber cortado el acceso, tres pantallas se lo confirmaban, y el cuidador la seguía viendo | Retirando el permiso por la API y comparando las cuatro respuestas. La fila sigue viniendo, con `datosClinicosVisibles: false` y los campos clínicos vacíos: ocultarla entera haría creer al cuidador que el vínculo desapareció |
+| R-2 **[CORREGIDO]** | **Consultar el calendario hacia atrás fabricaba incumplimientos.** Pedir la agenda de un día pasado *materializaba* sus tomas en PENDIENTE con fecha vencida, y la tarea de los quince minutos las cerraba a continuación como OMITIDA por el SISTEMA. Un paciente sin ningún registro pasaba a tener seis faltas y 0% de adherencia por el solo hecho de mirar tres días atrás — y disparaba el aviso «no confirmó una toma» a sus cuidadores | Ejecutado: `0 registros` → mirar tres días pasados → `{"tomasCerradas":6}` → `6 omitidas, 0%, adherencia BAJA`. Ahora un día pasado **solo se lee**. La app nunca pedía fechas pasadas, así que no llegó a ocurrir en la práctica; habría empezado a ocurrir con la API en internet |
+| R-3 **[CORREGIDO]** | **Todos los 500 que devolvía la API eran errores 400 del cliente.** `express.json()` lanza con su código ya puesto y el manejador lo ignoraba: JSON mal formado → 500, cuerpo de más de 256 kB → 500. Además cada uno imprimía una traza completa en el log, tapando los fallos de verdad | Ahora 400 y 413. La rama solo acepta códigos por debajo de 500: un 5xx de una librería sí es un fallo nuestro y se registra como tal |
+| R-4 **[CORREGIDO]** | **Los parámetros de la URL no se validaban.** Las rutas hacían `peticion.query.fecha as string`, pero `as` es una promesa al compilador, no una comprobación: Express entrega un **array** si el parámetro se repite y un **objeto** si lleva corchetes, y el dominio llamaba `.trim()` sobre eso. `?fecha=a&fecha=b` → 500, `?pacienteId[a]=1` → 500 | Tres esquemas de Zod nuevos para las consultas. También `?dias=100000` en el panel, que se aceptaba y lanzaba una consulta descomunal por cada paciente: ahora tope de 365 |
+| R-5 **[CORREGIDO]** | **El filtro del historial por medicamento fallaba en silencio.** El id se comparaba en crudo, sin pasar por `Identificador`, que normaliza a minúsculas. Un UUID escrito en mayúsculas —igual de válido— devolvía **200 con la lista vacía**: sin error, y el paciente leyendo que no se había tomado ninguna dosis | La prueba que lo fija usa ids UUID de verdad a propósito. Con el generador secuencial de las demás pruebas —ids de solo dígitos— una prueba de mayúsculas pasa siempre, esté el defecto o no |
+| R-6 **[CORREGIDO]** | **La ficha del cuidador se quedaba en blanco si fallaba la red.** El contexto guardaba el mensaje de error pero no bloqueaba nada; el layout montaba las tres pestañas igual y la primera hacía `if (!paciente) return null`. El cuidador tocaba la tarjeta de su madre y veía una pantalla vacía con una barra de pestañas: sin aviso, sin rueda y sin forma de reintentar | Motivo de bloqueo nuevo, `FALLO_DE_CARGA`. Si ya había datos cargados no se bloquea: un refresco fallido deja lo anterior en pantalla con el aviso encima, en vez de perder lo que se estaba leyendo |
+| R-7 **[CORREGIDO]** | El aviso de bloqueo decía **«Baja para reintentar»** y el gesto no estaba conectado | Prometer una salida que no existe es peor que no ofrecerla. Ahora el gesto funciona en los dos casos que pueden resolverse solos, y no se ofrece en los que no |
+| R-8 **[CORREGIDO]** | **Errores de carga disfrazados de «no tienes nada».** Si fallaba la carga, la lista de medicamentos del paciente decía *«Aún no tienes medicamentos»* y el historial *«Todavía no hay historial»*. Para un adulto mayor que depende de esa lista es un mensaje falso, alarmante, y parece que la app le borró el tratamiento | Se distingue «no pudimos preguntar» de «no hay nada», y las dos pantallas ganaron el gesto de recarga. `hoy.tsx` ya lo hacía bien: el patrón correcto existía y estas dos se habían quedado atrás |
+| R-9 **[CORREGIDO]** | **La lista de quién ve los datos de salud fallaba en silencio.** El `catch` decía *«es información secundaria: no vale la pena romper la pantalla»*. No lo es: es la lista de quién tiene acceso al tratamiento. Vacía por un fallo de red se lee como «no le has dado acceso a nadie», y puede haber dos cuidadores viéndolo todo | Ahora la sección dice que no pudo comprobarse, sin romper el resto de la pantalla — las preferencias de accesibilidad tienen que seguir siendo alcanzables aunque no haya red |
+
+Las veinte pruebas de `tests/http/` se escribieron para estos defectos y **se comprobó que fallan con el código anterior**: se revirtió cada arreglo, se vio la prueba en rojo y se volvió a aplicar. Una prueba de regresión que nunca se vio fallar no demuestra nada.
+
+## Lo que se revisó y está bien
+
+- **Ningún caso de uso huérfano.** Los 24 están instanciados en `contenedor.ts` y alcanzados por un endpoint. `CerrarTomasVencidas` lo parece y no lo es: se dispara desde `main.ts` cada quince minutos.
+- **Ningún cuerpo sin validar.** Los `POST` y `PATCH` pasan todos por un esquema de Zod que cubre los campos que el caso de uso lee, y Zod descarta las claves desconocidas.
+- **`ActualizarMedicamento`, `SuspenderMedicamento` y `ReabastecerStock`** resuelven el `pacienteId` **desde el medicamento**, no desde el cuerpo de la petición. No se pueden engañar.
+- **Los permisos del cuidador se comprueban antes de mostrar**, no reaccionando a un 403 del servidor. Está por encima de lo habitual.
+- **Ni un solo `TODO`, `FIXME` ni botón sin `onPress`** en todo el proyecto. Lo que falta son caminos, no andamios.
+
+## Lo que sigue abierto
+
+Nada de esto rompe nada hoy; es funcionalidad a medias, y conviene tenerla escrita para no defender el proyecto como si estuviera terminado:
+
+| Qué | Estado |
+|---|---|
+| **RF-02**, «registro de cuidador indicando su rol» | La pantalla de registro nunca envía `rol`. `cuidador.rol` es siempre nulo y dos líneas del perfil del paciente muestran una rama que no puede cumplirse |
+| **RF-19**, «historial en un período determinado» | El backend acepta `desde` y `hasta`; la app siempre pide 30 días, y no dice qué periodo cubre el porcentaje que muestra |
+| Medicamentos «cada N días» | El backend lo soporta entero; el formulario solo conoce «todos los días» y «algunos días». Si existe uno, **editarlo lo convierte en semanal sin avisar** |
+| Zona horaria | `Paciente.cambiarZonaHoraria()` existe y ningún endpoint la llama. Solo se fija al registrarse, y de ella dependen todos los horarios |
+| Baja de cuenta | `desactivar()` existe y solo lo llaman las pruebas. `VerificarSesion` sabe rechazar cuentas inactivas, pero nada puede desactivar una |
+| Reactivar un medicamento | El método existe; suspender es hoy un viaje sin retorno |
+| Avisos por adherencia baja | `Vinculo` documenta el permiso como «avisos cuando la adherencia baja **o** se pierde una toma». Solo está la segunda mitad |
+| `altoContraste` | Declarado en el modelo, en la API y en el contexto. Sin interruptor que lo encienda y sin nada que lo consuma |
+| Marca «Sí/No» de los días | `#E2E8EC` sobre blanco: **1.24:1**, cuando `tema.ts` afirma que ninguno baja de 4.5:1 |
+| El cuidador elige los permisos que pide | Si la solicitud la inicia él, los permisos que envía se guardan tal cual y «Aceptar» los concede de golpe. Contradice `permisosPorDefecto()`, que existe para ser conservador |
+| Enumeración de correos | `POST /vinculos` responde 404 con un correo que no existe y 201 con uno que sí. En una app de salud, saber que alguien está registrado ya es un dato |
+
+---
+
 # Qué queda
 
 Los ocho puntos del orden que proponía esta revisión se ejecutaron, en ese orden. Lo único que sigue abierto es el último, y sigue abierto **a propósito**:
 
 **G-6 y M-1 son los dos defectos de seguridad, y solo importan cuando el servidor esté en internet.** Hoy corre en una red local, donde el atacante tendría que estar sentado en la misma wifi. En cuanto haya una URL pública dejan de ser teóricos, así que van junto con el alojamiento y no antes.
+
+De la segunda revisión queda la tabla de arriba: funcionalidad a medias, ninguna de la cual rompe nada. Lo urgente de aquella —la fuga del panel, el historial que se fabricaba solo y las tres pantallas que mentían al usuario— está corregido y fijado con pruebas.
