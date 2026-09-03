@@ -15,6 +15,7 @@ import {
 import {
   GeneradorDeCodigosFijo,
   GeneradorDeIdsSecuencial,
+  GeneradorDeIdsUuid,
 } from "../src/infrastructure/system/GeneradorDeIdsUuid.js";
 import { CorreoEnConsola } from "../src/infrastructure/correo/CorreoEnConsola.js";
 import { NotificadorEnConsola } from "../src/infrastructure/notificaciones/NotificadorEnConsola.js";
@@ -88,10 +89,18 @@ export interface EntornoDePrueba {
  * `duracionDeToken` es corta por defecto para que las pruebas no tengan
  * que esperar nada. Las que comprueban la renovacion de sesion la suben,
  * porque el comportamiento depende de cuanta vida le quede al token.
+ *
+ * `idsReales` cambia el generador secuencial por UUID de verdad. Casi
+ * siempre conviene el secuencial —los ids son legibles y las pruebas son
+ * reproducibles—, pero tiene un punto ciego que costo descubrir: sus ids
+ * son "00000000-0000-4000-8000-000000000002", solo digitos. Una prueba
+ * sobre mayusculas y minusculas en un identificador pasa siempre con
+ * ellos, porque no hay ni una letra que cambiar.
  */
 export function montarAplicacion(
   fechaInicial = new Date("2026-08-31T12:00:00Z"),
   duracionDeToken = "1h",
+  { idsReales = false }: { idsReales?: boolean } = {},
 ): EntornoDePrueba {
   const reloj = new RelojFijo(fechaInicial);
   const notificador = new NotificadorEnConsola();
@@ -104,7 +113,7 @@ export function montarAplicacion(
     { ...ENTORNO_DE_PRUEBA, jwtDuracion: duracionDeToken },
     {
       reloj,
-      ids: new GeneradorDeIdsSecuencial(),
+      ids: idsReales ? new GeneradorDeIdsUuid() : new GeneradorDeIdsSecuencial(),
       codigos: new GeneradorDeCodigosFijo(CODIGO_DE_PRUEBA),
       correo,
       cifrador: new CifradorDePrueba(),

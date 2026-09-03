@@ -2,7 +2,11 @@ import { Router } from 'express';
 import type { Contenedor } from '../../../contenedor.js';
 import { asincrono } from '../middlewares/asincrono.js';
 import { autenticar, solicitanteDe } from '../middlewares/autenticacion.js';
-import { esquemaDeRegistroDeToma } from '../dtos/esquemas.js';
+import {
+  esquemaDeConsultaDeAgenda,
+  esquemaDeConsultaDeHistorial,
+  esquemaDeRegistroDeToma,
+} from '../dtos/esquemas.js';
 
 /** Rutas de agenda, registro de tomas e historial de adherencia. */
 export function rutasDeTomas(contenedor: Contenedor): Router {
@@ -16,10 +20,11 @@ export function rutasDeTomas(contenedor: Contenedor): Router {
     '/agenda',
     asincrono(async (peticion, respuesta) => {
       const solicitante = solicitanteDe(peticion);
+      const consulta = esquemaDeConsultaDeAgenda.parse(peticion.query);
       const agenda = await casosDeUso.obtenerAgendaDelDia.ejecutar({
         solicitante,
-        pacienteId: (peticion.query.pacienteId as string) ?? solicitante.id.valor,
-        fecha: peticion.query.fecha as string | undefined,
+        pacienteId: consulta.pacienteId ?? solicitante.id.valor,
+        fecha: consulta.fecha,
       });
       respuesta.json(agenda);
     }),
@@ -44,12 +49,13 @@ export function rutasDeTomas(contenedor: Contenedor): Router {
     '/historial',
     asincrono(async (peticion, respuesta) => {
       const solicitante = solicitanteDe(peticion);
+      const consulta = esquemaDeConsultaDeHistorial.parse(peticion.query);
       const historial = await casosDeUso.consultarHistorial.ejecutar({
         solicitante,
-        pacienteId: (peticion.query.pacienteId as string) ?? solicitante.id.valor,
-        desde: peticion.query.desde as string | undefined,
-        hasta: peticion.query.hasta as string | undefined,
-        medicamentoId: peticion.query.medicamentoId as string | undefined,
+        pacienteId: consulta.pacienteId ?? solicitante.id.valor,
+        desde: consulta.desde,
+        hasta: consulta.hasta,
+        medicamentoId: consulta.medicamentoId,
       });
       respuesta.json(historial);
     }),

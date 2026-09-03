@@ -155,3 +155,50 @@ export const esquemaDeDispositivo = z.object({
 export const esquemaDeBajaDeDispositivo = z.object({
   token: z.string().min(1, 'El token del dispositivo es obligatorio.').max(200),
 });
+
+/**
+ * Parametros que viajan en la URL (?fecha=...&pacienteId=...).
+ *
+ * Estaban sin validar: las rutas hacian `peticion.query.fecha as string`
+ * y confiaban. Pero `as` es una promesa al compilador, no una
+ * comprobacion, y Express entrega un ARRAY cuando el parametro se repite
+ * y un OBJETO cuando lleva corchetes. Cualquiera de las dos formas hacia
+ * que el dominio llamara `.trim()` sobre algo que no era texto, y eso
+ * salia como 500 "error inesperado del servidor" cuando en realidad el
+ * error venia del cliente:
+ *
+ *   ?fecha=2026-08-31&fecha=2026-09-01   ->  500
+ *   ?pacienteId[a]=1                     ->  500
+ *
+ * `z.string()` rechaza las dos y el manejador de errores las convierte
+ * en un 400 con el campo senalado, que es lo que eran desde el principio.
+ */
+const textoDeConsulta = (max = 200) => z.string().trim().min(1).max(max).optional();
+
+export const esquemaDeConsultaDeAgenda = z.object({
+  pacienteId: textoDeConsulta(),
+  fecha: textoDeConsulta(10),
+});
+
+export const esquemaDeConsultaDeHistorial = z.object({
+  pacienteId: textoDeConsulta(),
+  desde: textoDeConsulta(10),
+  hasta: textoDeConsulta(10),
+  medicamentoId: textoDeConsulta(),
+});
+
+export const esquemaDeConsultaDeMedicamentos = z.object({
+  pacienteId: textoDeConsulta(),
+  incluirSuspendidos: textoDeConsulta(10),
+});
+
+/**
+ * Dias hacia atras del panel del cuidador.
+ *
+ * Con un tope: sin el, `?dias=100000` se aceptaba y lanzaba una consulta
+ * de rango descomunal por CADA paciente del panel. Un ano es mas de lo
+ * que ninguna pantalla muestra.
+ */
+export const esquemaDeConsultaDelPanel = z.object({
+  dias: z.coerce.number().int().min(1).max(365).optional(),
+});

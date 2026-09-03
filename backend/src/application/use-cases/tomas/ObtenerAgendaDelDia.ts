@@ -43,6 +43,12 @@ export interface AgendaDelDia {
 }
 
 /**
+ * Hasta cuantos dias por delante se crean tomas al consultar la agenda.
+ * La app pide siete para las alarmas; el mes es margen.
+ */
+const DIAS_MAXIMOS_POR_ADELANTADO = 31;
+
+/**
  * CASO DE USO CENTRAL: la agenda de tomas de un dia.
  *
  * Aqui esta el corazon del producto. Un medicamento define un patron
@@ -97,13 +103,48 @@ export class ObtenerAgendaDelDia {
     const medicamentosActivos = await this.medicamentos.listarPorPaciente(pacienteId, false);
     const yaProgramadas = await this.tomas.listarPorPacienteEnRango(pacienteId, rango);
 
-    const candidatas = this.calcularTomasFaltantes(
-      medicamentosActivos,
-      yaProgramadas,
-      dia,
-      zona,
-      pacienteId,
-    );
+    /**
+     * Un dia que ya paso SOLO SE LEE. Nunca se materializa.
+     *
+     * Esta es la diferencia entre consultar el pasado y reescribirlo.
+     * Antes, pedir la agenda de un dia anterior creaba sus tomas en
+     * estado PENDIENTE con fecha vencida, y la tarea de los quince
+     * minutos las cerraba a continuacion como OMITIDA por el SISTEMA.
+     * Comprobado: un paciente sin ningun registro pasaba a tener seis
+     * faltas y 0% de adherencia por el solo hecho de mirar tres dias
+     * hacia atras en el calendario.
+     *
+     * Son incumplimientos que nunca ocurrieron, en un historial clinico,
+     * y ademas disparaban el aviso "no confirmo una toma" a los
+     * cuidadores. Un cuidador con permiso podia provocarlo sobre el
+     * historial de su paciente sin mas que navegar fechas.
+     *
+     * La agenda de hoy y la de manana si se materializan: son tomas que
+     * el paciente todavia puede confirmar, y la app las necesita por
+     * adelantado para programar las alarmas del telefono.
+     */
+    const hoyDelPaciente = zona.fechaLocalDe(this.reloj.ahora());
+    const diasDeDistancia = hoyDelPaciente.diasHasta(dia);
+
+    /**
+     * Tampoco se materializa un futuro lejano.
+     *
+     * La app pide siete dias por adelantado para programar las alarmas
+     * del telefono, asi que ese es el uso real. Sin tope, un `GET` a
+     * `?fecha=2030-01-01` insertaba las tomas de ese dia: una escritura
+     * en la base de datos, sin limite y a golpe de consulta, para un dia
+     * al que puede que el tratamiento ni siquiera llegue.
+     *
+     * El mes de margen deja sitio de sobra para lo que la app necesita
+     * hoy y para una pantalla de calendario si algun dia se anade.
+     */
+    const esUnDiaPasado = diasDeDistancia < 0;
+    const estaDemasiadoLejos = diasDeDistancia > DIAS_MAXIMOS_POR_ADELANTADO;
+
+    const candidatas =
+      esUnDiaPasado || estaDemasiadoLejos
+        ? []
+        : this.calcularTomasFaltantes(medicamentosActivos, yaProgramadas, dia, zona, pacienteId);
 
     // Si hubo que crear tomas, se vuelve a leer el dia completo en vez de
     // asumir que se insertaron todas. Otra peticion simultanea pudo haber

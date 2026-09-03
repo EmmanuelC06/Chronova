@@ -61,6 +61,37 @@ export function manejadorDeErrores(
     return;
   }
 
+  /**
+   * Errores que trae el propio Express y que YA saben su codigo.
+   *
+   * `express.json()` lanza con `status` puesto cuando el cuerpo no es
+   * JSON valido (400) o cuando pasa del limite de 256 kB (413). Sin esta
+   * rama caian abajo y se convertian en 500, con dos consecuencias: al
+   * cliente se le decia "error inesperado del servidor" cuando el error
+   * era suyo y reintentar no iba a arreglarlo, y el log del servidor se
+   * llenaba de trazas completas por cada peticion mal formada, tapando
+   * los fallos de verdad.
+   *
+   * Solo se acepta por debajo de 500: un `status` de 5xx que venga de una
+   * libreria si es un fallo nuestro y debe registrarse como tal.
+   */
+  const estadoDeclarado = (error as { status?: unknown; statusCode?: unknown } | null)?.status;
+  const estadoAlterno = (error as { statusCode?: unknown } | null)?.statusCode;
+  const estado = typeof estadoDeclarado === 'number' ? estadoDeclarado : estadoAlterno;
+
+  if (typeof estado === 'number' && estado >= 400 && estado < 500) {
+    respuesta.status(estado).json({
+      error: {
+        codigo: 'VALIDACION',
+        mensaje:
+          estado === 413
+            ? 'El contenido enviado es demasiado grande.'
+            : 'No pudimos entender los datos enviados.',
+      },
+    });
+    return;
+  }
+
   // Cualquier otra cosa es un fallo nuestro: se registra completo en el
   // servidor y al cliente se le da un mensaje generico, para no filtrar
   // detalles internos de la aplicacion.

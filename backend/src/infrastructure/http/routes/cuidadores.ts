@@ -3,6 +3,7 @@ import type { Contenedor } from '../../../contenedor.js';
 import { asincrono } from '../middlewares/asincrono.js';
 import { autenticar, exigirTipo, solicitanteDe } from '../middlewares/autenticacion.js';
 import {
+  esquemaDeConsultaDelPanel,
   esquemaDePermisos,
   esquemaDeRespuestaAVinculo,
   esquemaDeSolicitudDeVinculo,
@@ -63,10 +64,10 @@ export function rutasDeCuidadores(contenedor: Contenedor): Router {
     '/cuidadores/pacientes',
     exigirTipo('CUIDADOR'),
     asincrono(async (peticion, respuesta) => {
-      const dias = Number(peticion.query.dias);
+      const { dias } = esquemaDeConsultaDelPanel.parse(peticion.query);
       const pacientes = await casosDeUso.listarPacientesDelCuidador.ejecutar({
         solicitante: solicitanteDe(peticion),
-        dias: Number.isFinite(dias) && dias > 0 ? dias : undefined,
+        dias,
       });
       respuesta.json({ pacientes });
     }),

@@ -33,9 +33,26 @@ export interface PacienteEnPanel {
   medicamentosConStockBajo: number;
   /** Ultima vez que el paciente confirmo o rechazo una toma. */
   ultimaActividad: string | null;
+  /**
+   * Falso cuando el paciente no ha concedido (o ha retirado)
+   * `puedeVerHistorial`. La fila sigue viniendo —el cuidador tiene que
+   * poder ver que el vinculo existe y pedir el permiso— pero los campos
+   * clinicos vienen vacios, no ocultos: la app necesita distinguir "no
+   * hay datos" de "no puedo verlos".
+   */
+  datosClinicosVisibles: boolean;
 }
 
 const DIAS_POR_DEFECTO = 7;
+
+/** Adherencia en blanco, para las filas sin acceso a datos clinicos. */
+const SIN_ADHERENCIA = {
+  porcentaje: 0,
+  nivel: 'SIN_DATOS' as NivelDeAdherencia,
+  tomadas: 0,
+  omitidas: 0,
+  pendientes: 0,
+};
 
 /**
  * CASO DE USO: el panel del cuidador.
@@ -74,8 +91,25 @@ export class ListarPacientesDelCuidador {
       const paciente = porId.get(vinculo.pacienteId.valor);
       if (!paciente) continue;
 
-      // Una solicitud aun pendiente no da acceso a ningun dato clinico.
-      if (vinculo.estado === 'PENDIENTE') {
+      // Dos razones para no traer ningun dato clinico, y la misma
+      // respuesta para las dos:
+      //
+      //  - La solicitud sigue PENDIENTE: el paciente aun no ha aceptado.
+      //  - El vinculo esta aceptado pero SIN `puedeVerHistorial`: el
+      //    paciente lo apago, o nunca lo encendio.
+      //
+      // Este segundo caso faltaba, y era una fuga real: al retirar el
+      // permiso, `/medicamentos`, `/tomas/agenda` y `/tomas/historial`
+      // respondian 403 y este panel seguia devolviendo la adherencia, el
+      // numero de medicamentos y la ultima actividad. El paciente creia
+      // haber cortado el acceso —tres pantallas se lo confirmaban— y el
+      // cuidador lo seguia viendo. Es el unico caso de uso que lee datos
+      // clinicos sin pasar por PoliticaDeAcceso; el permiso se comprueba
+      // aqui, contra el mismo vinculo que ya tenemos cargado.
+      const puedeVerDatosClinicos =
+        vinculo.estado === 'ACEPTADO' && vinculo.autorizar('puedeVerHistorial');
+
+      if (!puedeVerDatosClinicos) {
         filas.push({
           vinculoId: vinculo.id.valor,
           pacienteId: paciente.id.valor,
@@ -83,11 +117,12 @@ export class ListarPacientesDelCuidador {
           parentesco: vinculo.parentesco,
           estadoDelVinculo: vinculo.estado,
           permisos: vinculo.permisos,
-          adherencia: { porcentaje: 0, nivel: 'SIN_DATOS', tomadas: 0, omitidas: 0, pendientes: 0 },
+          adherencia: { ...SIN_ADHERENCIA },
           requiereAtencion: false,
           medicamentosActivos: 0,
           medicamentosConStockBajo: 0,
           ultimaActividad: null,
+          datosClinicosVisibles: false,
         });
         continue;
       }
@@ -141,11 +176,19 @@ export class ListarPacientesDelCuidador {
           (m) => m.stock.necesitaReabastecimiento,
         ).length,
         ultimaActividad: resueltas[0]?.resueltaEn?.toISOString() ?? null,
+        datosClinicosVisibles: true,
       });
     }
 
     // Primero quien necesita atencion; entre iguales, el de peor adherencia.
+    //
+    // Las filas sin datos clinicos van al final. Su porcentaje es 0 por
+    // no tener nada que contar, no por mala adherencia, y sin esta regla
+    // encabezarian el panel como si fueran las mas urgentes.
     return filas.sort((a, b) => {
+      if (a.datosClinicosVisibles !== b.datosClinicosVisibles) {
+        return a.datosClinicosVisibles ? -1 : 1;
+      }
       if (a.requiereAtencion !== b.requiereAtencion) return a.requiereAtencion ? -1 : 1;
       return a.adherencia.porcentaje - b.adherencia.porcentaje;
     });

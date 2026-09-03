@@ -89,8 +89,14 @@ export class ConsultarHistorial {
 
     let tomas = await this.tomas.listarPorPacienteEnRango(pacienteId, rango);
     if (consulta.medicamentoId) {
-      const filtro = consulta.medicamentoId;
-      tomas = tomas.filter((t) => t.medicamentoId.valor === filtro);
+      // Pasa por `Identificador` en vez de compararse en crudo, y no es
+      // ceremonia: ese constructor NORMALIZA a minusculas. Comparando el
+      // texto tal como llego, un UUID escrito en mayusculas —una forma
+      // perfectamente valida— no coincidia con nada y la respuesta era un
+      // 200 con la lista vacia. El peor tipo de fallo: sin error, y el
+      // paciente leyendo que no se tomo ninguna dosis de ese medicamento.
+      const filtro = Identificador.desde(consulta.medicamentoId);
+      tomas = tomas.filter((t) => t.medicamentoId.valor === filtro.valor);
     }
 
     const medicamentos = await this.medicamentos.listarPorPaciente(pacienteId, true);

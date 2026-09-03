@@ -3,6 +3,7 @@ import type { Contenedor } from '../../../contenedor.js';
 import { asincrono } from '../middlewares/asincrono.js';
 import { autenticar, solicitanteDe } from '../middlewares/autenticacion.js';
 import {
+  esquemaDeConsultaDeMedicamentos,
   esquemaDeMedicamentoActualizado,
   esquemaDeMedicamentoNuevo,
   esquemaDeReabastecimiento,
@@ -27,12 +28,12 @@ export function rutasDeMedicamentos(contenedor: Contenedor): Router {
     '/',
     asincrono(async (peticion, respuesta) => {
       const solicitante = solicitanteDe(peticion);
-      const pacienteId = (peticion.query.pacienteId as string) ?? solicitante.id.valor;
+      const consulta = esquemaDeConsultaDeMedicamentos.parse(peticion.query);
 
       const lista = await casosDeUso.listarMedicamentos.ejecutar({
         solicitante,
-        pacienteId,
-        incluirSuspendidos: peticion.query.incluirSuspendidos === 'true',
+        pacienteId: consulta.pacienteId ?? solicitante.id.valor,
+        incluirSuspendidos: consulta.incluirSuspendidos === 'true',
       });
       respuesta.json({ medicamentos: lista });
     }),
