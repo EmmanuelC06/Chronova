@@ -2,8 +2,20 @@ import { Identificador } from '../../../domain/shared/Identificador.js';
 import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
 import type { RepositorioDeCuidadores } from '../../../domain/cuidador/RepositorioDeCuidadores.js';
 import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
-import type { Sesion } from '../../ports/ServicioDeTokens.js';
+import type { TipoDeUsuario } from '../../ports/ServicioDeTokens.js';
 import type { Reloj } from '../../ports/Reloj.js';
+
+/**
+ * Quien pide su perfil.
+ *
+ * Es su propio tipo y no el `Sesion` del puerto de tokens: a este caso
+ * de uso le da igual como se autentico la persona, y atarlo al formato
+ * del token obliga a inventar datos de token en cada prueba.
+ */
+export interface ComandoObtenerPerfil {
+  usuarioId: string;
+  tipo: TipoDeUsuario;
+}
 
 export interface PerfilDeUsuario {
   id: string;
@@ -28,7 +40,7 @@ export class ObtenerPerfil {
     private readonly reloj: Reloj,
   ) {}
 
-  async ejecutar(sesion: Sesion): Promise<PerfilDeUsuario> {
+  async ejecutar(sesion: ComandoObtenerPerfil): Promise<PerfilDeUsuario> {
     const id = Identificador.desde(sesion.usuarioId);
 
     if (sesion.tipo === 'PACIENTE') {

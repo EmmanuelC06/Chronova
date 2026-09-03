@@ -24,9 +24,14 @@ import { espacio } from '../../src/ui/tema';
  * El servidor ya se encarga de lo delicado: si cambian las horas, los
  * dias o la fecha de fin, retira las tomas futuras generadas con la
  * definicion anterior y deja intactas las que ya ocurrieron.
+ *
+ * Con un `pacienteId` en la ruta, quien edita es un cuidador y el
+ * tratamiento es de otra persona. Solo cambia de donde se lee la lista:
+ * el permiso lo comprueba el servidor en `ActualizarMedicamento`, que
+ * exige `puedeGestionarMedicamentos` sobre ese paciente.
  */
 export default function EditarMedicamento() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, pacienteId } = useLocalSearchParams<{ id: string; pacienteId?: string }>();
   const { api, sincronizarAlarmas } = useSesion();
 
   const [medicamento, setMedicamento] = useState<Medicamento | null>(null);
@@ -37,7 +42,7 @@ export default function EditarMedicamento() {
     setCargando(true);
     try {
       setError(null);
-      const lista = await api.listarMedicamentos();
+      const lista = await api.listarMedicamentos(pacienteId);
       setMedicamento(lista.find((m) => m.id === id) ?? null);
     } catch (problema) {
       setError(
@@ -48,7 +53,7 @@ export default function EditarMedicamento() {
     } finally {
       setCargando(false);
     }
-  }, [api, id]);
+  }, [api, id, pacienteId]);
 
   useEffect(() => {
     void cargar();
@@ -60,7 +65,11 @@ export default function EditarMedicamento() {
     // con lo que hubiera en pantalla.
     const { stock: _sinUsar, ...cambios } = datos;
     await api.actualizarMedicamento(String(id), cambios);
-    void sincronizarAlarmas();
+
+    // Solo se rehacen las alarmas de este telefono si el tratamiento es
+    // de quien lo esta usando. Ver la nota en nuevo.tsx.
+    if (!pacienteId) void sincronizarAlarmas();
+
     router.back();
   };
 

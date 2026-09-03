@@ -20,7 +20,10 @@ CREATE TABLE IF NOT EXISTS pacientes (
   zona_horaria         TEXT        NOT NULL DEFAULT 'America/Bogota',
   preferencias         JSONB       NOT NULL DEFAULT '{}'::jsonb,
   activo               BOOLEAN     NOT NULL DEFAULT TRUE,
-  creado_en            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  creado_en            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  -- Todo token emitido antes de esta marca deja de valer. Ver la nota
+  -- extensa en la seccion de alteraciones, mas abajo.
+  sesiones_validas_desde TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS cuidadores (
@@ -31,7 +34,8 @@ CREATE TABLE IF NOT EXISTS cuidadores (
   contrasena_cifrada   TEXT        NOT NULL,
   rol                  TEXT,
   activo               BOOLEAN     NOT NULL DEFAULT TRUE,
-  creado_en            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  creado_en            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  sesiones_validas_desde TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS medicamentos (
@@ -128,6 +132,27 @@ CREATE INDEX IF NOT EXISTS idx_dispositivos_propietario
 
 ALTER TABLE pacientes
   ADD COLUMN IF NOT EXISTS zona_horaria TEXT NOT NULL DEFAULT 'America/Bogota';
+
+-- ---------------------------------------------------------------
+-- Cierre de sesiones abiertas
+-- ---------------------------------------------------------------
+-- El servidor no guarda las sesiones que reparte: firma un token y
+-- confia en la firma. Eso escala bien, pero significa que un token
+-- robado sigue valiendo hasta que caduque, y cambiar la contrasena no
+-- lo tocaba: el intruso seguia dentro hasta siete dias mas.
+--
+-- Esta columna lo resuelve sin guardar ni una sesion. En lugar de
+-- recordar los tokens repartidos, se recuerda DESDE CUANDO se aceptan:
+-- al cambiar la contrasena se pone la hora actual, y todo token emitido
+-- antes deja de valer en la siguiente peticion.
+--
+-- El DEFAULT NOW() es para las filas que ya existen. En una cuenta
+-- nueva vale lo mismo que creado_en.
+ALTER TABLE pacientes
+  ADD COLUMN IF NOT EXISTS sesiones_validas_desde TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+ALTER TABLE cuidadores
+  ADD COLUMN IF NOT EXISTS sesiones_validas_desde TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
 -- ---------------------------------------------------------------
 -- Recuperaciones de contrasena

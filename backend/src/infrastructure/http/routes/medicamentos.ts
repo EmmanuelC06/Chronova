@@ -18,9 +18,9 @@ import {
  */
 export function rutasDeMedicamentos(contenedor: Contenedor): Router {
   const router = Router();
-  const { casosDeUso, tokens } = contenedor;
+  const { casosDeUso } = contenedor;
 
-  router.use(autenticar(tokens));
+  router.use(autenticar(casosDeUso.verificarSesion));
 
   // GET /api/medicamentos?pacienteId=...&incluirSuspendidos=true
   router.get(

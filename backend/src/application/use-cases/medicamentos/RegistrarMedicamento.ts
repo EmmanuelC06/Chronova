@@ -5,8 +5,9 @@ import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
 import { Dosis } from '../../../domain/medicamento/Dosis.js';
 import { Frecuencia } from '../../../domain/medicamento/Frecuencia.js';
 import { Medicamento } from '../../../domain/medicamento/Medicamento.js';
-import type { MedicamentoPlano } from '../../../domain/medicamento/Medicamento.js';
 import type { RepositorioDeMedicamentos } from '../../../domain/medicamento/RepositorioDeMedicamentos.js';
+import { aVistaDeMedicamento } from './vistaDeMedicamento.js';
+import type { MedicamentoListado } from './vistaDeMedicamento.js';
 import { Stock } from '../../../domain/medicamento/Stock.js';
 import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
 import type { GeneradorDeIds } from '../../ports/GeneradorDeIds.js';
@@ -47,7 +48,7 @@ export class RegistrarMedicamento {
     private readonly reloj: Reloj,
   ) {}
 
-  async ejecutar(comando: ComandoRegistrarMedicamento): Promise<MedicamentoPlano> {
+  async ejecutar(comando: ComandoRegistrarMedicamento): Promise<MedicamentoListado> {
     const pacienteId = Identificador.desde(comando.pacienteId);
     await this.politica.asegurarAccesoAPaciente(
       comando.solicitante,
@@ -81,7 +82,7 @@ export class RegistrarMedicamento {
     });
 
     await this.medicamentos.guardar(medicamento);
-    return medicamento.aPlano();
+    return aVistaDeMedicamento(medicamento);
   }
 }
 

@@ -54,14 +54,16 @@ hide empty members
     - zonaHoraria : ZonaHoraria
     - preferencias : PreferenciasDeAccesibilidad
     - activo : boolean
+    - sesionesValidasDesde : Date
     --
     + {static} registrar(datos) : Paciente
     + edadEn(fecha) : number
     + esAdultoMayorEn(fecha) : boolean
     + actualizarPerfil(cambios)
     + cambiarPreferencias(prefs)
-    + cambiarContrasena(hash)
-    + desactivar()
+    + <b>cambiarContrasena(hash, ahora)</b>
+    + <b>cerrarSesionesAbiertas(ahora)</b>
+    + desactivar(ahora)
   }
 
   class Cuidador {
@@ -73,11 +75,13 @@ hide empty members
     - contrasenaCifrada : string
     - rol : string
     - activo : boolean
+    - sesionesValidasDesde : Date
     --
     + {static} registrar(datos) : Cuidador
     + actualizarPerfil(cambios)
-    + cambiarContrasena(hash)
-    + desactivar()
+    + <b>cambiarContrasena(hash, ahora)</b>
+    + <b>cerrarSesionesAbiertas(ahora)</b>
+    + desactivar(ahora)
   }
 
   class Medicamento {
@@ -382,6 +386,15 @@ note bottom of Toma
   contra la corrida por los aplazamientos: de lo
   contrario posponer tres veces haria que toda
   toma pareciera puntual.
+end note
+
+note top of Cuidador
+  <b>sesionesValidasDesde</b> es lo que permite cerrar
+  las sesiones abiertas sin que el servidor guarde
+  ni una sola sesion. En vez de recordar los tokens
+  que ha repartido, recuerda DESDE CUANDO los
+  acepta: cambiar la contrasena mueve esa fecha y
+  todos los tokens anteriores dejan de valer.
 end note
 
 note right of Stock

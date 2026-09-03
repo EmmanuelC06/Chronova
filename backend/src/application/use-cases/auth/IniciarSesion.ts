@@ -47,7 +47,11 @@ export class IniciarSesion {
     }
 
     return {
-      token: this.tokens.emitir({ usuarioId: candidato.id, tipo: candidato.tipo }),
+      token: this.tokens.emitir({
+        usuarioId: candidato.id,
+        tipo: candidato.tipo,
+        validaDesde: candidato.sesionesValidasDesde,
+      }),
       usuario: {
         id: candidato.id,
         nombre: candidato.nombre,
@@ -67,6 +71,8 @@ export class IniciarSesion {
     contrasenaCifrada: string;
     activo: boolean;
     tipo: TipoDeUsuario;
+    /** Marca que llevara el token, en milisegundos. */
+    sesionesValidasDesde: number;
   } | null> {
     if (tipo !== 'CUIDADOR') {
       const paciente = await this.pacientes.buscarPorEmail(email);
@@ -78,6 +84,7 @@ export class IniciarSesion {
           contrasenaCifrada: paciente.contrasenaCifrada,
           activo: paciente.activo,
           tipo: 'PACIENTE',
+          sesionesValidasDesde: paciente.sesionesValidasDesde.getTime(),
         };
       }
     }
@@ -92,6 +99,7 @@ export class IniciarSesion {
           contrasenaCifrada: cuidador.contrasenaCifrada,
           activo: cuidador.activo,
           tipo: 'CUIDADOR',
+          sesionesValidasDesde: cuidador.sesionesValidasDesde.getTime(),
         };
       }
     }

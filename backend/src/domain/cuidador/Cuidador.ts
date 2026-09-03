@@ -13,6 +13,13 @@ export interface CuidadorPlano {
   rol: string | null;
   activo: boolean;
   creadoEn: string;
+  /**
+   * Desde cuando valen las sesiones de esta persona.
+   *
+   * Opcional al leer para no romper las cuentas creadas antes de que
+   * existiera la columna: si falta, se toma la fecha de creacion.
+   */
+  sesionesValidasDesde?: string;
 }
 
 /**
@@ -34,6 +41,7 @@ export class Cuidador {
     private _rol: string | null,
     private _activo: boolean,
     readonly creadoEn: Date,
+    private _sesionesValidasDesde: Date,
   ) {}
 
   static registrar(datos: {
@@ -54,6 +62,7 @@ export class Cuidador {
       Cuidador.validarRol(datos.rol ?? null),
       true,
       datos.ahora,
+      datos.ahora,
     );
   }
 
@@ -67,6 +76,7 @@ export class Cuidador {
       plano.rol,
       plano.activo,
       new Date(plano.creadoEn),
+      new Date(plano.sesionesValidasDesde ?? plano.creadoEn),
     );
   }
 
@@ -80,6 +90,7 @@ export class Cuidador {
       rol: this._rol,
       activo: this._activo,
       creadoEn: this.creadoEn.toISOString(),
+      sesionesValidasDesde: this._sesionesValidasDesde.toISOString(),
     };
   }
 
@@ -102,21 +113,36 @@ export class Cuidador {
     return this._activo;
   }
 
+  /**
+   * Instante a partir del cual una sesion de esta persona es valida.
+   * Cualquier token emitido antes deja de servir. Ver Paciente.
+   */
+  get sesionesValidasDesde(): Date {
+    return new Date(this._sesionesValidasDesde);
+  }
+
+  cerrarSesionesAbiertas(ahora: Date): void {
+    this._sesionesValidasDesde = ahora;
+  }
+
   actualizarPerfil(cambios: { nombre?: string; telefono?: Telefono | null; rol?: string | null }): void {
     if (cambios.nombre !== undefined) this._nombre = Cuidador.validarNombre(cambios.nombre);
     if (cambios.telefono !== undefined) this._telefono = cambios.telefono;
     if (cambios.rol !== undefined) this._rol = Cuidador.validarRol(cambios.rol);
   }
 
-  cambiarContrasena(nuevaContrasenaCifrada: string): void {
+  /** Ver la explicacion equivalente en Paciente: van juntas a proposito. */
+  cambiarContrasena(nuevaContrasenaCifrada: string, ahora: Date): void {
     if (!nuevaContrasenaCifrada || nuevaContrasenaCifrada.trim().length === 0) {
       throw new ErrorDeValidacion('La contrasena cifrada no puede estar vacia.', 'contrasena');
     }
     this._contrasenaCifrada = nuevaContrasenaCifrada;
+    this.cerrarSesionesAbiertas(ahora);
   }
 
-  desactivar(): void {
+  desactivar(ahora: Date): void {
     this._activo = false;
+    this.cerrarSesionesAbiertas(ahora);
   }
 
   private static validarNombre(nombre: string): string {

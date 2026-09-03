@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, Platform, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
@@ -13,6 +13,10 @@ import {
   Tarjeta,
   Texto,
 } from '../../src/ui/componentes/basicos';
+import {
+  confirmarSuspension,
+  pedirReabastecimiento,
+} from '../../src/ui/componentes/accionesDeMedicamento';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { colores, espacio } from '../../src/ui/tema';
 
@@ -59,54 +63,26 @@ export default function Medicamentos() {
     }
   };
 
-  const reabastecer = (medicamento: Medicamento) => {
-    // Alert.prompt EXISTE en las dos plataformas —es un metodo estatico
-    // de la clase— pero su cuerpo entero esta dentro de un if de iOS, asi
-    // que en Android no hace nada y no avisa. Comprobar si la funcion
-    // existe daba siempre verdadero: el boton se quedaba mudo en Android,
-    // que es la plataforma en la que se prueba esta aplicacion.
-    if (Platform.OS === 'ios') {
-      Alert.prompt(
-        'Reabastecer',
-        `¿Cuantas unidades de ${medicamento.nombre} agregaste?`,
-        (texto) => void aplicarReabastecimiento(medicamento, Number(texto)),
-        'plain-text',
-        '30',
-        'number-pad',
-      );
-      return;
-    }
-
-    Alert.alert('Reabastecer', `Se agregaran 30 unidades a ${medicamento.nombre}. ¿Continuar?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Agregar 30',
-        onPress: () => void aplicarReabastecimiento(medicamento, 30),
-      },
-    ]);
-  };
-
-  const suspender = (medicamento: Medicamento) => {
-    Alert.alert(
-      'Suspender medicamento',
-      `Dejaras de recibir recordatorios de ${medicamento.nombre}. Tu historial se conserva.\n\nHazlo solo si tu medico lo indico.`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Suspender',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.suspenderMedicamento(medicamento.id);
-              await cargar();
-            } catch {
-              setError('No pudimos suspender el medicamento.');
-            }
-          },
-        },
-      ],
+  // Los dialogos viven en un modulo compartido con la pantalla del
+  // cuidador: son las mismas dos decisiones clinicas, las tome el
+  // paciente o quien lo acompana. `null` significa "sobre mi mismo", y
+  // es lo que hace que los mensajes vayan en segunda persona.
+  const reabastecer = (medicamento: Medicamento) =>
+    pedirReabastecimiento(medicamento, null, (unidades) =>
+      void aplicarReabastecimiento(medicamento, unidades),
     );
-  };
+
+  const suspender = (medicamento: Medicamento) =>
+    confirmarSuspension(medicamento, null, () => {
+      void (async () => {
+        try {
+          await api.suspenderMedicamento(medicamento.id);
+          await cargar();
+        } catch {
+          setError('No pudimos suspender el medicamento.');
+        }
+      })();
+    });
 
   if (cargando) return <Cargando mensaje="Cargando tus medicamentos..." />;
 

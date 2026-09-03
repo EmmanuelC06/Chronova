@@ -39,6 +39,7 @@ entity "pacientes" as pacientes {
   preferencias : JSONB <<NN>>
   activo : BOOLEAN <<NN>>
   creado_en : TIMESTAMPTZ <<NN>>
+  sesiones_validas_desde : TIMESTAMPTZ <<NN>>
 }
 
 entity "cuidadores" as cuidadores {
@@ -51,6 +52,7 @@ entity "cuidadores" as cuidadores {
   rol : TEXT
   activo : BOOLEAN <<NN>>
   creado_en : TIMESTAMPTZ <<NN>>
+  sesiones_validas_desde : TIMESTAMPTZ <<NN>>
 }
 
 entity "medicamentos" as medicamentos {
@@ -209,6 +211,12 @@ note top of pacientes
   contraste, alertas y minutos de gracia. Vive en el
   servidor para que acompanen al paciente en cualquier
   dispositivo donde inicie sesion.
+
+  <b>sesiones_validas_desde</b> es como se cierran las
+  sesiones abiertas sin guardar ninguna: el token
+  lleva dentro esta fecha, y si no coincide con la
+  guardada, deja de valer. Cambiar la contrasena la
+  mueve, y con ella caen todos los tokens de antes.
 
   <b>zona_horaria</b> (IANA, "America/Bogota") es lo que da
   sentido a los horarios: "las 8:00" son las 8 donde vive

@@ -49,7 +49,11 @@ export class RegistrarCuidador {
     await this.cuidadores.guardar(cuidador);
 
     return {
-      token: this.tokens.emitir({ usuarioId: cuidador.id.valor, tipo: 'CUIDADOR' }),
+      token: this.tokens.emitir({
+        usuarioId: cuidador.id.valor,
+        tipo: 'CUIDADOR',
+        validaDesde: cuidador.sesionesValidasDesde.getTime(),
+      }),
       usuario: {
         id: cuidador.id.valor,
         nombre: cuidador.nombre,

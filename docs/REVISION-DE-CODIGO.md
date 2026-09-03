@@ -10,11 +10,11 @@ Lo que está bien no se repite aquí; hay una sección al final con lo que se re
 
 ## Estado
 
-Los defectos marcados **[CORREGIDO]** se arreglaron el mismo día, con una prueba automatizada que los fija para que no vuelvan. La suite pasó de 104 a 128 pruebas.
+Los defectos marcados **[CORREGIDO]** se arreglaron con una prueba automatizada que los fija para que no vuelvan. La suite pasó de 104 a 146 pruebas.
 
 | Corregidos | Pendientes |
 |---|---|
-| B-1, B-2, B-3, G-1, G-2, G-3, G-4, G-5, M-2, M-3, M-5, M-6, M-7, y las trece correcciones de documentación | G-6 y M-1 (seguridad, antes de desplegar), M-4 y **M-8** (sesiones: renovarlas y poder cerrarlas) |
+| B-1, B-2, B-3, G-1, G-2, G-3, G-4, G-5, M-2, M-3, **M-4**, M-5, M-6, M-7, **M-8**, D-11, **D-13**, y las demás correcciones de documentación | G-6 y M-1 (seguridad, antes de desplegar) |
 
 ---
 
@@ -215,9 +215,13 @@ Una toma confirmada **13 horas antes** se reporta como 100 % de puntualidad, y d
 
 **Escenario:** Julián en Madrid, Rosa en Medellín. Rosa se salta la dosis del lunes a las 20:00; Julián lee *"martes, 03:00"* y llama a su madre por una dosis de madrugada que nunca existió. El backend se arregló en su momento; la vista no.
 
-## M-4. Token vencido = callejón sin salida
+## M-4. Token vencido = callejón sin salida  **[CORREGIDO]**
 
 Ninguna pantalla comprueba el 401. Al octavo día, todas las acciones fallan con un error genérico y la única salida es encontrar "Cerrar sesión" al final de "Mi cuenta" — un botón que dice lo contrario de lo que el usuario quiere.
+
+**Cómo se arregló.** No se añadió una pantalla de "tu sesión expiró": se hizo que no llegue a expirar. Cuando al token le quedan menos de tres días, el servidor emite uno nuevo y lo devuelve en la cabecera `X-Sesion-Renovada`; el cliente HTTP de la app la lee en el único punto por donde pasan todas las peticiones y reemplaza el guardado. La persona no ve nada, que es el objetivo.
+
+Esto **solo era seguro después de M-8**. Alargar indefinidamente unas sesiones que no se podían cortar habría sido empeorar el problema, no resolverlo. Por eso los dos se hicieron juntos y en ese orden.
 
 ## M-5. Un fallo de red en la pantalla de detalle dice "el vínculo se revocó"  **[CORREGIDO]**
 
@@ -235,7 +239,7 @@ Es un defecto que introduje ayer al hacer la tarjeta pulsable.
 
 ---
 
-## M-8. Cambiar la contraseña no cierra las sesiones ya abiertas
+## M-8. Cambiar la contraseña no cierra las sesiones ya abiertas  **[CORREGIDO]**
 
 *Hallazgo posterior a la revisión, encontrado al construir la recuperación de contraseña.*
 
@@ -246,9 +250,16 @@ El middleware valida la firma y la caducidad del token, y nada más. No consulta
 - Si alguien te robó la cuenta y tú recuperas la contraseña, **su token sigue valiendo** hasta siete días. Cambiar la clave debería dejarlo fuera de inmediato, y no lo hace.
 - Una cuenta **desactivada** (`activo: false`) conserva el acceso el mismo tiempo. `IniciarSesion` sí comprueba `activo`; el middleware no.
 
-Arreglarlo bien exige una consulta al usuario en cada petición —para comparar la fecha de emisión del token contra la del último cambio de contraseña— y eso toca la misma infraestructura de sesiones que la renovación pendiente (M-4).
+**Cómo se arregló.** No guardando sesiones —eso obligaría a una tabla que crece sin parar y a limpiarla— sino guardando **una sola fecha por cuenta**: `sesiones_validas_desde`. El token lleva dentro la fecha que tenía la cuenta cuando se emitió; si al llegar una petición no coincide con la guardada, el token no vale. Cambiar la contraseña mueve esa fecha, y con ella caen todas las sesiones abiertas a la vez.
 
-**Se dejó fuera a propósito** de la recuperación de contraseña, para que ese cambio se pudiera revisar solo. Va junto con M-4.
+La comprobación se hace en un caso de uso nuevo, `VerificarSesion`, y no en el middleware. El middleware solo lee la cabecera y escribe la respuesta; la regla —cuenta activa, token posterior al último cambio, renovación si toca— vive en la capa de aplicación, donde se puede probar sin levantar un servidor. Las siete pruebas de `tests/use-cases/sesiones.test.ts` no tocan Express.
+
+Dos detalles que costaron y conviene poder explicar:
+
+- **Se compara por igualdad exacta, no por "el token es más viejo que el cambio".** La marca de emisión de un JWT (`iat`) va en **segundos**. Al restablecer la contraseña la app entra acto seguido, dentro del mismo segundo: con una comparación por fecha, el token recién emitido habría parecido anterior al cambio y habría quedado inválido al nacer. Hay una prueba dedicada a ese caso.
+- **Cuesta una consulta a la base de datos por petición.** No hay forma de revocar sesiones sin consultar algo; es el precio de poder cerrarlas. La consulta es por clave primaria, la más barata que existe.
+
+**Efecto secundario al desplegar:** los tokens antiguos no llevan la marca nueva, así que todo el mundo tendrá que iniciar sesión una vez más. Es esperado y ocurre una sola vez.
 
 ---
 
@@ -270,7 +281,7 @@ Son las más urgentes en términos de entrega, porque se refutan en la sustentac
 | D-10 | RNF-13 y RNF-12 | «25 peticiones simultáneas», «20-75 ms» | Mismo problema: no hay script en el repositorio que lo reproduzca. La prueba automática usa 2 peticiones |
 | D-11 **[CORREGIDO]** | Diagramas 03 y 08 | «las cinco entidades», «las cinco tablas» | Eran **siete y siete**: faltaban `Dispositivo` y `SolicitudDeRecuperacion`, y las tablas `dispositivos` y `recuperaciones`. Ambos diagramas se rehicieron con las dos entidades, sus value objects (`TokenDeDispositivo`, `CodigoDeRecuperacion`), las enumeraciones `TipoDePropietario` y `MotivoDeRechazo`, y las dos tablas dibujadas con línea punteada para dejar claro que **no** llevan clave foránea. El diagrama de clases pasó a `left to right direction`, que lo vuelve alto y estrecho en vez de ancho: con siete entidades medía 4400 px de ancho y PlantUML recorta en silencio lo que pasa de 4096, de modo que la primera versión perdió media nota sin dar error. De paso, los ocho `.puml` llevan ahora en su primera línea el mismo nombre del archivo, que es lo que evita que una regeneración deje la imagen nueva al lado de la vieja |
 | D-12 | API.md | `POST /registro/paciente` | No documenta el parámetro **`zonaHoraria`**, del que depende toda la Prueba 5 y el RNF-15 |
-| D-13 | Requerimientos | «Los treinta y dos están implementados» | RF-08 (editar medicamento) y RF-25 (cambiar permisos) existen en el backend pero **no son alcanzables desde la app**. El README ya lo admite; el documento no, y se contradicen |
+| D-13 **[CORREGIDO]** | Requerimientos | «Los treinta y dos están implementados» | RF-08 (editar medicamento) y RF-25 (cambiar permisos) existían en el backend y **no eran alcanzables desde la app**. RF-25 se cerró con la lista de permisos del perfil del paciente. RF-08 quedó a medias hasta hoy: el paciente podía editar su medicación, pero el cuidador no, aunque el paciente le hubiera concedido `puedeGestionarMedicamentos` y el servidor lo respetara en las tres operaciones. Ahora la pantalla del cuidador honra ese permiso: agregar, editar, reabastecer y suspender |
 
 Menores del mismo tipo: RNF-07 dice «bcrypt» y la dependencia es `bcryptjs`; RNF-01 dice «el texto base» y hay tamaños de 14 y 16 (es cierto para el texto de cuerpo); DEL-MVP dice «~45 archivos» y son 88; README y la guía citan la IP `192.168.1.10`, que ya no es la del `app.json`.
 
@@ -286,7 +297,7 @@ Para que no se toque por error, y porque también es parte del resultado de la r
 - **Autenticación y autorización:** los nueve casos de uso que tocan datos del paciente llaman a `PoliticaDeAcceso` con el permiso correcto. Verificado sin token (401), tipo equivocado (403) y cuidador sin vínculo (403).
 - **RNF-16 (cero dependencias externas en el dominio):** comprobado archivo por archivo en los 40 del dominio. Cierto.
 - **RNF-18 (todo el SQL en un archivo):** cierto para las consultas. Matiz honesto: el DDL vive en `esquema.sql`.
-- **RNF-15 (seis husos):** 128 pruebas en verde bajo los seis. Cierto.
+- **RNF-15 (seis husos):** 146 pruebas en verde bajo los seis, de Kiritimati (UTC+14) a Anchorage (UTC−9). Cierto, y vuelto a comprobar tras el trabajo de sesiones.
 - **Prueba 6 de ARQUITECTURA:** cierta y verificable con `git show`. En ese commit no cambió ningún archivo de `backend/src/`.
 - **Notificador de Expo:** nunca lanza, reparte en lotes de 100, da de baja los tokens muertos, y el compuesto aísla cada destino.
 - **API.md:** los 21 endpoints documentados existen con ese método y esa ruta, y no falta ninguno.
@@ -302,6 +313,6 @@ Para que no se toque por error, y porque también es parte del resultado de la r
 3. **D-1 a D-6** (la documentación falsa) — barato, y es lo que se refuta en la sustentación.
 4. **B-3**, **G-3**, **G-5** — cada uno es un arreglo pequeño y cierra un callejón sin salida.
 5. **G-1** — coherencia con el RNF-15 ya declarado.
-6. **G-4**, **M-4** (sesión) — junto con la recuperación de contraseña, que sigue pendiente.
+6. **G-4**, **M-4**, **M-8** (sesión) — los tres tocan la misma pieza; hacerlos por separado habría sido reescribirla tres veces.
 7. **M-6**, **M-7** (accesibilidad) — encajan bien con el trabajo de diseño cuando se retome.
 8. **G-6**, **M-1** (seguridad) — antes de cualquier despliegue real, no antes de la sustentación.

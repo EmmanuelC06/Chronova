@@ -100,7 +100,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Arranca el servidor y se recarga solo al guardar cambios |
-| `npm test` | Ejecuta las 128 pruebas automáticas |
+| `npm test` | Ejecuta las 146 pruebas automáticas |
 | `npm run typecheck` | Revisa que no haya errores de tipos |
 | `npm run build` | Compila para producción |
 | `npm run db:migrate` | Crea las tablas en PostgreSQL |
@@ -147,12 +147,13 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 
 ## Estado del proyecto
 
-- Backend completo, con 128 pruebas automáticas en verde.
+- Backend completo, con 146 pruebas automáticas en verde.
 - App móvil con las pantallas principales conectadas a la API.
 - Las horas se manejan en la zona horaria de cada paciente, no en la del servidor. Verificado con la suite completa bajo seis relojes distintos, de UTC+14 a UTC−9.
 - Notificaciones push al teléfono del cuidador, **verificadas de extremo a extremo sobre un Android real**: el servidor detecta la toma vencida, el aviso llega al teléfono y al tocarlo se abre la información de esa paciente. Con baja automática de los dispositivos donde se desinstaló la aplicación.
 - El proyecto está preparado para generar un *development build* (`eas.json` y `expo-dev-client` incluidos). Es la vía recomendada para probar: evita el baile de versiones de Expo Go y es la única forma de recibir notificaciones push, que Expo Go no admite desde el SDK 53. Ver la [Parte 6 de la guía](docs/GUIA-DE-INICIO.md).
 - El cuidador puede abrir a cada paciente y ver su agenda del día, su tratamiento y las tomas que se saltó; y tocar una notificación lo lleva directo a ese paciente. Se añadió sin modificar ningún archivo de `backend/src/`.
-- El paciente decide permiso por permiso qué puede hacer cada cuidador —ver el tratamiento, recibir avisos, confirmar tomas por él, cambiar la medicación— y puede editar un medicamento sin perder su historial.
+- El paciente decide permiso por permiso qué puede hacer cada cuidador —ver el tratamiento, recibir avisos, confirmar tomas por él, cambiar la medicación— y esos permisos se notan de verdad: con «cambiar la medicación» concedido, el cuidador puede agregar, editar, reabastecer y suspender medicamentos desde la ficha del paciente. Sin él, ve el tratamiento y no puede tocarlo. Editar conserva el historial de tomas.
 - Recuperación de contraseña con un código de seis dígitos enviado por correo, que caduca, sirve una sola vez y admite cinco intentos. El envío está detrás de un puerto: por defecto escribe en la consola, así que el flujo completo se prueba sin contratar ningún servicio.
-- Pendiente: renovación de sesión, y pruebas de usabilidad con adultos mayores reales.
+- La sesión se renueva sola antes de caducar, y cambiar la contraseña cierra de inmediato todas las sesiones abiertas.
+- Pendiente: alojar el servidor con HTTPS, y pruebas de usabilidad con adultos mayores reales.

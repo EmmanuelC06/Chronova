@@ -90,7 +90,11 @@ export class RegistrarPaciente {
     await this.pacientes.guardar(paciente);
 
     return {
-      token: this.tokens.emitir({ usuarioId: paciente.id.valor, tipo: 'PACIENTE' }),
+      token: this.tokens.emitir({
+        usuarioId: paciente.id.valor,
+        tipo: 'PACIENTE',
+        validaDesde: paciente.sesionesValidasDesde.getTime(),
+      }),
       usuario: {
         id: paciente.id.valor,
         nombre: paciente.nombre,

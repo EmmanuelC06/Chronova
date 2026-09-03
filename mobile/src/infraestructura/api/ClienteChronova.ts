@@ -32,6 +32,17 @@ const URL_POR_DEFECTO = 'http://localhost:4000';
 const TIEMPO_MAXIMO_MS = 15_000;
 
 /**
+ * Cabecera por la que el servidor manda un token de recambio.
+ *
+ * Tiene que coincidir letra por letra con la del backend
+ * (infrastructure/http/middlewares/autenticacion.ts). Si no coincidiera,
+ * no habria ningun error: la sesion simplemente caducaria a los siete
+ * dias como antes, que es el tipo de fallo que no se descubre hasta la
+ * semana siguiente.
+ */
+const CABECERA_DE_RENOVACION = 'X-Sesion-Renovada';
+
+/**
  * Zona horaria del telefono, en nomenclatura IANA.
  *
  * Intl viene con el motor de JavaScript, asi que no hace falta ninguna
@@ -53,11 +64,16 @@ function resolverUrlBase(): string {
 
 export class ClienteChronova implements ApiDeChronova {
   private token: string | null = null;
+  private alRenovar: ((token: string) => void) | null = null;
 
   constructor(private readonly urlBase: string = resolverUrlBase()) {}
 
   usarToken(token: string | null): void {
     this.token = token;
+  }
+
+  alRenovarLaSesion(manejador: ((token: string) => void) | null): void {
+    this.alRenovar = manejador;
   }
 
   // ---------------------------------------------------------------
@@ -278,6 +294,8 @@ export class ClienteChronova implements ApiDeChronova {
       clearTimeout(temporizador);
     }
 
+    this.atenderRenovacion(respuesta);
+
     const texto = await respuesta.text();
     const datos = texto ? (JSON.parse(texto) as Record<string, any>) : {};
 
@@ -292,5 +310,20 @@ export class ClienteChronova implements ApiDeChronova {
     }
 
     return datos as T;
+  }
+
+  /**
+   * Recoge el token de recambio si el servidor lo mando en esta respuesta.
+   *
+   * Se hace aqui, en el unico sitio por donde pasan todas las peticiones,
+   * y no en cada pantalla: asi la renovacion funciona en las treinta
+   * rutas sin que ninguna se entere de que existe.
+   */
+  private atenderRenovacion(respuesta: Response): void {
+    const nuevo = respuesta.headers.get(CABECERA_DE_RENOVACION);
+    if (!nuevo || nuevo === this.token) return;
+
+    this.token = nuevo;
+    this.alRenovar?.(nuevo);
   }
 }

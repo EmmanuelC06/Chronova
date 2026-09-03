@@ -1,8 +1,18 @@
 import type { NextFunction, Request, Response } from 'express';
-import { Identificador } from '../../../domain/shared/Identificador.js';
 import { ErrorDeAutenticacion, ErrorDeAutorizacion } from '../../../domain/shared/errores.js';
-import type { ServicioDeTokens, TipoDeUsuario } from '../../../application/ports/ServicioDeTokens.js';
+import type { TipoDeUsuario } from '../../../application/ports/ServicioDeTokens.js';
+import type { VerificarSesion } from '../../../application/use-cases/auth/VerificarSesion.js';
 import type { Solicitante } from '../../../application/services/PoliticaDeAcceso.js';
+
+/**
+ * Cabecera por la que viaja un token de recambio.
+ *
+ * La app la lee en cada respuesta y, si viene, reemplaza el token que
+ * tenia guardado. Se eligio una cabecera y no un campo en el cuerpo
+ * porque asi funciona igual en las 30 rutas sin tocar ni una: el cuerpo
+ * de cada respuesta sigue siendo exactamente lo que la ruta devuelve.
+ */
+export const CABECERA_DE_RENOVACION = 'X-Sesion-Renovada';
 
 /** Se anade el solicitante ya resuelto a la peticion de Express. */
 declare global {
@@ -20,9 +30,19 @@ declare global {
  * Traduce el encabezado "Authorization: Bearer <token>" en un objeto
  * Solicitante que los casos de uso entienden. A partir de aqui, nada mas
  * en el sistema vuelve a saber que existen los JWT.
+ *
+ * Este archivo no decide NADA sobre si una sesion vale: solo lee la
+ * cabecera, se lo pregunta al caso de uso y escribe la respuesta. La
+ * regla —cuenta activa, token posterior al ultimo cambio de contrasena,
+ * renovacion si esta a punto de caducar— vive en VerificarSesion, que se
+ * puede probar sin levantar un servidor.
  */
-export function autenticar(tokens: ServicioDeTokens) {
-  return (peticion: Request, _respuesta: Response, siguiente: NextFunction): void => {
+export function autenticar(verificarSesion: VerificarSesion) {
+  return async (
+    peticion: Request,
+    respuesta: Response,
+    siguiente: NextFunction,
+  ): Promise<void> => {
     const encabezado = peticion.headers.authorization ?? '';
     const [esquema, token] = encabezado.split(' ');
 
@@ -32,18 +52,17 @@ export function autenticar(tokens: ServicioDeTokens) {
       );
     }
 
-    const sesion = tokens.verificar(token);
-    if (!sesion) {
-      return siguiente(
-        new ErrorDeAutenticacion('Tu sesion expiro o no es valida. Inicia sesion de nuevo.'),
-      );
-    }
+    try {
+      const { solicitante, tokenRenovado } = await verificarSesion.ejecutar(token);
+      peticion.solicitante = solicitante;
 
-    peticion.solicitante = {
-      id: Identificador.desde(sesion.usuarioId),
-      tipo: sesion.tipo,
-    };
-    siguiente();
+      if (tokenRenovado) {
+        respuesta.setHeader(CABECERA_DE_RENOVACION, tokenRenovado);
+      }
+      siguiente();
+    } catch (problema) {
+      siguiente(problema);
+    }
   };
 }
 

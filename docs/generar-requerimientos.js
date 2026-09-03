@@ -139,7 +139,7 @@ const RNF = [
   ['RNF-14', 'Disponibilidad', 'Las alarmas de toma sonarán aunque el dispositivo no tenga conexión a internet.', 'Las alarmas se programan localmente en el teléfono, con siete días de antelación, de modo que suenan sin conexión y sin necesidad de abrir la aplicación. Verificado por diseño y en dispositivo.'],
   ['RNF-15', 'Portabilidad', 'El comportamiento del sistema no dependerá de la zona horaria en que corra el servidor.', 'La suite completa se ejecuta con idéntico resultado bajo seis husos, de UTC+14 a UTC−9. Verificado.'],
   ['RNF-16', 'Mantenibilidad', 'El núcleo de reglas de negocio no dependerá de ninguna librería externa.', 'Cero importaciones externas en el directorio del dominio. Verificado.'],
-  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '128 pruebas en menos de dos segundos. Verificado.'],
+  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '143 pruebas en menos de dos segundos. Verificado.'],
   ['RNF-18', 'Mantenibilidad', 'Toda consulta SQL residirá en un único archivo del proyecto.', 'Inspección del directorio de persistencia. Verificado.'],
   ['RNF-19', 'Portabilidad', 'El mecanismo de persistencia será intercambiable sin modificar el dominio ni los casos de uso.', 'La aplicación funciona completa en memoria o con PostgreSQL cambiando una variable. Verificado.'],
   ['RNF-20', 'Compatibilidad', 'La aplicación móvil funcionará sobre Android mediante Expo y el servidor sobre Node.js 20 o superior.', 'Ejecución sobre un dispositivo Android real mediante una compilación de desarrollo, más verificación de tipos y compilación del backend. Verificado.'],

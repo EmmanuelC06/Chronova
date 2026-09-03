@@ -4,6 +4,7 @@ import type { Entorno } from './config/entorno.js';
 
 import { PoliticaDeAcceso } from './application/services/PoliticaDeAcceso.js';
 import { ActualizarPreferencias } from './application/use-cases/auth/ActualizarPreferencias.js';
+import { VerificarSesion } from './application/use-cases/auth/VerificarSesion.js';
 import { IniciarSesion } from './application/use-cases/auth/IniciarSesion.js';
 import { ObtenerPerfil } from './application/use-cases/auth/ObtenerPerfil.js';
 import { RegistrarCuidador } from './application/use-cases/auth/RegistrarCuidador.js';
@@ -82,6 +83,7 @@ export interface Contenedor {
     registrarPaciente: RegistrarPaciente;
     registrarCuidador: RegistrarCuidador;
     iniciarSesion: IniciarSesion;
+    verificarSesion: VerificarSesion;
     obtenerPerfil: ObtenerPerfil;
     actualizarPreferencias: ActualizarPreferencias;
 
@@ -196,6 +198,7 @@ export function construirContenedor(
     registrarPaciente: new RegistrarPaciente(pacientes, cifrador, tokens, ids, reloj),
     registrarCuidador: new RegistrarCuidador(cuidadores, cifrador, tokens, ids, reloj),
     iniciarSesion: new IniciarSesion(pacientes, cuidadores, cifrador, tokens),
+    verificarSesion: new VerificarSesion(pacientes, cuidadores, tokens, reloj),
     obtenerPerfil: new ObtenerPerfil(pacientes, cuidadores, reloj),
     actualizarPreferencias: new ActualizarPreferencias(pacientes),
 

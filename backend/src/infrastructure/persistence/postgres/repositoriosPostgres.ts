@@ -61,8 +61,8 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
     await this.pool.query(
       `INSERT INTO pacientes
          (id, nombre, email, telefono, fecha_de_nacimiento, contrasena_cifrada,
-          zona_horaria, preferencias, activo, creado_en)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+          zona_horaria, preferencias, activo, creado_en, sesiones_validas_desde)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        ON CONFLICT (id) DO UPDATE SET
          nombre = EXCLUDED.nombre,
          telefono = EXCLUDED.telefono,
@@ -70,7 +70,8 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
          contrasena_cifrada = EXCLUDED.contrasena_cifrada,
          zona_horaria = EXCLUDED.zona_horaria,
          preferencias = EXCLUDED.preferencias,
-         activo = EXCLUDED.activo`,
+         activo = EXCLUDED.activo,
+         sesiones_validas_desde = EXCLUDED.sesiones_validas_desde`,
       [
         p.id,
         p.nombre,
@@ -82,6 +83,7 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
         JSON.stringify(p.preferencias),
         p.activo,
         p.creadoEn,
+        p.sesionesValidasDesde,
       ],
     );
   }
@@ -125,6 +127,10 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
       preferencias: fila.preferencias ?? {},
       activo: fila.activo,
       creadoEn: aFechaIso(fila.creado_en)!,
+      // Las cuentas anteriores a esta columna la tienen nula: se toma la
+      // fecha de creacion, que equivale a "ninguna sesion se ha cerrado".
+      sesionesValidasDesde:
+        aFechaIso(fila.sesiones_validas_desde ?? null) ?? aFechaIso(fila.creado_en)!,
     });
   }
 }
@@ -140,15 +146,27 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
     const c = cuidador.aPlano();
     await this.pool.query(
       `INSERT INTO cuidadores
-         (id, nombre, email, telefono, contrasena_cifrada, rol, activo, creado_en)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+         (id, nombre, email, telefono, contrasena_cifrada, rol, activo, creado_en,
+          sesiones_validas_desde)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
        ON CONFLICT (id) DO UPDATE SET
          nombre = EXCLUDED.nombre,
          telefono = EXCLUDED.telefono,
          contrasena_cifrada = EXCLUDED.contrasena_cifrada,
          rol = EXCLUDED.rol,
-         activo = EXCLUDED.activo`,
-      [c.id, c.nombre, c.email, c.telefono, c.contrasenaCifrada, c.rol, c.activo, c.creadoEn],
+         activo = EXCLUDED.activo,
+         sesiones_validas_desde = EXCLUDED.sesiones_validas_desde`,
+      [
+        c.id,
+        c.nombre,
+        c.email,
+        c.telefono,
+        c.contrasenaCifrada,
+        c.rol,
+        c.activo,
+        c.creadoEn,
+        c.sesionesValidasDesde,
+      ],
     );
   }
 
@@ -181,6 +199,8 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
       rol: fila.rol,
       activo: fila.activo,
       creadoEn: aFechaIso(fila.creado_en)!,
+      sesionesValidasDesde:
+        aFechaIso(fila.sesiones_validas_desde ?? null) ?? aFechaIso(fila.creado_en)!,
     });
   }
 }

@@ -35,7 +35,7 @@ export function NavegacionPorNotificaciones() {
 
       if (sesion.usuario.tipo === 'CUIDADOR') {
         // Los avisos del cuidador siempre hablan de un paciente concreto.
-        if (datos.pacienteId) router.push(`/paciente/${datos.pacienteId}`);
+        if (datos.pacienteId) router.push(`/paciente/${datos.pacienteId}/hoy`);
         return;
       }
 

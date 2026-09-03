@@ -1,6 +1,7 @@
 import { Identificador } from '../../../domain/shared/Identificador.js';
-import type { MedicamentoPlano } from '../../../domain/medicamento/Medicamento.js';
 import type { RepositorioDeMedicamentos } from '../../../domain/medicamento/RepositorioDeMedicamentos.js';
+import { aVistaDeMedicamento } from './vistaDeMedicamento.js';
+import type { MedicamentoListado } from './vistaDeMedicamento.js';
 import type { PoliticaDeAcceso, Solicitante } from '../../services/PoliticaDeAcceso.js';
 
 export interface ConsultaListarMedicamentos {
@@ -9,11 +10,7 @@ export interface ConsultaListarMedicamentos {
   incluirSuspendidos?: boolean;
 }
 
-export interface MedicamentoListado extends MedicamentoPlano {
-  descripcionDeDosis: string;
-  descripcionDeFrecuencia: string;
-  necesitaReabastecimiento: boolean;
-}
+export type { MedicamentoListado } from './vistaDeMedicamento.js';
 
 /** CASO DE USO: listar los medicamentos de un paciente. */
 export class ListarMedicamentos {
@@ -35,13 +32,6 @@ export class ListarMedicamentos {
       consulta.incluirSuspendidos ?? false,
     );
 
-    // Se agregan campos ya "masticados" para que la app movil no tenga
-    // que recalcular textos ni reglas: la interfaz solo pinta.
-    return lista.map((medicamento) => ({
-      ...medicamento.aPlano(),
-      descripcionDeDosis: medicamento.dosis.descripcion,
-      descripcionDeFrecuencia: medicamento.frecuencia.descripcion,
-      necesitaReabastecimiento: medicamento.stock.necesitaReabastecimiento,
-    }));
+    return lista.map(aVistaDeMedicamento);
   }
 }

@@ -24,6 +24,19 @@ export interface ApiDeChronova {
   /** Define el token que se enviara en las siguientes peticiones. */
   usarToken(token: string | null): void;
 
+  /**
+   * Registra a quien hay que avisar cuando el servidor entrega un token
+   * de recambio.
+   *
+   * El servidor lo hace por su cuenta cuando al token actual le quedan
+   * pocos dias. La app solo tiene que guardarlo: si no lo guardara, la
+   * sesion seguiria caducando a los siete dias y la persona se
+   * encontraria fuera un dia cualquiera sin haber hecho nada.
+   *
+   * Pasar null cancela el aviso.
+   */
+  alRenovarLaSesion(manejador: ((token: string) => void) | null): void;
+
   registrarPaciente(datos: {
     nombre: string;
     email: string;

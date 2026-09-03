@@ -163,7 +163,7 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
       // tarjeta que se hunde al tocarla y no lleva a ningun lado se lee
       // como que la app fallo.
       onPress={
-        pendiente ? undefined : () => router.push(`/paciente/${paciente.pacienteId}`)
+        pendiente ? undefined : () => router.push(`/paciente/${paciente.pacienteId}/hoy`)
       }
       // Una tarjeta pulsable se lee como UN solo elemento: el lector de
       // pantalla anuncia esta frase y ya no entra en su contenido. Por

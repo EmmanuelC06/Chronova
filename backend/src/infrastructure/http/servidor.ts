@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import type { Express } from 'express';
 import type { Contenedor } from '../../contenedor.js';
+import { CABECERA_DE_RENOVACION } from './middlewares/autenticacion.js';
 import { manejadorDeErrores } from './middlewares/manejadorDeErrores.js';
 import { rutasDeAutenticacion } from './routes/autenticacion.js';
 import { rutasDeCuidadores } from './routes/cuidadores.js';
@@ -22,7 +23,11 @@ import { rutasDeTomas } from './routes/tomas.js';
 export function crearServidor(contenedor: Contenedor): Express {
   const app = express();
 
-  app.use(cors());
+  // exposedHeaders es imprescindible para la renovacion de sesion: un
+  // navegador solo deja leer a JavaScript un punado de cabeceras, y las
+  // demas hay que declararlas una por una. Sin esta linea la app web
+  // recibiria el token nuevo y no podria verlo — sin ningun error.
+  app.use(cors({ exposedHeaders: [CABECERA_DE_RENOVACION] }));
   app.use(express.json({ limit: '256kb' }));
 
   // Comprobacion de vida: util para el despliegue y para verificar

@@ -40,7 +40,7 @@ describe('Registro e inicio de sesion', () => {
     });
 
     expect(resultado.usuario.tipo).toBe('PACIENTE');
-    expect(app.contenedor.tokens.verificar(resultado.token)).toEqual({
+    expect(app.contenedor.tokens.verificar(resultado.token)).toMatchObject({
       usuarioId: resultado.usuario.id,
       tipo: 'PACIENTE',
     });
@@ -606,6 +606,103 @@ describe('Vinculo cuidador-paciente y control de acceso', () => {
       nombre: 'Losartan potasico',
     });
     expect(actualizado.nombre).toBe('Losartan potasico');
+  });
+
+  /**
+   * Las tres acciones que la pantalla del cuidador acaba de habilitar.
+   *
+   * El permiso `puedeGestionarMedicamentos` existia y el servidor ya lo
+   * respetaba, pero desde la aplicacion no se alcanzaba: el paciente
+   * podia concederlo y no servia de nada. Estas pruebas fijan que las
+   * tres pasan por la misma puerta.
+   */
+  it('con permiso, el cuidador puede registrar un medicamento nuevo', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+
+    // Sin el permiso no puede: es el estado por defecto de un vinculo.
+    await expect(
+      registrarLosartan(cuidador.solicitante, paciente.id),
+    ).rejects.toThrow(/no te ha concedido permiso/);
+
+    await app.contenedor.casosDeUso.cambiarPermisosDelVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      permisos: { puedeGestionarMedicamentos: true },
+    });
+
+    const creado = await registrarLosartan(cuidador.solicitante, paciente.id);
+
+    // Y queda a nombre del PACIENTE, no del cuidador que lo registro.
+    expect(creado.pacienteId).toBe(paciente.id);
+  });
+
+  it('con permiso, el cuidador puede reabastecer el inventario', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+    const medicamento = await registrarLosartan(paciente.solicitante, paciente.id, {
+      unidadesDisponibles: 4,
+      umbralDeAlerta: 10,
+    });
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+    await app.contenedor.casosDeUso.cambiarPermisosDelVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      permisos: { puedeGestionarMedicamentos: true },
+    });
+
+    const repuesto = await app.contenedor.casosDeUso.reabastecerStock.ejecutar({
+      solicitante: cuidador.solicitante,
+      medicamentoId: medicamento.id,
+      unidades: 30,
+    });
+
+    expect(repuesto.stock.unidadesDisponibles).toBe(34);
+    expect(repuesto.necesitaReabastecimiento).toBe(false);
+  });
+
+  it('retirar solo ese permiso corta la gestion pero deja ver el tratamiento', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+    const medicamento = await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+    await app.contenedor.casosDeUso.cambiarPermisosDelVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      permisos: { puedeGestionarMedicamentos: true },
+    });
+    await app.contenedor.casosDeUso.cambiarPermisosDelVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      permisos: { puedeGestionarMedicamentos: false },
+    });
+
+    await expect(
+      app.contenedor.casosDeUso.suspenderMedicamento.ejecutar({
+        solicitante: cuidador.solicitante,
+        medicamentoId: medicamento.id,
+      }),
+    ).rejects.toThrow(/no te ha concedido permiso/);
+
+    // Los permisos son independientes: quitar uno no quita los demas.
+    const lista = await app.contenedor.casosDeUso.listarMedicamentos.ejecutar({
+      solicitante: cuidador.solicitante,
+      pacienteId: paciente.id,
+    });
+    expect(lista).toHaveLength(1);
   });
 
   it('revocar corta el acceso de inmediato', async () => {

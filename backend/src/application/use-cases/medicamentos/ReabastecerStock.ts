@@ -1,7 +1,8 @@
 import { Identificador } from '../../../domain/shared/Identificador.js';
 import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
-import type { MedicamentoPlano } from '../../../domain/medicamento/Medicamento.js';
 import type { RepositorioDeMedicamentos } from '../../../domain/medicamento/RepositorioDeMedicamentos.js';
+import { aVistaDeMedicamento } from './vistaDeMedicamento.js';
+import type { MedicamentoListado } from './vistaDeMedicamento.js';
 import type { PoliticaDeAcceso, Solicitante } from '../../services/PoliticaDeAcceso.js';
 
 export interface ComandoReabastecerStock {
@@ -25,7 +26,7 @@ export class ReabastecerStock {
     private readonly politica: PoliticaDeAcceso,
   ) {}
 
-  async ejecutar(comando: ComandoReabastecerStock): Promise<MedicamentoPlano> {
+  async ejecutar(comando: ComandoReabastecerStock): Promise<MedicamentoListado> {
     const medicamento = await this.medicamentos.buscarPorId(
       Identificador.desde(comando.medicamentoId),
     );
@@ -43,6 +44,6 @@ export class ReabastecerStock {
     }
 
     await this.medicamentos.guardar(medicamento);
-    return medicamento.aPlano();
+    return aVistaDeMedicamento(medicamento);
   }
 }

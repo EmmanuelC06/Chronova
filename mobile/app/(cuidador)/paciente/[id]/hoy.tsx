@@ -1,0 +1,190 @@
+import { RefreshControl, ScrollView, View } from 'react-native';
+
+import type { ElementoDeAgenda } from '../../../../src/dominio/modelos';
+import {
+  Aviso,
+  Boton,
+  Insignia,
+  Tarjeta,
+  Texto,
+} from '../../../../src/ui/componentes/basicos';
+import {
+  DIAS_DE_RESUMEN,
+  usePacienteObservado,
+} from '../../../../src/ui/contexto/PacienteObservadoContexto';
+import { colores, espacio, ESTILO_POR_ESTADO, ESTILO_POR_NIVEL } from '../../../../src/ui/tema';
+
+/**
+ * PESTANA "Hoy": como va el paciente en este momento.
+ *
+ * Responde la pregunta con la que un cuidador abre la aplicacion —"¿le
+ * falta alguna toma hoy?"— y le deja actuar sobre ella si el paciente le
+ * dio permiso. Todo lo que no sea de hoy vive en las otras dos pestanas.
+ */
+export default function Hoy() {
+  const {
+    paciente,
+    agenda,
+    medicamentos,
+    nombreCorto,
+    error,
+    refrescando,
+    procesando,
+    alTirarParaRefrescar,
+    registrarToma,
+  } = usePacienteObservado();
+
+  if (!paciente) return null;
+
+  const nivel = ESTILO_POR_NIVEL[paciente.adherencia.nivel];
+  const puedeRegistrar = paciente.permisos.puedeRegistrarTomas;
+
+  const pendientes = agenda?.elementos.filter((e) => e.puedeConfirmarse) ?? [];
+  const resueltas = agenda?.elementos.filter((e) => !e.puedeConfirmarse) ?? [];
+  const porAgotarse = medicamentos.filter((m) => m.necesitaReabastecimiento);
+
+  return (
+    <ScrollView
+      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refrescando}
+          onRefresh={alTirarParaRefrescar}
+          tintColor={colores.primario}
+        />
+      }
+    >
+      {error ? <Aviso mensaje={error} tono="error" /> : null}
+
+      {/* ---- Como va ---- */}
+      <Tarjeta colorDeBorde={nivel.color}>
+        <Texto variante="titulo" negrita color={nivel.color}>
+          {paciente.adherencia.porcentaje}%
+        </Texto>
+        <Insignia texto={nivel.etiqueta} color={nivel.color} fondo={nivel.fondo} />
+        <Texto variante="pequeno" color={colores.textoSuave}>
+          Ultimos {DIAS_DE_RESUMEN} dias: {paciente.adherencia.tomadas} tomadas,{' '}
+          {paciente.adherencia.omitidas} sin tomar, {paciente.adherencia.pendientes} pendientes.
+        </Texto>
+        {paciente.parentesco ? (
+          <Texto variante="pequeno" color={colores.textoSuave}>
+            Tu relacion: {paciente.parentesco}
+          </Texto>
+        ) : null}
+      </Tarjeta>
+
+      {/* ---- Lo urgente primero ---- */}
+      {porAgotarse.length > 0 ? (
+        <Aviso
+          tono="advertencia"
+          mensaje={
+            porAgotarse.length === 1
+              ? `Se esta agotando el ${porAgotarse[0]?.nombre}. Quedan ${porAgotarse[0]?.stock.unidadesDisponibles} unidades. Puedes reponerlo en la pestana Tratamiento.`
+              : `Hay ${porAgotarse.length} medicamentos por agotarse. Los ves en la pestana Tratamiento.`
+          }
+        />
+      ) : null}
+
+      {/* ---- Las tomas de hoy ---- */}
+      <Texto variante="subtitulo" negrita>
+        Tomas de hoy
+      </Texto>
+
+      {agenda === null ? (
+        <Texto color={colores.textoSuave}>No pudimos cargar la agenda de hoy.</Texto>
+      ) : agenda.elementos.length === 0 ? (
+        <Texto color={colores.textoSuave}>
+          {nombreCorto} no tiene tomas programadas para hoy.
+        </Texto>
+      ) : (
+        <>
+          {pendientes.map((elemento) => (
+            <TarjetaDeToma
+              key={elemento.tomaId}
+              elemento={elemento}
+              puedeRegistrar={puedeRegistrar}
+              procesando={procesando === elemento.tomaId}
+              onAccion={(accion) => registrarToma(elemento, accion)}
+            />
+          ))}
+          {resueltas.map((elemento) => (
+            <TarjetaDeToma key={elemento.tomaId} elemento={elemento} puedeRegistrar={false} />
+          ))}
+        </>
+      )}
+
+      {!puedeRegistrar && pendientes.length > 0 ? (
+        <Texto variante="pequeno" color={colores.textoSuave}>
+          {nombreCorto} no te ha dado permiso para registrar tomas por el. Puedes ver como va, pero
+          solo el puede confirmarlas.
+        </Texto>
+      ) : null}
+    </ScrollView>
+  );
+}
+
+// -----------------------------------------------------------------
+
+function TarjetaDeToma({
+  elemento,
+  puedeRegistrar,
+  procesando = false,
+  onAccion,
+}: {
+  elemento: ElementoDeAgenda;
+  puedeRegistrar: boolean;
+  procesando?: boolean;
+  onAccion?: (accion: 'CONFIRMAR' | 'OMITIR') => void;
+}) {
+  const estilo = ESTILO_POR_ESTADO[elemento.estado];
+
+  return (
+    <Tarjeta colorDeBorde={estilo.color}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Texto variante="subtitulo" negrita>
+          {elemento.horaProgramada}
+        </Texto>
+        <Insignia
+          texto={estilo.etiqueta}
+          icono={estilo.icono}
+          color={estilo.color}
+          fondo={estilo.fondo}
+        />
+      </View>
+
+      <Texto>{elemento.nombreDelMedicamento}</Texto>
+      <Texto variante="pequeno" color={colores.textoSuave}>
+        {elemento.dosis}
+      </Texto>
+
+      {elemento.vecesPospuesta > 0 ? (
+        <Texto variante="pequeno" color={colores.advertencia}>
+          Pospuesta {elemento.vecesPospuesta} de 3 veces.
+        </Texto>
+      ) : null}
+
+      {puedeRegistrar && elemento.puedeConfirmarse && onAccion ? (
+        <View style={{ flexDirection: 'row', gap: espacio.sm, marginTop: espacio.sm }}>
+          <View style={{ flex: 1 }}>
+            <Boton
+              titulo="Ya la tomo"
+              variante="exito"
+              ocupado={procesando}
+              onPress={() => onAccion('CONFIRMAR')}
+              descripcionAccesible={`Registrar que ya tomo ${elemento.nombreDelMedicamento} de las ${elemento.horaProgramada}`}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Boton
+              titulo="No la tomo"
+              variante="peligro"
+              deshabilitado={procesando}
+              onPress={() => onAccion('OMITIR')}
+              descripcionAccesible={`Registrar que no tomo ${elemento.nombreDelMedicamento} de las ${elemento.horaProgramada}`}
+            />
+          </View>
+        </View>
+      ) : null}
+    </Tarjeta>
+  );
+}

@@ -164,6 +164,31 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
     [api, almacen, registrarEsteDispositivo, sincronizarAlarmas],
   );
 
+  /**
+   * El servidor renueva la sesion sola cuando al token le quedan pocos
+   * dias, y manda el de recambio en una cabecera. Aqui solo hay que
+   * guardarlo donde estaba el anterior.
+   *
+   * Sin esto la persona se quedaria fuera un dia cualquiera, sin haber
+   * hecho nada y sin ningun aviso previo. En una aplicacion de
+   * medicacion eso es el dia en que no le suenan las alarmas, asi que no
+   * es una molestia menor: es la funcion principal apagandose sola.
+   */
+  useEffect(() => {
+    api.alRenovarLaSesion((tokenNuevo) => {
+      setSesion((anterior) => {
+        if (!anterior) return anterior;
+        const renovada = { ...anterior, token: tokenNuevo };
+        // Se guarda sin esperar: es una escritura pequena y no puede
+        // retrasar la respuesta que la persona esta viendo.
+        void almacen.guardar(renovada);
+        return renovada;
+      });
+    });
+
+    return () => api.alRenovarLaSesion(null);
+  }, [api, almacen]);
+
   // Al abrir la app: recuperar la sesion guardada, si la hay.
   useEffect(() => {
     let vigente = true;

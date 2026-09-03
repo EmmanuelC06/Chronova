@@ -8,6 +8,27 @@ Todas las respuestas son JSON. Salvo el registro y el inicio de sesión, todas l
 Authorization: Bearer <token>
 ```
 
+## La sesión: cuándo vale y cuándo deja de valer
+
+Un token bien firmado **no es** por sí solo una sesión válida. En cada petición autenticada el servidor consulta además la cuenta, y rechaza el token si:
+
+- la cuenta está **desactivada**, o
+- el token se emitió **antes del último cambio de contraseña** de esa persona.
+
+Lo segundo es lo que hace que recuperar la contraseña sirva de algo: cierra de inmediato todas las sesiones abiertas, incluida la de quien hubiera entrado sin permiso. Ambos casos responden `401` con código `NO_AUTENTICADO`; el mensaje distingue *"esta cuenta ya no está activa"* de *"tu contraseña cambió"*.
+
+### Renovación automática — `X-Sesion-Renovada`
+
+El token dura siete días (`JWT_EXPIRES_IN`). Cuando le quedan **menos de tres**, cualquier respuesta autenticada trae un token de recambio en esta cabecera:
+
+```
+X-Sesion-Renovada: eyJhbGciOi...
+```
+
+El cliente debe reemplazar el token guardado por ese. No hay ninguna ruta de refresco que llamar: si se ignora la cabecera, la sesión sencillamente caduca a los siete días.
+
+La cabecera está declarada en `Access-Control-Expose-Headers`, sin lo cual un cliente web la recibiría y no podría leerla.
+
 ---
 
 ## Formato de los errores
@@ -174,6 +195,8 @@ Responde `{ "olvidado": true }` o `{ "olvidado": false }`. Devuelve lo mismo exi
 
 ## Medicamentos
 
+> **Los cuatro devuelven la misma forma.** Crear, listar, actualizar y reabastecer responden con el mismo objeto, incluidos los tres campos derivados `descripcionDeDosis`, `descripcionDeFrecuencia` y `necesitaReabastecimiento`. No siempre fue así: durante un tiempo solo los traía `GET`, y los otros tres devolvían un objeto más pobre sin avisar. El cliente recibía algo al que le faltaban campos que su propio tipo declaraba, y eso solo se nota el día que alguien intenta leerlos.
+
 ### `GET /api/medicamentos`
 
 Parámetros opcionales: `pacienteId` (para cuidadores), `incluirSuspendidos=true`.
@@ -250,6 +273,8 @@ Suma unidades al inventario. `nuevoUmbralDeAlerta` es opcional.
 ## Tomas
 
 > **Cuando quien consulta es un cuidador.** `GET /api/medicamentos`, `GET /api/tomas/agenda` y `GET /api/tomas/historial` aceptan `pacienteId` y exigen el permiso `puedeVerHistorial`; `POST /api/tomas/:id/registro` exige `puedeRegistrarTomas`. Sin vínculo aceptado responden `403 NO_AUTORIZADO` con el mismo mensaje exista o no ese paciente, para no revelar quién está registrado. Son las tres consultas que alimentan la pantalla de detalle del paciente en la app.
+>
+> **Y cuando además lo modifica.** `POST /api/medicamentos` (con `pacienteId`), `PATCH /api/medicamentos/:id`, `DELETE /api/medicamentos/:id` y `POST /api/medicamentos/:id/stock` exigen `puedeGestionarMedicamentos`, que **viene desactivado por defecto** al crear un vínculo: cambiar la medicación de otra persona es la acción más delicada que permite el sistema y el paciente tiene que concederla a propósito. Retirarla corta esas cuatro de inmediato y no afecta a las demás.
 
 ### `GET /api/tomas/agenda`
 

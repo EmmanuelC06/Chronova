@@ -81,7 +81,15 @@ export class RestablecerContrasena {
     solicitud.marcarComoUsada(ahora);
     await this.recuperaciones.guardar(solicitud);
 
-    await this.cambiarContrasenaDe(cuenta, await this.cifrador.cifrar(comando.nuevaContrasena));
+    // Cambiar la contrasena cierra ademas las sesiones que hubiera
+    // abiertas. Es el caso que da sentido a la funcion: si alguien pide
+    // recuperar su cuenta es, muchas veces, porque sospecha que otro
+    // entro en ella. Dejarle la sesion viva no arreglaria nada.
+    await this.cambiarContrasenaDe(
+      cuenta,
+      await this.cifrador.cifrar(comando.nuevaContrasena),
+      ahora,
+    );
 
     return { restablecida: true };
   }
@@ -114,18 +122,22 @@ export class RestablecerContrasena {
     return null;
   }
 
-  private async cambiarContrasenaDe(cuenta: CuentaResuelta, cifrada: string): Promise<void> {
+  private async cambiarContrasenaDe(
+    cuenta: CuentaResuelta,
+    cifrada: string,
+    ahora: Date,
+  ): Promise<void> {
     if (cuenta.tipo === 'PACIENTE') {
       const paciente = await this.pacientes.buscarPorId(cuenta.id);
       if (!paciente) throw this.errorGenerico();
-      paciente.cambiarContrasena(cifrada);
+      paciente.cambiarContrasena(cifrada, ahora);
       await this.pacientes.guardar(paciente);
       return;
     }
 
     const cuidador = await this.cuidadores.buscarPorId(cuenta.id);
     if (!cuidador) throw this.errorGenerico();
-    cuidador.cambiarContrasena(cifrada);
+    cuidador.cambiarContrasena(cifrada, ahora);
     await this.cuidadores.guardar(cuidador);
   }
 }

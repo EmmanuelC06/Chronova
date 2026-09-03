@@ -3,8 +3,9 @@ import { FechaLocal } from '../../../domain/shared/FechaLocal.js';
 import { Identificador } from '../../../domain/shared/Identificador.js';
 import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
 import { Dosis } from '../../../domain/medicamento/Dosis.js';
-import type { MedicamentoPlano } from '../../../domain/medicamento/Medicamento.js';
 import type { RepositorioDeMedicamentos } from '../../../domain/medicamento/RepositorioDeMedicamentos.js';
+import { aVistaDeMedicamento } from './vistaDeMedicamento.js';
+import type { MedicamentoListado } from './vistaDeMedicamento.js';
 import type { RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
 import type { Reloj } from '../../ports/Reloj.js';
 import type { PoliticaDeAcceso, Solicitante } from '../../services/PoliticaDeAcceso.js';
@@ -46,7 +47,7 @@ export class ActualizarMedicamento {
     private readonly reloj: Reloj,
   ) {}
 
-  async ejecutar(comando: ComandoActualizarMedicamento): Promise<MedicamentoPlano> {
+  async ejecutar(comando: ComandoActualizarMedicamento): Promise<MedicamentoListado> {
     const medicamento = await this.medicamentos.buscarPorId(
       Identificador.desde(comando.medicamentoId),
     );
@@ -90,6 +91,6 @@ export class ActualizarMedicamento {
       await this.tomas.eliminarPendientesDesde(medicamento.id, this.reloj.ahora());
     }
 
-    return medicamento.aPlano();
+    return aVistaDeMedicamento(medicamento);
   }
 }

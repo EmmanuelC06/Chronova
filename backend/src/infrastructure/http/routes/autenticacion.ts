@@ -23,7 +23,7 @@ import {
  */
 export function rutasDeAutenticacion(contenedor: Contenedor): Router {
   const router = Router();
-  const { casosDeUso, tokens } = contenedor;
+  const { casosDeUso } = contenedor;
 
   // POST /api/auth/registro/paciente
   router.post(
@@ -81,7 +81,7 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
   // GET /api/auth/perfil
   router.get(
     '/perfil',
-    autenticar(tokens),
+    autenticar(casosDeUso.verificarSesion),
     asincrono(async (peticion, respuesta) => {
       const solicitante = solicitanteDe(peticion);
       const perfil = await casosDeUso.obtenerPerfil.ejecutar({
@@ -95,7 +95,7 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
   // PATCH /api/auth/preferencias
   router.patch(
     '/preferencias',
-    autenticar(tokens),
+    autenticar(casosDeUso.verificarSesion),
     exigirTipo('PACIENTE'),
     asincrono(async (peticion, respuesta) => {
       const datos = esquemaDePreferencias.parse(peticion.body);
@@ -111,7 +111,7 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
   // La app lo llama tras iniciar sesion, para recibir notificaciones.
   router.post(
     '/dispositivos',
-    autenticar(tokens),
+    autenticar(casosDeUso.verificarSesion),
     asincrono(async (peticion, respuesta) => {
       const datos = esquemaDeDispositivo.parse(peticion.body);
       const dispositivo = await casosDeUso.registrarDispositivo.ejecutar({
@@ -127,7 +127,7 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
   // llegando a un telefono que ya no es de esa persona.
   router.delete(
     '/dispositivos',
-    autenticar(tokens),
+    autenticar(casosDeUso.verificarSesion),
     asincrono(async (peticion, respuesta) => {
       const datos = esquemaDeBajaDeDispositivo.parse(peticion.body);
       const resultado = await casosDeUso.olvidarDispositivo.ejecutar({

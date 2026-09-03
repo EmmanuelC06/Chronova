@@ -7,9 +7,9 @@ import { esquemaDeRegistroDeToma } from '../dtos/esquemas.js';
 /** Rutas de agenda, registro de tomas e historial de adherencia. */
 export function rutasDeTomas(contenedor: Contenedor): Router {
   const router = Router();
-  const { casosDeUso, tokens } = contenedor;
+  const { casosDeUso } = contenedor;
 
-  router.use(autenticar(tokens));
+  router.use(autenticar(casosDeUso.verificarSesion));
 
   // GET /api/tomas/agenda?fecha=2026-08-31&pacienteId=...
   router.get(

@@ -11,9 +11,9 @@ import {
 /** Rutas del vinculo cuidador-paciente y del panel de seguimiento. */
 export function rutasDeCuidadores(contenedor: Contenedor): Router {
   const router = Router();
-  const { casosDeUso, tokens } = contenedor;
+  const { casosDeUso } = contenedor;
 
-  router.use(autenticar(tokens));
+  router.use(autenticar(casosDeUso.verificarSesion));
 
   // POST /api/vinculos  (lo puede iniciar cualquiera de las dos partes)
   router.post(

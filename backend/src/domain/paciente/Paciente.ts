@@ -24,6 +24,13 @@ export interface PacientePlano {
   };
   activo: boolean;
   creadoEn: string;
+  /**
+   * Desde cuando valen las sesiones de esta persona.
+   *
+   * Opcional al leer para no romper las cuentas creadas antes de que
+   * existiera la columna: si falta, se toma la fecha de creacion.
+   */
+  sesionesValidasDesde?: string;
 }
 
 /**
@@ -45,6 +52,7 @@ export class Paciente {
     private _preferencias: PreferenciasDeAccesibilidad,
     private _activo: boolean,
     readonly creadoEn: Date,
+    private _sesionesValidasDesde: Date,
   ) {}
 
   static registrar(datos: {
@@ -71,6 +79,7 @@ export class Paciente {
       datos.preferencias ?? PreferenciasDeAccesibilidad.porDefecto(),
       true,
       datos.ahora,
+      datos.ahora,
     );
   }
 
@@ -86,6 +95,7 @@ export class Paciente {
       PreferenciasDeAccesibilidad.desde(plano.preferencias),
       plano.activo,
       new Date(plano.creadoEn),
+      new Date(plano.sesionesValidasDesde ?? plano.creadoEn),
     );
   }
 
@@ -103,6 +113,7 @@ export class Paciente {
       preferencias: this._preferencias.toJSON(),
       activo: this._activo,
       creadoEn: this.creadoEn.toISOString(),
+      sesionesValidasDesde: this._sesionesValidasDesde.toISOString(),
     };
   }
 
@@ -131,6 +142,30 @@ export class Paciente {
   }
   get activo(): boolean {
     return this._activo;
+  }
+
+  /**
+   * Instante a partir del cual una sesion de esta persona es valida.
+   *
+   * Cualquier token emitido ANTES de esta marca deja de servir. Es lo que
+   * permite cerrar las sesiones abiertas sin que el servidor guarde ni
+   * una sola sesion: en vez de recordar los tokens que ha repartido,
+   * recuerda desde cuando los acepta.
+   */
+  get sesionesValidasDesde(): Date {
+    return new Date(this._sesionesValidasDesde);
+  }
+
+  /**
+   * Cierra todas las sesiones abiertas de esta persona.
+   *
+   * Se llama al cambiar la contrasena. Es el punto del sistema donde se
+   * responde a "alguien entro a mi cuenta": cambiar la contrasena sin
+   * esto dejaba al intruso dentro hasta siete dias mas, que es
+   * exactamente lo contrario de lo que la persona cree estar haciendo.
+   */
+  cerrarSesionesAbiertas(ahora: Date): void {
+    this._sesionesValidasDesde = ahora;
   }
 
   /**
@@ -188,15 +223,25 @@ export class Paciente {
     this._zonaHoraria = zona;
   }
 
-  cambiarContrasena(nuevaContrasenaCifrada: string): void {
+  /**
+   * Cambia la contrasena y, en el mismo acto, cierra las sesiones abiertas.
+   *
+   * Las dos cosas van juntas a proposito, y por eso `ahora` es
+   * obligatorio: si fueran dos llamadas separadas, tarde o temprano
+   * alguien haria solo la primera y el cambio de contrasena volveria a
+   * no servir de nada.
+   */
+  cambiarContrasena(nuevaContrasenaCifrada: string, ahora: Date): void {
     if (!nuevaContrasenaCifrada || nuevaContrasenaCifrada.trim().length === 0) {
       throw new ErrorDeValidacion('La contrasena cifrada no puede estar vacia.', 'contrasena');
     }
     this._contrasenaCifrada = nuevaContrasenaCifrada;
+    this.cerrarSesionesAbiertas(ahora);
   }
 
-  desactivar(): void {
+  desactivar(ahora: Date): void {
     this._activo = false;
+    this.cerrarSesionesAbiertas(ahora);
   }
 
   // --------------------------------------------------------------
