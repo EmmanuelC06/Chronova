@@ -1,4 +1,4 @@
-@startuml estados-toma
+@startuml 04-estados-toma
 ' ============================================================
 '  Chronova — Diagrama de estados de la entidad Toma
 '  Refleja backend/src/domain/toma/Toma.ts

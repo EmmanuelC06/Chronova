@@ -4,6 +4,8 @@ Ocho diagramas generados **a partir del código real**, no de un boceto previo. 
 
 Eso importa para la sustentación. Si el profesor pregunta «¿dónde está esto en el código?», la respuesta siempre existe.
 
+> **Última verificación contra el código: 3 de septiembre de 2026.** Los diagramas 03 y 08 se rehicieron ese día para incorporar `Dispositivo` y `SolicitudDeRecuperacion`, que se habían añadido al dominio después de dibujarlos. Esa desincronización es el riesgo real de esta carpeta: un diagrama desactualizado es peor que ninguno, porque se defiende con la misma confianza. Al añadir una entidad o una tabla, actualizar aquí en el mismo commit.
+
 ---
 
 ## Los archivos
@@ -40,14 +42,21 @@ Dos detalles que conviene poder explicar:
 ### 03 · Diagrama de clases del dominio
 `03-clases-dominio.png`
 
-Las cinco entidades, sus value objects, el servicio de dominio `ResumenDeAdherencia` y las enumeraciones.
+Las siete entidades, sus value objects, el servicio de dominio `ResumenDeAdherencia` y las enumeraciones.
 
 Cómo leer las relaciones:
 
 - **Composición** (rombo relleno): `Medicamento` contiene su `Dosis`, su `Stock` y su `Frecuencia`. Si el medicamento desaparece, esos objetos desaparecen con él porque no tienen sentido solos.
 - **Agregación** (rombo vacío): `Paciente` agrega `Medicamento`. El medicamento tiene identidad propia y su propio ciclo de vida.
 
-Los métodos en **negrita** son los que concentran las reglas más importantes: `horariosDelDia()`, `aplicaEn()`, `necesitaReabastecimiento`, `confirmar()`, `autorizar()`.
+Los métodos en **negrita** son los que concentran las reglas más importantes: `horariosDelDia()`, `aplicaEn()`, `necesitaReabastecimiento`, `confirmar()`, `autorizar()`, `motivoParaRechazar()`.
+
+Dos entidades merecen explicación aparte porque no son clínicas:
+
+- **`Dispositivo`** es un teléfono concreto, no una persona. Por eso tanto `Paciente` como `Cuidador` apuntan a él, y por eso `reasignarA()` existe: si la hija instala la app en el teléfono viejo de su madre, el token es el mismo y la fila cambia de dueño en vez de duplicarse.
+- **`SolicitudDeRecuperacion`** guarda las tres reglas que hacen segura una contraseña olvidada — caduca a los 30 minutos, se usa una sola vez y admite cinco intentos. Están en la entidad y no en el servidor web ni en la base de datos, que es exactamente el argumento de la arquitectura.
+
+Una nota sobre el dibujo: la fuente lleva `left to right direction`, que hace que las relaciones fluyan de izquierda a derecha y, como efecto, que la imagen salga **alta y estrecha** en vez de ancha. Con cinco entidades la disposición por defecto funcionaba; con siete producía una franja de 4400 × 1240 px que no cabe legible en ninguna página. Ojo con eso: PlantUML recorta a 4096 px **sin avisar**, así que la versión ancha llegó a perder media nota sin dar ningún error.
 
 ### 04 · Diagrama de estados de la Toma
 `04-estados-toma.png`
@@ -80,9 +89,11 @@ Es el diagrama que responde «¿por qué hexagonal?». Se ve que hay **dos adapt
 ### 08 · Modelo entidad-relación
 `08-entidad-relacion.png`
 
-Las cinco tablas con sus tipos, claves y restricciones, en notación pata de gallo.
+Las siete tablas con sus tipos, claves y restricciones, en notación pata de gallo.
 
 Las notas documentan las decisiones de diseño que conviene poder justificar: por qué `horarios` es un arreglo, por qué la dosis se guarda separada en cantidad y unidad, y qué hace la restricción `UNIQUE (medicamento_id, programada_originalmente_para)`.
+
+**Atención a las líneas punteadas de `dispositivos` y `recuperaciones`: no son claves foráneas.** Ambas tablas tienen una columna que apunta a `pacientes` *o* a `cuidadores` según otra columna, y PostgreSQL no admite una foránea con dos destinos posibles. Es un compromiso consciente: se pierde la integridad referencial de esas dos columnas —la cuida la aplicación— y a cambio no hacen falta cuatro tablas casi idénticas. Conviene tenerlo preparado, porque es justo el tipo de cosa que un jurado pregunta.
 
 ---
 
@@ -108,9 +119,16 @@ sudo apt install plantuml
 Y luego, desde `docs/diagramas/`:
 
 ```bash
-plantuml -tpng fuentes/*.puml
-plantuml -tsvg fuentes/*.puml
+plantuml -DPLANTUML_LIMIT_SIZE=16384 -tpng -o .. fuentes/*.puml
+plantuml -DPLANTUML_LIMIT_SIZE=16384 -tsvg -o .. fuentes/*.puml
 ```
+
+Dos detalles del comando que ahorran un rato de confusión:
+
+- **`-o ..`** manda las imágenes a `docs/diagramas/` en vez de dejarlas dentro de `fuentes/`.
+- **`PLANTUML_LIMIT_SIZE`** sube el límite de 4096 px que PlantUML aplica por defecto. Al superarlo no falla: recorta la imagen en silencio, y lo normal es descubrirlo cuando falta media nota en el documento ya entregado.
+
+Y una convención que conviene respetar: la primera línea de cada `.puml` dice `@startuml 03-clases-dominio`, con el **mismo nombre del archivo**. PlantUML usa ese nombre —no el del archivo— para la imagen que genera. Si no coinciden, el comando parece funcionar pero deja un archivo nuevo al lado del viejo y uno sigue mirando la versión antigua sin enterarse.
 
 **En VS Code:** la extensión *PlantUML* de jebbs muestra una vista previa mientras editas (`Alt + D`).
 
@@ -128,9 +146,9 @@ Tamaños aproximados, por si necesitas planear la maquetación:
 |---|---|---|
 | 01 Casos de uso — Paciente | 904 × 1350 | Vertical |
 | 02 Casos de uso — Cuidador | 1266 × 825 | Horizontal |
-| 03 Clases del dominio | 2133 × 1228 | Horizontal, página completa |
+| 03 Clases del dominio | 1560 × 2716 | Vertical, página completa |
 | 04 Estados de la Toma | 1618 × 657 | Horizontal, apaisado |
 | 05 Secuencia — Confirmar toma | 1932 × 1486 | Página completa |
 | 06 Secuencia — Agenda del día | 1654 × 1085 | Horizontal |
 | 07 Componentes | 1569 × 1112 | Horizontal |
-| 08 Entidad-relación | 1276 × 1127 | Vertical u horizontal |
+| 08 Entidad-relación | 2612 × 1218 | Horizontal, página completa |

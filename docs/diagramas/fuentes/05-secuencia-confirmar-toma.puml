@@ -1,4 +1,4 @@
-@startuml secuencia-confirmar-toma
+@startuml 05-secuencia-confirmar-toma
 ' ============================================================
 '  Chronova — Diagrama de secuencia: confirmar una toma
 '  Refleja RegistrarToma.ts y el recorrido por las capas

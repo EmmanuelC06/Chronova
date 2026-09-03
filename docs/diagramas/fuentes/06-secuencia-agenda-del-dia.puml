@@ -1,4 +1,4 @@
-@startuml secuencia-agenda-del-dia
+@startuml 06-secuencia-agenda-del-dia
 ' ============================================================
 '  Chronova — Secuencia: generar la agenda del dia
 '  Refleja ObtenerAgendaDelDia.ts, incluida la resolucion

@@ -1,4 +1,4 @@
-@startuml clases-dominio
+@startuml 03-clases-dominio
 ' ============================================================
 '  Chronova — Diagrama de clases de la capa de dominio
 '  Refleja backend/src/domain/
@@ -33,6 +33,10 @@ skinparam package {
   BackgroundColor #FBFCFC
   FontColor #4E5C59
 }
+
+' Con siete entidades el diagrama en vertical se volvia una franja de
+' 4400 px de ancho, ilegible impresa. En horizontal cabe en una pagina.
+left to right direction
 
 hide empty members
 
@@ -141,6 +145,39 @@ hide empty members
     + <b>autorizar(permiso)</b> : boolean
   }
 
+  class Dispositivo {
+    + {readonly} id : Identificador
+    + {readonly} token : TokenDeDispositivo
+    + {readonly} registradoEn : Date
+    - propietarioId : Identificador
+    - tipoDePropietario : TipoDePropietario
+    - plataforma : Plataforma
+    - ultimoUsoEn : Date
+    --
+    + {static} registrar(datos) : Dispositivo
+    + <b>reasignarA(propietario, tipo, ahora)</b>
+    + marcarComoUsado(ahora)
+    + perteneceA(propietarioId) : boolean
+  }
+
+  class SolicitudDeRecuperacion {
+    + {readonly} id : Identificador
+    + {readonly} usuarioId : Identificador
+    + {readonly} tipoDeCuenta : TipoDeCuenta
+    + {readonly} codigoCifrado : string
+    + {readonly} creadaEn : Date
+    + {readonly} expiraEn : Date
+    - intentos : number
+    - usadaEn : Date
+    --
+    + {static} MINUTOS_DE_VIGENCIA = 30
+    + {static} MAXIMO_DE_INTENTOS = 5
+    + {static} abrir(datos) : SolicitudDeRecuperacion
+    + <b>motivoParaRechazar(ahora)</b> : MotivoDeRechazo
+    + registrarIntento()
+    + marcarComoUsada(ahora)
+  }
+
 ' =================== VALUE OBJECTS ===================
 
 
@@ -224,6 +261,21 @@ hide empty members
     + esIgualA(otro) : boolean
   }
 
+  class TokenDeDispositivo <<VO>> {
+    + {readonly} valor : string
+    --
+    + {static} desde(valor) : TokenDeDispositivo
+    + esIgualA(otro) : boolean
+  }
+
+  class CodigoDeRecuperacion <<VO>> {
+    + {readonly} valor : string
+    --
+    + {static} LONGITUD = 6
+    + {static} desde(texto) : CodigoDeRecuperacion
+    + esIgualA(otro) : boolean
+  }
+
 ' =================== SERVICIO DE DOMINIO ===================
 
 class ResumenDeAdherencia <<servicio de dominio>> {
@@ -261,6 +313,18 @@ enum NivelDeAdherencia {
   SIN_DATOS
 }
 
+enum TipoDePropietario {
+  PACIENTE
+  CUIDADOR
+}
+
+enum MotivoDeRechazo {
+  CADUCADA
+  YA_USADA
+  DEMASIADOS_INTENTOS
+  CODIGO_INCORRECTO
+}
+
 ' =================== RELACIONES ===================
 
 Paciente "1" *-- "1" PreferenciasDeAccesibilidad
@@ -286,6 +350,16 @@ ResumenDeAdherencia ..> Toma : calcula sobre >
 Paciente ..> Email
 Cuidador ..> Email
 Paciente ..> Identificador
+
+Dispositivo "1" *-- "1" TokenDeDispositivo
+Dispositivo ..> TipoDePropietario
+Paciente "1" o-- "0..*" Dispositivo : recibe avisos en >
+Cuidador "1" o-- "0..*" Dispositivo : recibe avisos en >
+
+SolicitudDeRecuperacion ..> MotivoDeRechazo
+SolicitudDeRecuperacion ..> CodigoDeRecuperacion : cifra >
+Paciente "1" o-- "0..*" SolicitudDeRecuperacion : abre >
+Cuidador "1" o-- "0..*" SolicitudDeRecuperacion : abre >
 
 note top of ResumenDeAdherencia
   <b>adherencia = tomadas / (tomadas + omitidas)</b>
@@ -314,6 +388,26 @@ note right of Stock
   Inmutable: descontar() y
   reabastecer() devuelven un
   Stock nuevo.
+end note
+
+note bottom of Dispositivo
+  El <b>token</b> identifica un aparato, no a una
+  persona. Por eso puede cambiar de dueno:
+  si la hija instala la app en el telefono
+  viejo de su madre, <b>reasignarA()</b> mueve la
+  fila en vez de crear otra. Dos filas con el
+  mismo token significan avisos duplicados.
+end note
+
+note bottom of SolicitudDeRecuperacion
+  Tres reglas la protegen, y las tres viven
+  <b>aqui</b>, no en el servidor web ni en la base:
+  caduca a los 30 minutos, se usa <b>una sola vez</b>
+  y admite <b>cinco intentos</b>.
+
+  <b>registrarIntento()</b> se llama antes de saber si
+  el codigo era correcto: un contador que solo
+  cuenta fallos se esquiva alternando codigos.
 end note
 
 @enduml

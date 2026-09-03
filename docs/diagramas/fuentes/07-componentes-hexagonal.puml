@@ -1,4 +1,4 @@
-@startuml componentes-hexagonal
+@startuml 07-componentes-hexagonal
 ' ============================================================
 '  Chronova — Diagrama de componentes (arquitectura hexagonal)
 '  Las flechas de dependencia apuntan siempre hacia el dominio.

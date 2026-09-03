@@ -1,4 +1,4 @@
-@startuml casos-de-uso-paciente
+@startuml 01-casos-de-uso-paciente
 ' ============================================================
 '  Chronova — Casos de uso del actor Paciente
 ' ============================================================

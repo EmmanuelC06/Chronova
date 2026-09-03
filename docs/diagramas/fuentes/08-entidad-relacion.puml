@@ -1,4 +1,4 @@
-@startuml entidad-relacion
+@startuml 08-entidad-relacion
 ' ============================================================
 '  Chronova — Modelo entidad-relacion
 '  Refleja backend/src/infrastructure/persistence/postgres/esquema.sql
@@ -102,11 +102,39 @@ entity "vinculos" as vinculos {
   resuelto_en : TIMESTAMPTZ
 }
 
+entity "dispositivos" as dispositivos {
+  <b>PK</b> id : UUID
+  --
+  propietario_id : UUID <<NN>>
+  tipo_de_propietario : TEXT <<NN>>
+  <b>UQ</b> token : TEXT <<NN>>
+  plataforma : TEXT <<NN>>
+  registrado_en : TIMESTAMPTZ <<NN>>
+  ultimo_uso_en : TIMESTAMPTZ <<NN>>
+}
+
+entity "recuperaciones" as recuperaciones {
+  <b>PK</b> id : UUID
+  --
+  usuario_id : UUID <<NN>>
+  tipo_de_cuenta : TEXT <<NN>>
+  codigo_cifrado : TEXT <<NN>>
+  creada_en : TIMESTAMPTZ <<NN>>
+  expira_en : TIMESTAMPTZ <<NN>>
+  intentos : INTEGER <<NN>>
+  usada_en : TIMESTAMPTZ
+}
+
 pacientes ||--o{ medicamentos : "sigue"
 pacientes ||--o{ tomas : "registra"
 medicamentos ||--o{ tomas : "genera"
 pacientes ||--o{ vinculos : "autoriza"
 cuidadores ||--o{ vinculos : "acompana"
+
+pacientes ||..o{ dispositivos : "sin FK"
+cuidadores ||..o{ dispositivos : "sin FK"
+pacientes ||..o{ recuperaciones : "sin FK"
+cuidadores ||..o{ recuperaciones : "sin FK"
 
 note bottom of tomas
   <b>UNIQUE (medicamento_id, programada_originalmente_para)</b>
@@ -146,6 +174,34 @@ note left of medicamentos
   <b>fecha_inicio</b> y <b>fecha_fin</b> son DATE, no
   TIMESTAMP: son dias del calendario, no instantes.
   Un dia no se desplaza al cambiar de huso horario.
+end note
+
+note right of dispositivos
+  <b>Las lineas punteadas no son claves foraneas.</b>
+  <b>propietario_id</b> apunta a <i>pacientes</i> O a
+  <i>cuidadores</i> segun <b>tipo_de_propietario</b>, y
+  PostgreSQL no admite una foranea con dos
+  destinos. Se pierde integridad referencial y
+  se gana no tener dos tablas casi identicas;
+  la integridad la cuida la aplicacion.
+
+  <b>UNIQUE (token)</b>: el token identifica un
+  aparato. Si cambia de dueno se reasigna la
+  fila, no se anade otra.
+end note
+
+note right of recuperaciones
+  <b>codigo_cifrado</b>: el codigo se guarda cifrado
+  igual que una contrasena. Quien leyera esta
+  tabla no obtendria codigos utilizables.
+
+  <b>intentos</b> y <b>expira_en</b> son lo que convierte
+  seis digitos en algo que no se puede adivinar:
+  un millon de combinaciones, cinco disparos y
+  treinta minutos.
+
+  Indice parcial <b>WHERE usada_en IS NULL</b>: solo
+  se busca entre las solicitudes vivas.
 end note
 
 note top of pacientes
