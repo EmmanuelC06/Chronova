@@ -6,12 +6,17 @@ import type { Solicitante } from '../src/application/services/PoliticaDeAcceso.j
 import {
   RepositorioDeCuidadoresEnMemoria,
   RepositorioDeDispositivosEnMemoria,
+  RepositorioDeRecuperacionesEnMemoria,
   RepositorioDeMedicamentosEnMemoria,
   RepositorioDePacientesEnMemoria,
   RepositorioDeTomasEnMemoria,
   RepositorioDeVinculosEnMemoria,
 } from '../src/infrastructure/persistence/in-memory/repositoriosEnMemoria.js';
-import { GeneradorDeIdsSecuencial } from '../src/infrastructure/system/GeneradorDeIdsUuid.js';
+import {
+  GeneradorDeCodigosFijo,
+  GeneradorDeIdsSecuencial,
+} from '../src/infrastructure/system/GeneradorDeIdsUuid.js';
+import { CorreoEnConsola } from '../src/infrastructure/correo/CorreoEnConsola.js';
 import { NotificadorEnConsola } from '../src/infrastructure/notificaciones/NotificadorEnConsola.js';
 import { RelojFijo } from '../src/infrastructure/system/RelojDelSistema.js';
 import type { CifradorDeContrasenas } from '../src/application/ports/CifradorDeContrasenas.js';
@@ -24,6 +29,15 @@ import type { CifradorDeContrasenas } from '../src/application/ports/CifradorDeC
  * datos, con un reloj congelado y con ids predecibles. Las pruebas
  * corren en milisegundos y sus resultados son siempre los mismos.
  */
+
+/**
+ * Codigo de recuperacion fijo para las pruebas.
+ *
+ * En produccion lo genera el generador criptografico del sistema. Aqui se
+ * fija para poder comprobar el flujo completo sin adivinar nada, que es
+ * justo para lo que existe ese puerto.
+ */
+export const CODIGO_DE_PRUEBA = '246813';
 
 /** Cifrador de mentira: rapido y reversible. Solo para pruebas. */
 class CifradorDePrueba implements CifradorDeContrasenas {
@@ -46,12 +60,19 @@ export const ENTORNO_DE_PRUEBA: Entorno = {
   ventanaDeToleranciaEnMinutos: 60,
   notificaciones: 'consola',
   expoTokenDeAcceso: undefined,
+  correo: 'consola',
+  correoClaveApi: undefined,
+  correoRemitente: 'Chronova <pruebas@chronova.test>',
 };
 
 export interface EntornoDePrueba {
   contenedor: Contenedor;
   reloj: RelojFijo;
   notificador: NotificadorEnConsola;
+  correo: CorreoEnConsola;
+  recuperaciones: RepositorioDeRecuperacionesEnMemoria;
+  /** El codigo que devuelve el generador fijo de recuperacion. */
+  codigoDeRecuperacion: string;
 }
 
 export function montarAplicacion(
@@ -59,10 +80,14 @@ export function montarAplicacion(
 ): EntornoDePrueba {
   const reloj = new RelojFijo(fechaInicial);
   const notificador = new NotificadorEnConsola();
+  const correo = new CorreoEnConsola();
+  const recuperaciones = new RepositorioDeRecuperacionesEnMemoria();
 
   const contenedor = construirContenedor(ENTORNO_DE_PRUEBA, {
     reloj,
     ids: new GeneradorDeIdsSecuencial(),
+    codigos: new GeneradorDeCodigosFijo(CODIGO_DE_PRUEBA),
+    correo,
     cifrador: new CifradorDePrueba(),
     notificador,
     repositorios: {
@@ -72,10 +97,18 @@ export function montarAplicacion(
       tomas: new RepositorioDeTomasEnMemoria(),
       vinculos: new RepositorioDeVinculosEnMemoria(),
       dispositivos: new RepositorioDeDispositivosEnMemoria(),
+      recuperaciones,
     },
   });
 
-  return { contenedor, reloj, notificador };
+  return {
+    contenedor,
+    reloj,
+    notificador,
+    correo,
+    recuperaciones,
+    codigoDeRecuperacion: CODIGO_DE_PRUEBA,
+  };
 }
 
 export function comoPaciente(id: string): Solicitante {

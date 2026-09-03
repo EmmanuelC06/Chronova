@@ -11,6 +11,13 @@ import { RegistrarPaciente } from './application/use-cases/auth/RegistrarPacient
 import { CambiarPermisosDelVinculo } from './application/use-cases/cuidadores/CambiarPermisosDelVinculo.js';
 import { OlvidarDispositivo } from './application/use-cases/dispositivos/OlvidarDispositivo.js';
 import { RegistrarDispositivo } from './application/use-cases/dispositivos/RegistrarDispositivo.js';
+import { SolicitarRecuperacion } from './application/use-cases/auth/SolicitarRecuperacion.js';
+import { RestablecerContrasena } from './application/use-cases/auth/RestablecerContrasena.js';
+import type { RepositorioDeRecuperaciones } from './domain/recuperacion/RepositorioDeRecuperaciones.js';
+import type { EnviadorDeCorreo } from './application/ports/EnviadorDeCorreo.js';
+import type { GeneradorDeCodigos } from './application/ports/GeneradorDeCodigos.js';
+import { CorreoEnConsola } from './infrastructure/correo/CorreoEnConsola.js';
+import { CorreoResendHttp } from './infrastructure/correo/CorreoResendHttp.js';
 import { ListarCuidadoresDelPaciente } from './application/use-cases/cuidadores/ListarCuidadoresDelPaciente.js';
 import { ListarPacientesDelCuidador } from './application/use-cases/cuidadores/ListarPacientesDelCuidador.js';
 import { ResponderSolicitudDeVinculo } from './application/use-cases/cuidadores/ResponderSolicitudDeVinculo.js';
@@ -37,6 +44,7 @@ import {
   RepositorioDeDispositivosEnMemoria,
   RepositorioDeMedicamentosEnMemoria,
   RepositorioDePacientesEnMemoria,
+  RepositorioDeRecuperacionesEnMemoria,
   RepositorioDeTomasEnMemoria,
   RepositorioDeVinculosEnMemoria,
 } from './infrastructure/persistence/in-memory/repositoriosEnMemoria.js';
@@ -45,13 +53,14 @@ import {
   RepositorioDeDispositivosPostgres,
   RepositorioDeMedicamentosPostgres,
   RepositorioDePacientesPostgres,
+  RepositorioDeRecuperacionesPostgres,
   RepositorioDeTomasPostgres,
   RepositorioDeVinculosPostgres,
 } from './infrastructure/persistence/postgres/repositoriosPostgres.js';
 import { crearPool } from './infrastructure/persistence/postgres/pool.js';
 import { CifradorBcrypt } from './infrastructure/security/CifradorBcrypt.js';
 import { ServicioDeTokensJwt } from './infrastructure/security/ServicioDeTokensJwt.js';
-import { GeneradorDeIdsUuid } from './infrastructure/system/GeneradorDeIdsUuid.js';
+import { GeneradorDeCodigosSeguro, GeneradorDeIdsUuid } from './infrastructure/system/GeneradorDeIdsUuid.js';
 import { ClienteDeExpoHttp } from './infrastructure/notificaciones/ClienteDeExpo.js';
 import { NotificadorCompuesto } from './infrastructure/notificaciones/NotificadorCompuesto.js';
 import { NotificadorEnConsola } from './infrastructure/notificaciones/NotificadorEnConsola.js';
@@ -93,6 +102,8 @@ export interface Contenedor {
     listarPacientesDelCuidador: ListarPacientesDelCuidador;
     listarCuidadoresDelPaciente: ListarCuidadoresDelPaciente;
 
+    solicitarRecuperacion: SolicitarRecuperacion;
+    restablecerContrasena: RestablecerContrasena;
     registrarDispositivo: RegistrarDispositivo;
     olvidarDispositivo: OlvidarDispositivo;
   };
@@ -105,6 +116,8 @@ export interface DependenciasOpcionales {
   ids?: GeneradorDeIds;
   cifrador?: CifradorDeContrasenas;
   notificador?: Notificador;
+  codigos?: GeneradorDeCodigos;
+  correo?: EnviadorDeCorreo;
   repositorios?: {
     pacientes: RepositorioDePacientes;
     cuidadores: RepositorioDeCuidadores;
@@ -112,6 +125,7 @@ export interface DependenciasOpcionales {
     tomas: RepositorioDeTomas;
     vinculos: RepositorioDeVinculos;
     dispositivos: RepositorioDeDispositivos;
+    recuperaciones: RepositorioDeRecuperaciones;
   };
 }
 
@@ -134,6 +148,8 @@ export function construirContenedor(
   const reloj = opcionales.reloj ?? new RelojDelSistema();
   const ids = opcionales.ids ?? new GeneradorDeIdsUuid();
   const cifrador = opcionales.cifrador ?? new CifradorBcrypt();
+  const codigos = opcionales.codigos ?? new GeneradorDeCodigosSeguro();
+  const correo = opcionales.correo ?? construirEnviadorDeCorreo(entorno);
   const tokens = new ServicioDeTokensJwt(entorno.jwtSecreto, entorno.jwtDuracion);
 
   // --- Adaptadores de persistencia ---
@@ -150,6 +166,7 @@ export function construirContenedor(
         tomas: new RepositorioDeTomasPostgres(pool),
         vinculos: new RepositorioDeVinculosPostgres(pool),
         dispositivos: new RepositorioDeDispositivosPostgres(pool),
+        recuperaciones: new RepositorioDeRecuperacionesPostgres(pool),
       };
     } else {
       repositorios = {
@@ -159,11 +176,13 @@ export function construirContenedor(
         tomas: new RepositorioDeTomasEnMemoria(),
         vinculos: new RepositorioDeVinculosEnMemoria(),
         dispositivos: new RepositorioDeDispositivosEnMemoria(),
+        recuperaciones: new RepositorioDeRecuperacionesEnMemoria(),
       };
     }
   }
 
-  const { pacientes, cuidadores, medicamentos, tomas, vinculos, dispositivos } = repositorios;
+  const { pacientes, cuidadores, medicamentos, tomas, vinculos, dispositivos, recuperaciones } =
+    repositorios;
   const politica = new PoliticaDeAcceso(vinculos);
   const tolerancia = entorno.ventanaDeToleranciaEnMinutos;
 
@@ -232,6 +251,23 @@ export function construirContenedor(
     ),
     listarCuidadoresDelPaciente: new ListarCuidadoresDelPaciente(vinculos, cuidadores),
 
+    solicitarRecuperacion: new SolicitarRecuperacion(
+      pacientes,
+      cuidadores,
+      recuperaciones,
+      cifrador,
+      codigos,
+      ids,
+      reloj,
+      correo,
+    ),
+    restablecerContrasena: new RestablecerContrasena(
+      pacientes,
+      cuidadores,
+      recuperaciones,
+      cifrador,
+      reloj,
+    ),
     registrarDispositivo: new RegistrarDispositivo(dispositivos, ids, reloj),
     olvidarDispositivo: new OlvidarDispositivo(dispositivos),
   };
@@ -272,4 +308,19 @@ function construirNotificador(
   );
 
   return entorno.notificaciones === 'push' ? push : new NotificadorCompuesto(push, consola);
+}
+
+/**
+ * Elige el adaptador de correo.
+ *
+ * Por defecto escribe en la consola, que permite ejercitar la
+ * recuperacion de contrasena entera sin contratar nada: el codigo aparece
+ * en la terminal del servidor. Con CORREO=resend y una clave se envia de
+ * verdad, sin tocar el dominio ni los casos de uso.
+ */
+function construirEnviadorDeCorreo(entorno: Entorno): EnviadorDeCorreo {
+  if (entorno.correo === 'resend' && entorno.correoClaveApi) {
+    return new CorreoResendHttp(entorno.correoClaveApi, entorno.correoRemitente);
+  }
+  return new CorreoEnConsola();
 }

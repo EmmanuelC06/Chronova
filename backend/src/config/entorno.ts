@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 export type ModoDePersistencia = 'memory' | 'postgres';
 export type ModoDeNotificaciones = 'consola' | 'push' | 'ambos';
+export type ModoDeCorreo = 'consola' | 'resend';
 
 export interface Entorno {
   puerto: number;
@@ -13,6 +14,10 @@ export interface Entorno {
   baseDeDatosConSsl: boolean;
   ventanaDeToleranciaEnMinutos: number;
   notificaciones: ModoDeNotificaciones;
+  /** Como salen los correos: por consola o por un proveedor real. */
+  correo: ModoDeCorreo;
+  correoClaveApi: string | undefined;
+  correoRemitente: string;
   expoTokenDeAcceso: string | undefined;
 }
 
@@ -52,6 +57,14 @@ export function cargarEntorno(): Entorno {
     throw new Error('PERSISTENCE=postgres requiere que definas DATABASE_URL en el archivo .env.');
   }
 
+  const correo = (process.env.CORREO ?? 'consola') as ModoDeCorreo;
+  if (correo !== 'consola' && correo !== 'resend') {
+    throw new Error(`CORREO debe ser "consola" o "resend", no "${correo}".`);
+  }
+  if (correo === 'resend' && !process.env.RESEND_API_KEY) {
+    throw new Error('CORREO=resend requiere que definas RESEND_API_KEY en el archivo .env.');
+  }
+
   const notificaciones = (process.env.NOTIFICACIONES ?? 'consola') as ModoDeNotificaciones;
   if (!['consola', 'push', 'ambos'].includes(notificaciones)) {
     throw new Error(
@@ -69,6 +82,9 @@ export function cargarEntorno(): Entorno {
     baseDeDatosConSsl: process.env.DATABASE_SSL === 'true',
     ventanaDeToleranciaEnMinutos: leerNumero(process.env.VENTANA_TOLERANCIA_MINUTOS, 60),
     notificaciones,
+    correo,
+    correoClaveApi: process.env.RESEND_API_KEY,
+    correoRemitente: process.env.CORREO_REMITENTE ?? 'Chronova <onboarding@resend.dev>',
     expoTokenDeAcceso: process.env.EXPO_ACCESS_TOKEN || undefined,
   };
 }

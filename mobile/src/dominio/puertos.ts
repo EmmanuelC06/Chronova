@@ -49,6 +49,20 @@ export interface ApiDeChronova {
   }): Promise<Sesion>;
 
   obtenerPerfil(): Promise<Perfil>;
+
+  /**
+   * Pide un codigo para recuperar la contrasena.
+   *
+   * Responde lo mismo exista o no la cuenta: si distinguiera, cualquiera
+   * podria averiguar quien esta registrado en una aplicacion de salud.
+   */
+  solicitarRecuperacion(email: string): Promise<{ mensaje: string; minutosDeVigencia: number }>;
+
+  restablecerContrasena(datos: {
+    email: string;
+    codigo: string;
+    nuevaContrasena: string;
+  }): Promise<unknown>;
   actualizarPreferencias(cambios: Partial<Preferencias>): Promise<Preferencias>;
 
   listarMedicamentos(pacienteId?: string): Promise<Medicamento[]>;

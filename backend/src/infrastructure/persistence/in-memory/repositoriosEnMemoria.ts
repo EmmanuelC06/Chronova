@@ -13,6 +13,12 @@ import { Toma } from '../../../domain/toma/Toma.js';
 import type { TomaPlana } from '../../../domain/toma/Toma.js';
 import type { RangoDeFechas, RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
 import { Dispositivo } from '../../../domain/dispositivo/Dispositivo.js';
+import { SolicitudDeRecuperacion } from '../../../domain/recuperacion/SolicitudDeRecuperacion.js';
+import type {
+  SolicitudDeRecuperacionPlana,
+  TipoDeCuenta,
+} from '../../../domain/recuperacion/SolicitudDeRecuperacion.js';
+import type { RepositorioDeRecuperaciones } from '../../../domain/recuperacion/RepositorioDeRecuperaciones.js';
 import type { DispositivoPlano } from '../../../domain/dispositivo/Dispositivo.js';
 import type { RepositorioDeDispositivos } from '../../../domain/dispositivo/RepositorioDeDispositivos.js';
 import type { TokenDeDispositivo } from '../../../domain/dispositivo/TokenDeDispositivo.js';
@@ -289,5 +295,62 @@ export class RepositorioDeDispositivosEnMemoria implements RepositorioDeDisposit
 
   async eliminarPorToken(token: TokenDeDispositivo): Promise<void> {
     this.datos.delete(token.valor);
+  }
+}
+
+// =================================================================
+// Recuperaciones de contrasena
+// =================================================================
+
+export class RepositorioDeRecuperacionesEnMemoria implements RepositorioDeRecuperaciones {
+  private readonly datos = new Map<string, SolicitudDeRecuperacionPlana>();
+
+  async guardar(solicitud: SolicitudDeRecuperacion): Promise<void> {
+    this.datos.set(solicitud.id.valor, solicitud.aPlano());
+  }
+
+  async buscarVigentePorUsuario(
+    usuarioId: Identificador,
+    tipoDeCuenta: TipoDeCuenta,
+  ): Promise<SolicitudDeRecuperacion | null> {
+    const candidatas = [...this.datos.values()]
+      .filter(
+        (s) =>
+          s.usuarioId === usuarioId.valor &&
+          s.tipoDeCuenta === tipoDeCuenta &&
+          s.usadaEn === null,
+      )
+      // La mas reciente primero: si por lo que sea quedaran varias, la
+      // que vale es la ultima que se pidio.
+      .sort((a, b) => new Date(b.creadaEn).getTime() - new Date(a.creadaEn).getTime());
+
+    const encontrada = candidatas[0];
+    return encontrada ? SolicitudDeRecuperacion.desdePlano(encontrada) : null;
+  }
+
+  async invalidarAnteriores(
+    usuarioId: Identificador,
+    tipoDeCuenta: TipoDeCuenta,
+  ): Promise<void> {
+    for (const [id, plano] of this.datos) {
+      if (
+        plano.usuarioId === usuarioId.valor &&
+        plano.tipoDeCuenta === tipoDeCuenta &&
+        plano.usadaEn === null
+      ) {
+        this.datos.delete(id);
+      }
+    }
+  }
+
+  async eliminarCaducadas(limite: Date): Promise<number> {
+    let borradas = 0;
+    for (const [id, plano] of this.datos) {
+      if (new Date(plano.expiraEn).getTime() < limite.getTime()) {
+        this.datos.delete(id);
+        borradas += 1;
+      }
+    }
+    return borradas;
   }
 }

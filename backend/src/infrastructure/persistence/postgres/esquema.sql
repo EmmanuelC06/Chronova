@@ -128,3 +128,29 @@ CREATE INDEX IF NOT EXISTS idx_dispositivos_propietario
 
 ALTER TABLE pacientes
   ADD COLUMN IF NOT EXISTS zona_horaria TEXT NOT NULL DEFAULT 'America/Bogota';
+
+-- ---------------------------------------------------------------
+-- Recuperaciones de contrasena
+-- ---------------------------------------------------------------
+-- El codigo se guarda CIFRADO, igual que una contrasena: quien leyera
+-- esta tabla no obtendria codigos utilizables.
+--
+-- usuario_id no lleva clave foranea porque apunta a pacientes o a
+-- cuidadores segun tipo_de_cuenta. Es el mismo compromiso que en
+-- dispositivos: se gana una tabla unica y se pierde integridad
+-- referencial, que aqui compensa porque las filas caducan solas.
+CREATE TABLE IF NOT EXISTS recuperaciones (
+  id                UUID PRIMARY KEY,
+  usuario_id        UUID NOT NULL,
+  tipo_de_cuenta    TEXT NOT NULL CHECK (tipo_de_cuenta IN ('PACIENTE', 'CUIDADOR')),
+  codigo_cifrado    TEXT NOT NULL,
+  creada_en         TIMESTAMPTZ NOT NULL,
+  expira_en         TIMESTAMPTZ NOT NULL,
+  intentos          INTEGER NOT NULL DEFAULT 0,
+  usada_en          TIMESTAMPTZ
+);
+
+-- Cubre la consulta de "la vigente mas reciente de esta cuenta".
+CREATE INDEX IF NOT EXISTS idx_recuperaciones_vigentes
+  ON recuperaciones (usuario_id, tipo_de_cuenta, creada_en DESC)
+  WHERE usada_en IS NULL;

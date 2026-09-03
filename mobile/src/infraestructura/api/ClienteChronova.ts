@@ -102,6 +102,20 @@ export class ClienteChronova implements ApiDeChronova {
     return this.pedir<Perfil>('GET', '/api/auth/perfil');
   }
 
+  solicitarRecuperacion(
+    email: string,
+  ): Promise<{ mensaje: string; minutosDeVigencia: number }> {
+    return this.pedir('POST', '/api/auth/recuperacion', { email });
+  }
+
+  restablecerContrasena(datos: {
+    email: string;
+    codigo: string;
+    nuevaContrasena: string;
+  }): Promise<unknown> {
+    return this.pedir('POST', '/api/auth/recuperacion/confirmar', datos);
+  }
+
   actualizarPreferencias(cambios: Partial<Preferencias>): Promise<Preferencias> {
     return this.pedir<Preferencias>('PATCH', '/api/auth/preferencias', cambios);
   }

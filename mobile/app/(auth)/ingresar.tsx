@@ -93,6 +93,15 @@ export default function Ingresar() {
 
         <Boton titulo="Entrar" onPress={entrar} ocupado={ocupado} />
 
+        {/* Va justo debajo de "Entrar", que es donde se busca cuando la
+            contrasena no funciona. Escondida al final de la pantalla no
+            la encontraria quien mas la necesita. */}
+        <Boton
+          titulo="Olvide mi contrasena"
+          variante="texto"
+          onPress={() => router.push('/(auth)/recuperar')}
+        />
+
         <View style={{ gap: espacio.sm, marginTop: espacio.md }}>
           <Texto centrado color={colores.textoSuave}>
             ¿Todavia no tienes cuenta?

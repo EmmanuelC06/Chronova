@@ -84,6 +84,7 @@ Las reglas que serían ciertas aunque Chronova fuera una libreta de papel.
 | `toma/Toma.ts` | Una toma no se puede registrar dos veces; máximo 3 aplazamientos |
 | `toma/ResumenDeAdherencia.ts` | Adherencia = tomadas ÷ resueltas. Buena a partir del 80% |
 | `vinculo/Vinculo.ts` | Un cuidador solo accede si el paciente aceptó |
+| `recuperacion/SolicitudDeRecuperacion.ts` | El código caduca, sirve una vez y admite cinco intentos |
 
 Cada entidad se construye con una fábrica que la valida al nacer —`Medicamento.crear()`, `Paciente.registrar()`, `Toma.programar()`, `Vinculo.solicitar()`— y todas tienen `desdePlano()` (se reconstruye desde la base de datos) y `aPlano()` (se convierte en datos simples para guardar o enviar). Los constructores son privados: no hay forma de fabricar una entidad en un estado inválido.
 
@@ -110,6 +111,8 @@ Aquí también viven los **puertos**, en `application/ports/`:
 | `CifradorDeContrasenas` | "cifra / verifica" | Para cambiar bcrypt por otro sin tocar nada más |
 | `ServicioDeTokens` | "emite / verifica sesión" | Para que el dominio no sepa qué es un JWT |
 | `Notificador` | "avisa esto a esta persona" | Consola, notificaciones push, o ambas: se elige en el contenedor |
+| `EnviadorDeCorreo` | "manda este correo" | Consola durante el desarrollo, un proveedor real en producción |
+| `GeneradorDeCodigos` | "dame un número impredecible" | Para fijarlo en las pruebas, y para no usar `Math.random` en producción |
 
 Los puertos de persistencia (`RepositorioDeMedicamentos`, etc.) están en el dominio, porque es el dominio quien define qué necesita.
 
@@ -124,6 +127,7 @@ Todo lo que se puede reemplazar.
 | `security/` | bcrypt y JWT |
 | `system/` | Reloj del sistema y generador de UUID |
 | `notificaciones/` | Los tres notificadores (consola, push de Expo y el compuesto) y el cliente HTTP de Expo |
+| `correo/` | Los dos adaptadores de correo: consola y proveedor real |
 | `http/` | Express: rutas, middlewares, validación, traducción de errores |
 
 ---
@@ -138,7 +142,7 @@ Eso solo es posible porque el dominio nunca supo que existía una base de datos.
 
 ### Prueba 2: las pruebas corren en milisegundos
 
-Las 114 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
+Las 128 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
 
 Con la arquitectura del MVP anterior, donde la lógica vivía dentro de las rutas de Express y hablaba directamente con PostgreSQL, cada prueba habría necesitado una base de datos levantada, datos sembrados y limpieza posterior. En la práctica, eso significa que nadie escribe pruebas.
 
@@ -161,9 +165,9 @@ Y como los adaptadores cumplen el mismo contrato, se pueden combinar: `NOTIFICAC
 La suite completa se ejecuta bajo seis zonas horarias distintas —de Kiritimati (UTC+14) a Anchorage (UTC−9)— y da exactamente el mismo resultado:
 
 ```bash
-TZ=UTC              npm test    # 114 passed
-TZ=America/Bogota   npm test    # 114 passed
-TZ=Asia/Tokyo       npm test    # 114 passed
+TZ=UTC              npm test    # 128 passed
+TZ=America/Bogota   npm test    # 128 passed
+TZ=Asia/Tokyo       npm test    # 128 passed
 ```
 
 Esto no era así al principio. El dominio usaba objetos `Date` para representar días del calendario, y un `Date` siempre es un instante que se lee en la zona del proceso. La consecuencia: con el servidor en UTC, la pastilla de las 08:00 de una paciente colombiana se agendaba a las 03:00 de su madrugada.

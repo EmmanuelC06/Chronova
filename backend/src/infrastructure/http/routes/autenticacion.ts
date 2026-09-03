@@ -9,6 +9,8 @@ import {
   esquemaDePreferencias,
   esquemaDeRegistroDeCuidador,
   esquemaDeRegistroDePaciente,
+  esquemaDeRestablecimiento,
+  esquemaDeSolicitudDeRecuperacion,
 } from '../dtos/esquemas.js';
 
 /**
@@ -49,6 +51,29 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
     asincrono(async (peticion, respuesta) => {
       const datos = esquemaDeInicioDeSesion.parse(peticion.body);
       const resultado = await casosDeUso.iniciarSesion.ejecutar(datos);
+      respuesta.json(resultado);
+    }),
+  );
+
+  // POST /api/auth/recuperacion
+  // Sin autenticacion, por razones obvias: quien la usa es justamente
+  // quien no puede entrar.
+  router.post(
+    '/recuperacion',
+    asincrono(async (peticion, respuesta) => {
+      const datos = esquemaDeSolicitudDeRecuperacion.parse(peticion.body);
+      const resultado = await casosDeUso.solicitarRecuperacion.ejecutar(datos);
+      // Siempre 200 y siempre el mismo cuerpo, exista o no la cuenta.
+      respuesta.json(resultado);
+    }),
+  );
+
+  // POST /api/auth/recuperacion/confirmar
+  router.post(
+    '/recuperacion/confirmar',
+    asincrono(async (peticion, respuesta) => {
+      const datos = esquemaDeRestablecimiento.parse(peticion.body);
+      const resultado = await casosDeUso.restablecerContrasena.ejecutar(datos);
       respuesta.json(resultado);
     }),
   );

@@ -91,6 +91,43 @@ Igual, pero con `rol` opcional (`"Hija"`, `"Enfermera"`) en vez de `fechaDeNacim
 
 `tipo` es opcional (`"PACIENTE"` o `"CUIDADOR"`). Solo hace falta si la misma persona tiene ambas cuentas con el mismo correo.
 
+### `POST /api/auth/recuperacion`
+
+Sin autenticación: quien la usa es justamente quien no puede entrar.
+
+```json
+{ "email": "rosa@correo.com" }
+```
+
+**200 siempre**, exista o no la cuenta:
+
+```json
+{
+  "mensaje": "Si ese correo tiene una cuenta en Chronova, te enviamos un codigo para restablecer tu contrasena.",
+  "minutosDeVigencia": 30
+}
+```
+
+Esa respuesta invariable es deliberada. Si distinguiera entre un correo registrado y uno que no lo está, cualquiera podría averiguar quién usa Chronova probando correos — y saber que alguien usa una aplicación de adherencia farmacológica ya dice algo sobre su salud. Es la misma regla que sigue el inicio de sesión.
+
+**El código no viaja en la respuesta.** Sale por correo. Con `CORREO=consola` (el valor por defecto) se imprime en la terminal del servidor, lo que permite probar el flujo completo sin contratar ningún servicio.
+
+### `POST /api/auth/recuperacion/confirmar`
+
+```json
+{
+  "email": "rosa@correo.com",
+  "codigo": "482913",
+  "nuevaContrasena": "una-clave-nueva-larga"
+}
+```
+
+**200:** `{ "restablecida": true }`
+
+Tres reglas lo protegen: el código **caduca a los 30 minutos**, sirve **una sola vez**, y admite **cinco intentos**. Pedir un código nuevo invalida el anterior.
+
+El mensaje de error es el mismo para código equivocado, caducado, ya usado o correo inexistente — distinguirlos ayudaría más a quien prueba códigos ajenos que al dueño legítimo, que tiene el correo delante. La única excepción es agotar los intentos, donde sí conviene decirlo para que la persona sepa que debe pedir uno nuevo.
+
 ### `GET /api/auth/perfil`
 
 Devuelve el perfil de quien tiene la sesión abierta, con la edad calculada y las preferencias si es paciente.

@@ -10,6 +10,9 @@ import type { RepositorioDePacientes } from '../../../domain/paciente/Repositori
 import { Toma } from '../../../domain/toma/Toma.js';
 import type { RangoDeFechas, RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
 import { Dispositivo } from '../../../domain/dispositivo/Dispositivo.js';
+import { SolicitudDeRecuperacion } from '../../../domain/recuperacion/SolicitudDeRecuperacion.js';
+import type { TipoDeCuenta } from '../../../domain/recuperacion/SolicitudDeRecuperacion.js';
+import type { RepositorioDeRecuperaciones } from '../../../domain/recuperacion/RepositorioDeRecuperaciones.js';
 import type { RepositorioDeDispositivos } from '../../../domain/dispositivo/RepositorioDeDispositivos.js';
 import type { TokenDeDispositivo } from '../../../domain/dispositivo/TokenDeDispositivo.js';
 import { Vinculo } from '../../../domain/vinculo/Vinculo.js';
@@ -614,6 +617,82 @@ export class RepositorioDeDispositivosPostgres implements RepositorioDeDispositi
       plataforma: fila.plataforma,
       registradoEn: aFechaIso(fila.registrado_en)!,
       ultimoUsoEn: aFechaIso(fila.ultimo_uso_en)!,
+    });
+  }
+}
+
+// =================================================================
+// Recuperaciones de contrasena
+// =================================================================
+
+export class RepositorioDeRecuperacionesPostgres implements RepositorioDeRecuperaciones {
+  constructor(private readonly pool: pg.Pool) {}
+
+  async guardar(solicitud: SolicitudDeRecuperacion): Promise<void> {
+    const r = solicitud.aPlano();
+    await this.pool.query(
+      `INSERT INTO recuperaciones
+         (id, usuario_id, tipo_de_cuenta, codigo_cifrado, creada_en, expira_en, intentos, usada_en)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       ON CONFLICT (id) DO UPDATE SET
+         intentos = EXCLUDED.intentos,
+         usada_en = EXCLUDED.usada_en`,
+      [
+        r.id,
+        r.usuarioId,
+        r.tipoDeCuenta,
+        r.codigoCifrado,
+        r.creadaEn,
+        r.expiraEn,
+        r.intentos,
+        r.usadaEn,
+      ],
+    );
+  }
+
+  async buscarVigentePorUsuario(
+    usuarioId: Identificador,
+    tipoDeCuenta: TipoDeCuenta,
+  ): Promise<SolicitudDeRecuperacion | null> {
+    const { rows } = await this.pool.query(
+      `SELECT * FROM recuperaciones
+        WHERE usuario_id = $1 AND tipo_de_cuenta = $2 AND usada_en IS NULL
+        ORDER BY creada_en DESC
+        LIMIT 1`,
+      [usuarioId.valor, tipoDeCuenta],
+    );
+    return rows[0] ? this.aEntidad(rows[0]) : null;
+  }
+
+  async invalidarAnteriores(
+    usuarioId: Identificador,
+    tipoDeCuenta: TipoDeCuenta,
+  ): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM recuperaciones
+        WHERE usuario_id = $1 AND tipo_de_cuenta = $2 AND usada_en IS NULL`,
+      [usuarioId.valor, tipoDeCuenta],
+    );
+  }
+
+  async eliminarCaducadas(limite: Date): Promise<number> {
+    const { rowCount } = await this.pool.query(
+      'DELETE FROM recuperaciones WHERE expira_en < $1',
+      [limite.toISOString()],
+    );
+    return rowCount ?? 0;
+  }
+
+  private aEntidad(fila: Record<string, any>): SolicitudDeRecuperacion {
+    return SolicitudDeRecuperacion.desdePlano({
+      id: fila.id,
+      usuarioId: fila.usuario_id,
+      tipoDeCuenta: fila.tipo_de_cuenta,
+      codigoCifrado: fila.codigo_cifrado,
+      creadaEn: aFechaIso(fila.creada_en)!,
+      expiraEn: aFechaIso(fila.expira_en)!,
+      intentos: Number(fila.intentos),
+      usadaEn: aFechaIso(fila.usada_en),
     });
   }
 }

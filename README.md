@@ -100,7 +100,7 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Arranca el servidor y se recarga solo al guardar cambios |
-| `npm test` | Ejecuta las 114 pruebas automáticas |
+| `npm test` | Ejecuta las 128 pruebas automáticas |
 | `npm run typecheck` | Revisa que no haya errores de tipos |
 | `npm run build` | Compila para producción |
 | `npm run db:migrate` | Crea las tablas en PostgreSQL |
@@ -125,7 +125,9 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 | [docs/API.md](docs/API.md) | Todos los endpoints con ejemplos listos para copiar |
 | [docs/DEL-MVP-A-CHRONOVA.md](docs/DEL-MVP-A-CHRONOVA.md) | Qué cambió respecto a MedAlerta y por qué |
 | [docs/diagramas/](docs/diagramas/) | Los 8 diagramas UML, en PNG, SVG y fuente editable |
-| [docs/Chronova-Requerimientos.docx](docs/Chronova-Requerimientos.docx) | Actores, cronograma y los 32 requerimientos funcionales y 22 no funcionales, listo para el entregable |
+| [docs/Chronova-Requerimientos.docx](docs/Chronova-Requerimientos.docx) | Actores, cronograma y los 34 requerimientos funcionales y 25 no funcionales, listo para el entregable |
+| [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md) | Cómo alojar el servidor y repartir la app para que otros la prueben desde sus teléfonos |
+| [docs/REVISION-DE-CODIGO.md](docs/REVISION-DE-CODIGO.md) | Revisión de defectos con escenarios reproducibles, y cuáles quedan pendientes |
 | [docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md](docs/FLUJO-DE-TRABAJO-CON-CLAUDE.md) | Subir el proyecto a GitHub y traer cambios sin credenciales |
 
 ---
@@ -145,11 +147,12 @@ Los tres caminos están explicados paso a paso, con sus errores típicos, en [do
 
 ## Estado del proyecto
 
-- Backend completo, con 114 pruebas automáticas en verde.
+- Backend completo, con 128 pruebas automáticas en verde.
 - App móvil con las pantallas principales conectadas a la API.
 - Las horas se manejan en la zona horaria de cada paciente, no en la del servidor. Verificado con la suite completa bajo seis relojes distintos, de UTC+14 a UTC−9.
 - Notificaciones push al teléfono del cuidador, **verificadas de extremo a extremo sobre un Android real**: el servidor detecta la toma vencida, el aviso llega al teléfono y al tocarlo se abre la información de esa paciente. Con baja automática de los dispositivos donde se desinstaló la aplicación.
 - El proyecto está preparado para generar un *development build* (`eas.json` y `expo-dev-client` incluidos). Es la vía recomendada para probar: evita el baile de versiones de Expo Go y es la única forma de recibir notificaciones push, que Expo Go no admite desde el SDK 53. Ver la [Parte 6 de la guía](docs/GUIA-DE-INICIO.md).
 - El cuidador puede abrir a cada paciente y ver su agenda del día, su tratamiento y las tomas que se saltó; y tocar una notificación lo lleva directo a ese paciente. Se añadió sin modificar ningún archivo de `backend/src/`.
 - El paciente decide permiso por permiso qué puede hacer cada cuidador —ver el tratamiento, recibir avisos, confirmar tomas por él, cambiar la medicación— y puede editar un medicamento sin perder su historial.
-- Pendiente: recuperación de contraseña, renovación de sesión, y pruebas de usabilidad con adultos mayores reales.
+- Recuperación de contraseña con un código de seis dígitos enviado por correo, que caduca, sirve una sola vez y admite cinco intentos. El envío está detrás de un puerto: por defecto escribe en la consola, así que el flujo completo se prueba sin contratar ningún servicio.
+- Pendiente: renovación de sesión, y pruebas de usabilidad con adultos mayores reales.

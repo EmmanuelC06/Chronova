@@ -10,11 +10,11 @@ Lo que está bien no se repite aquí; hay una sección al final con lo que se re
 
 ## Estado
 
-Los defectos marcados **[CORREGIDO]** se arreglaron el mismo día, con una prueba automatizada que los fija para que no vuelvan. La suite pasó de 104 a 114 pruebas.
+Los defectos marcados **[CORREGIDO]** se arreglaron el mismo día, con una prueba automatizada que los fija para que no vuelvan. La suite pasó de 104 a 128 pruebas.
 
 | Corregidos | Pendientes |
 |---|---|
-| B-1, B-2, B-3, G-1, G-2, G-3, G-4, G-5, M-2, M-3, M-5, M-6, M-7, y las trece correcciones de documentación | G-6 y M-1 (seguridad, antes de desplegar), M-4 (renovación de sesión, junto con la recuperación de contraseña) |
+| B-1, B-2, B-3, G-1, G-2, G-3, G-4, G-5, M-2, M-3, M-5, M-6, M-7, y las trece correcciones de documentación | G-6 y M-1 (seguridad, antes de desplegar), M-4 y **M-8** (sesiones: renovarlas y poder cerrarlas) |
 
 ---
 
@@ -235,6 +235,23 @@ Es un defecto que introduje ayer al hacer la tarjeta pulsable.
 
 ---
 
+## M-8. Cambiar la contraseña no cierra las sesiones ya abiertas
+
+*Hallazgo posterior a la revisión, encontrado al construir la recuperación de contraseña.*
+
+**Dónde:** `backend/src/infrastructure/http/middlewares/autenticacion.ts`
+
+El middleware valida la firma y la caducidad del token, y nada más. No consulta al usuario, así que:
+
+- Si alguien te robó la cuenta y tú recuperas la contraseña, **su token sigue valiendo** hasta siete días. Cambiar la clave debería dejarlo fuera de inmediato, y no lo hace.
+- Una cuenta **desactivada** (`activo: false`) conserva el acceso el mismo tiempo. `IniciarSesion` sí comprueba `activo`; el middleware no.
+
+Arreglarlo bien exige una consulta al usuario en cada petición —para comparar la fecha de emisión del token contra la del último cambio de contraseña— y eso toca la misma infraestructura de sesiones que la renovación pendiente (M-4).
+
+**Se dejó fuera a propósito** de la recuperación de contraseña, para que ese cambio se pudiera revisar solo. Va junto con M-4.
+
+---
+
 # Documentación: afirmaciones que no resisten una comprobación
 
 Son las más urgentes en términos de entrega, porque se refutan en la sustentación con un comando.
@@ -269,7 +286,7 @@ Para que no se toque por error, y porque también es parte del resultado de la r
 - **Autenticación y autorización:** los nueve casos de uso que tocan datos del paciente llaman a `PoliticaDeAcceso` con el permiso correcto. Verificado sin token (401), tipo equivocado (403) y cuidador sin vínculo (403).
 - **RNF-16 (cero dependencias externas en el dominio):** comprobado archivo por archivo en los 40 del dominio. Cierto.
 - **RNF-18 (todo el SQL en un archivo):** cierto para las consultas. Matiz honesto: el DDL vive en `esquema.sql`.
-- **RNF-15 (seis husos):** 114 pruebas en verde bajo los seis. Cierto.
+- **RNF-15 (seis husos):** 128 pruebas en verde bajo los seis. Cierto.
 - **Prueba 6 de ARQUITECTURA:** cierta y verificable con `git show`. En ese commit no cambió ningún archivo de `backend/src/`.
 - **Notificador de Expo:** nunca lanza, reparte en lotes de 100, da de baja los tokens muertos, y el compuesto aísla cada destino.
 - **API.md:** los 21 endpoints documentados existen con ese método y esa ruta, y no falta ninguno.

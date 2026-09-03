@@ -135,6 +135,18 @@ export const esquemaDePermisos = z.object({
   recibeAlertas: z.boolean().optional(),
 });
 
+export const esquemaDeSolicitudDeRecuperacion = z.object({
+  email: z.string().min(1, 'Escribe tu correo.').max(200),
+  tipo: z.enum(['PACIENTE', 'CUIDADOR']).optional(),
+});
+
+export const esquemaDeRestablecimiento = z.object({
+  email: z.string().min(1, 'Escribe tu correo.').max(200),
+  codigo: z.string().min(1, 'Escribe el codigo que te llego al correo.').max(20),
+  nuevaContrasena: z.string().min(1, 'Escribe tu contrasena nueva.').max(200),
+  tipo: z.enum(['PACIENTE', 'CUIDADOR']).optional(),
+});
+
 export const esquemaDeDispositivo = z.object({
   token: z.string().min(1, 'El token del dispositivo es obligatorio.').max(200),
   plataforma: z.enum(['android', 'ios', 'web']),

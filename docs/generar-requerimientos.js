@@ -118,6 +118,8 @@ const RF = [
   ['RF-30', 'El sistema debe dar de baja el teléfono al cerrar sesión, y también cuando el servicio informe que la aplicación fue desinstalada.', 'Ambos', 'Media', 'OlvidarDispositivo'],
   ['RF-31', 'El sistema debe permitir al cuidador autorizado consultar el detalle de un paciente: su agenda del día, su tratamiento vigente y las tomas que no realizó.', 'Cuidador', 'Alta', 'ObtenerAgendaDelDia'],
   ['RF-32', 'La aplicación debe abrir directamente la información del paciente al que se refiere una notificación cuando el cuidador la toca.', 'Sistema', 'Media', 'NavegacionPorNotificaciones'],
+  ['RF-33', 'El sistema debe permitir recuperar el acceso a una cuenta cuyo titular olvidó la contraseña, mediante un código enviado a su correo.', 'Ambos', 'Alta', 'SolicitarRecuperacion'],
+  ['RF-34', 'El sistema debe permitir establecer una contraseña nueva presentando ese código, que caducará, servirá una sola vez y admitirá un número limitado de intentos.', 'Ambos', 'Alta', 'RestablecerContrasena'],
 ];
 
 const RNF = [
@@ -137,12 +139,15 @@ const RNF = [
   ['RNF-14', 'Disponibilidad', 'Las alarmas de toma sonarán aunque el dispositivo no tenga conexión a internet.', 'Las alarmas se programan localmente en el teléfono, con siete días de antelación, de modo que suenan sin conexión y sin necesidad de abrir la aplicación. Verificado por diseño y en dispositivo.'],
   ['RNF-15', 'Portabilidad', 'El comportamiento del sistema no dependerá de la zona horaria en que corra el servidor.', 'La suite completa se ejecuta con idéntico resultado bajo seis husos, de UTC+14 a UTC−9. Verificado.'],
   ['RNF-16', 'Mantenibilidad', 'El núcleo de reglas de negocio no dependerá de ninguna librería externa.', 'Cero importaciones externas en el directorio del dominio. Verificado.'],
-  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '114 pruebas en menos de dos segundos. Verificado.'],
+  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '128 pruebas en menos de dos segundos. Verificado.'],
   ['RNF-18', 'Mantenibilidad', 'Toda consulta SQL residirá en un único archivo del proyecto.', 'Inspección del directorio de persistencia. Verificado.'],
   ['RNF-19', 'Portabilidad', 'El mecanismo de persistencia será intercambiable sin modificar el dominio ni los casos de uso.', 'La aplicación funciona completa en memoria o con PostgreSQL cambiando una variable. Verificado.'],
   ['RNF-20', 'Compatibilidad', 'La aplicación móvil funcionará sobre Android mediante Expo y el servidor sobre Node.js 20 o superior.', 'Ejecución sobre un dispositivo Android real mediante una compilación de desarrollo, más verificación de tipos y compilación del backend. Verificado.'],
   ['RNF-21', 'Resiliencia', 'Un fallo del servicio de notificaciones no impedirá registrar ni cerrar una toma.', 'Prueba automatizada con el cliente de Expo sustituido por uno que falla: el aviso se pierde, el registro de la toma no. Verificado.'],
   ['RNF-22', 'Mantenibilidad', 'Los tokens de dispositivos que dejen de existir se darán de baja automáticamente, sin intervención manual.', 'Prueba automatizada del acuse DeviceNotRegistered. Verificado.'],
+  ['RNF-23', 'Seguridad', 'El código de recuperación caducará a los 30 minutos, servirá una sola vez y admitirá como máximo cinco intentos.', 'Diez pruebas automatizadas de los casos de abuso: caducidad, reutilización, agotamiento de intentos y códigos de otra cuenta. Verificado.'],
+  ['RNF-24', 'Privacidad', 'La recuperación de contraseña no revelará si un correo está registrado.', 'Prueba automatizada que compara ambas respuestas, y verificación contra el servidor real. Verificado.'],
+  ['RNF-25', 'Seguridad', 'El código de recuperación se almacenará cifrado, nunca en texto plano.', 'Prueba automatizada sobre el valor guardado en el repositorio. Verificado.'],
 ];
 
 const FASES = [
@@ -207,7 +212,7 @@ const doc = new Document({
         ['ID', 'Requerimiento', 'Actor', 'Prioridad', 'Implementado en'],
         RF, { centrar: [0, 3], mono: [4], size: 18 }),
       new Paragraph({ spacing: { after: 200 } }),
-      p('Los treinta y dos requerimientos están implementados en el servidor, son alcanzables desde la aplicación móvil y se verificaron en ejecución. El RF-28 se comprobó de extremo a extremo sobre un dispositivo Android real, con una compilación de desarrollo del proyecto: el servidor detectó una toma vencida, envió el aviso y este llegó al teléfono de la cuidadora, que al tocarlo abrió directamente la información de esa paciente. Conviene dejar constancia de que esa comprobación exige dicha compilación, porque desde la versión 53 del SDK la aplicación Expo Go no admite notificaciones remotas.'),
+      p('Los treinta y cuatro requerimientos están implementados en el servidor, son alcanzables desde la aplicación móvil y se verificaron en ejecución. El RF-28 se comprobó de extremo a extremo sobre un dispositivo Android real, con una compilación de desarrollo del proyecto: el servidor detectó una toma vencida, envió el aviso y este llegó al teléfono de la cuidadora, que al tocarlo abrió directamente la información de esa paciente. Conviene dejar constancia de que esa comprobación exige dicha compilación, porque desde la versión 53 del SDK la aplicación Expo Go no admite notificaciones remotas.'),
 
       h1('6.  Requerimientos no funcionales'),
       p('Describen cómo debe comportarse el sistema. Se presta especial atención a la accesibilidad, porque la revisión de literatura del proyecto identifica la experiencia de usuario como el principal factor de abandono de las aplicaciones de salud entre adultos mayores; y a la portabilidad y la mantenibilidad, que son las que justifican la arquitectura elegida.'),
