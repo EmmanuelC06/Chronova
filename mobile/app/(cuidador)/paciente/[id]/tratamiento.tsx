@@ -32,7 +32,21 @@ export default function Tratamiento() {
     suspender,
   } = usePacienteObservado();
 
-  if (!paciente) return null;
+  // El layout ya resuelve todos los casos en que no hay ficha: carga,
+  // fallo de red, vinculo sin aceptar y permiso no concedido. Si aun asi
+  // llegamos aqui sin paciente es un fallo nuestro, no del usuario, y se
+  // dice. Devolver `null` en su lugar es exactamente lo que producia la
+  // pantalla en blanco que este arreglo vino a quitar.
+  if (!paciente) {
+    return (
+      <ScrollView contentContainerStyle={{ padding: espacio.md }}>
+        <Aviso
+          mensaje="No pudimos mostrar la informacion de este paciente. Vuelve atras y entra de nuevo."
+          tono="error"
+        />
+      </ScrollView>
+    );
+  }
 
   const puedeGestionar = paciente.permisos.puedeGestionarMedicamentos;
 

@@ -1,4 +1,4 @@
-import { ScrollView } from 'react-native';
+import { RefreshControl, ScrollView } from 'react-native';
 import { Stack, Tabs, useLocalSearchParams } from 'expo-router';
 
 import { Aviso, Cargando } from '../../../../src/ui/componentes/basicos';
@@ -50,7 +50,8 @@ export default function LayoutDeLaFicha() {
  * proveedor para poder leerlo.
  */
 function Contenido() {
-  const { nombre, nombreCorto, cargando, bloqueo } = usePacienteObservado();
+  const { nombre, nombreCorto, cargando, bloqueo, refrescando, alTirarParaRefrescar } =
+    usePacienteObservado();
 
   if (cargando) {
     return (
@@ -62,10 +63,32 @@ function Contenido() {
   }
 
   if (bloqueo) {
+    // Los dos motivos que pueden desaparecer solos —se recupera la senal,
+    // el paciente acepta la solicitud— ofrecen reintentar. Los otros dos
+    // no dependen de esta pantalla, y un gesto que no cambia nada se lee
+    // como que la app se colgo.
+    const sePuedeReintentar = bloqueo === 'FALLO_DE_CARGA' || bloqueo === 'SIN_ACEPTAR';
+    const sinNombre = bloqueo === 'NO_ENCONTRADO' || bloqueo === 'FALLO_DE_CARGA';
+
     return (
       <>
-        <Stack.Screen options={{ title: bloqueo === 'NO_ENCONTRADO' ? 'Paciente' : nombre }} />
-        <ScrollView contentContainerStyle={{ padding: espacio.md, gap: espacio.md }}>
+        <Stack.Screen options={{ title: sinNombre ? 'Paciente' : nombre }} />
+        <ScrollView
+          contentContainerStyle={{ padding: espacio.md, gap: espacio.md }}
+          // Antes este aviso decia "Baja para reintentar" y el gesto no
+          // estaba conectado. Prometer una salida que no existe es peor
+          // que no ofrecerla: el cuidador tiraba hacia abajo hasta que se
+          // le acababa la paciencia.
+          refreshControl={
+            sePuedeReintentar ? (
+              <RefreshControl
+                refreshing={refrescando}
+                onRefresh={alTirarParaRefrescar}
+                tintColor={colores.primario}
+              />
+            ) : undefined
+          }
+        >
           <Aviso {...MENSAJE_DE_BLOQUEO[bloqueo](nombre, nombreCorto)} />
         </ScrollView>
       </>
@@ -127,16 +150,21 @@ function Contenido() {
  * cayo el wifi es un mensaje falso y alarmante.
  */
 const MENSAJE_DE_BLOQUEO: Record<
-  'NO_ENCONTRADO' | 'SIN_ACEPTAR' | 'SIN_PERMISO',
+  'NO_ENCONTRADO' | 'SIN_ACEPTAR' | 'SIN_PERMISO' | 'FALLO_DE_CARGA',
   (nombre: string, corto: string) => { mensaje: string; tono: 'info' | 'advertencia' | 'error' }
 > = {
-  NO_ENCONTRADO: () => ({
+  FALLO_DE_CARGA: () => ({
     mensaje:
-      'No pudimos cargar a este paciente. Puede ser un problema de conexion, o que el vinculo ya no exista. Baja para reintentar.',
+      'No pudimos conectarnos para traer la informacion de este paciente. Revisa tu conexion y baja para reintentar.',
     tono: 'error',
   }),
+  NO_ENCONTRADO: () => ({
+    mensaje:
+      'Este paciente ya no aparece entre los que acompanas. Es probable que el vinculo se haya revocado.',
+    tono: 'advertencia',
+  }),
   SIN_ACEPTAR: (nombre) => ({
-    mensaje: `${nombre} todavia no ha aceptado tu solicitud. Hasta que lo haga no puedes ver su tratamiento.`,
+    mensaje: `${nombre} todavia no ha aceptado tu solicitud. Hasta que lo haga no puedes ver su tratamiento. Baja para comprobar si ya respondio.`,
     tono: 'info',
   }),
   SIN_PERMISO: (nombre) => ({

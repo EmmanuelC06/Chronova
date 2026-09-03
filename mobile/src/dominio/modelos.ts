@@ -161,6 +161,13 @@ export interface PacienteEnPanel {
   medicamentosActivos: number;
   medicamentosConStockBajo: number;
   ultimaActividad: string | null;
+  /**
+   * Falso cuando la solicitud sigue pendiente o cuando el paciente no ha
+   * concedido `puedeVerHistorial`. En ese caso los campos clinicos de
+   * arriba vienen en cero desde el servidor, y pintarlos seria mentir:
+   * un 0% que en realidad significa "no puedo verlo".
+   */
+  datosClinicosVisibles: boolean;
 }
 
 export interface CuidadorDelPaciente {

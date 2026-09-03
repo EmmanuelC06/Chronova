@@ -16,6 +16,7 @@ import {
 } from '../../src/ui/componentes/basicos';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { colores, espacio, ESTILO_POR_NIVEL } from '../../src/ui/tema';
+import { primerNombre } from '../../src/ui/texto';
 
 /**
  * Panel del cuidador.
@@ -106,7 +107,7 @@ export default function Pacientes() {
     >
       <View style={{ gap: espacio.xs }}>
         <Texto variante="titulo" peso="negrita">
-          Hola, {perfil?.nombre?.split(' ')[0] ?? 'cuidador'}
+          Hola, {perfil ? primerNombre(perfil.nombre) : 'cuidador'}
         </Texto>
         <Texto color={colores.textoSuave}>
           {pacientes.length === 0
@@ -164,6 +165,13 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
   const pendiente = paciente.estadoDelVinculo === 'PENDIENTE';
   const nivel = ESTILO_POR_NIVEL[paciente.adherencia.nivel];
 
+  // El servidor manda los campos clinicos en cero cuando no hay derecho a
+  // verlos. Sin esta distincion la tarjeta pintaria "0%, sin datos aun,
+  // 0 tomadas", que es indistinguible de un paciente que acaba de
+  // empezar. Son dos cosas muy distintas y el cuidador tiene que poder
+  // separarlas: una se arregla esperando, la otra pidiendo permiso.
+  const conDatos = paciente.datosClinicosVisibles;
+
   return (
     <Tarjeta
       // Mientras la solicitud no se acepte no hay nada que abrir, y una
@@ -202,6 +210,11 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
       {pendiente ? (
         <Aviso
           mensaje="Esperando que el paciente acepte tu solicitud. Hasta entonces no puedes ver su informacion."
+          tono="info"
+        />
+      ) : !conDatos ? (
+        <Aviso
+          mensaje={`${primerNombre(paciente.nombre)} no te ha concedido permiso para ver su tratamiento. Puedes pedirselo: es una decision suya y puede cambiarla cuando quiera.`}
           tono="info"
         />
       ) : (
@@ -254,6 +267,10 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
 function descripcionParaLector(paciente: PacienteEnPanel): string {
   if (paciente.estadoDelVinculo === 'PENDIENTE') {
     return `${paciente.nombre}. Esperando que acepte tu solicitud.`;
+  }
+
+  if (!paciente.datosClinicosVisibles) {
+    return `${paciente.nombre}. No te ha concedido permiso para ver su tratamiento. Toca para saber mas.`;
   }
 
   const nivel = ESTILO_POR_NIVEL[paciente.adherencia.nivel];

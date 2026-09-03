@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { useFocusEffect } from 'expo-router';
 
 import { ErrorDeApi } from '../../dominio/modelos';
@@ -10,6 +10,7 @@ import type {
   PacienteEnPanel,
 } from '../../dominio/modelos';
 import { confirmarSuspension, pedirReabastecimiento } from '../componentes/accionesDeMedicamento';
+import { primerNombre } from '../texto';
 import { useSesion } from './SesionContexto';
 
 /**
@@ -28,8 +29,20 @@ import { useSesion } from './SesionContexto';
 
 export const DIAS_DE_RESUMEN = 7;
 
-/** Por que no se puede mostrar la ficha, si es que no se puede. */
-export type MotivoDeBloqueo = 'NO_ENCONTRADO' | 'SIN_ACEPTAR' | 'SIN_PERMISO' | null;
+/**
+ * Por que no se puede mostrar la ficha, si es que no se puede.
+ *
+ * `FALLO_DE_CARGA` es distinto de los otros tres: no dice nada sobre el
+ * vinculo, solo que no se pudo preguntar. Existe porque faltaba, y su
+ * ausencia dejaba la ficha COMPLETAMENTE EN BLANCO: al fallar la red, el
+ * contexto guardaba el mensaje de error pero no bloqueaba nada, el layout
+ * montaba las tres pestanas igual, y la primera hacia `if (!paciente)
+ * return null`. El cuidador tocaba la tarjeta de su madre y veia una
+ * pantalla vacia con una barra de pestanas: sin aviso, sin rueda de
+ * carga y sin forma de reintentar.
+ */
+export type MotivoDeBloqueo =
+  'NO_ENCONTRADO' | 'SIN_ACEPTAR' | 'SIN_PERMISO' | 'FALLO_DE_CARGA' | null;
 
 interface Valor {
   paciente: PacienteEnPanel | null;
@@ -88,6 +101,17 @@ export function ProveedorDePacienteObservado({
   const [bloqueo, setBloqueo] = useState<MotivoDeBloqueo>(null);
   const [procesando, setProcesando] = useState<string | null>(null);
 
+  /**
+   * ¿Llegamos alguna vez a tener la ficha?
+   *
+   * Va en una referencia y no en el estado porque se consulta dentro del
+   * `catch` de la propia carga, donde leer `paciente` daria el valor de
+   * este render y no el actual. Lo unico que decide es si un fallo deja
+   * la pantalla bloqueada o solo pone un aviso encima de lo que ya se
+   * estaba leyendo.
+   */
+  const fichaCargada = useRef(false);
+
   const recargar = useCallback(async () => {
     try {
       setError(null);
@@ -99,6 +123,7 @@ export function ProveedorDePacienteObservado({
       const lista = await api.listarPacientesDelCuidador(DIAS_DE_RESUMEN);
       const fila = lista.find((p) => p.pacienteId === pacienteId) ?? null;
       setPaciente(fila);
+      if (fila) fichaCargada.current = true;
 
       if (!fila) {
         setBloqueo('NO_ENCONTRADO');
@@ -108,7 +133,12 @@ export function ProveedorDePacienteObservado({
         setBloqueo('SIN_ACEPTAR');
         return;
       }
-      if (!fila.permisos.puedeVerHistorial) {
+      // Lo decide el servidor, no la app. `datosClinicosVisibles` es la
+      // misma comprobacion que hace el backend antes de calcular la
+      // adherencia, asi que las dos partes no pueden discrepar: si viene
+      // en falso, los campos clinicos de esta fila vienen vacios y pedir
+      // la agenda o el historial devolveria 403.
+      if (!fila.datosClinicosVisibles) {
         setBloqueo('SIN_PERMISO');
         return;
       }
@@ -139,6 +169,16 @@ export function ProveedorDePacienteObservado({
           ? problema.message
           : 'No pudimos cargar la informacion de este paciente.',
       );
+
+      // Si nunca llegamos a tener la ficha, no hay nada que pintar y hay
+      // que decirlo: sin esto las pestanas se montaban sobre un paciente
+      // nulo y la pantalla quedaba en blanco.
+      //
+      // Si ya la teniamos, en cambio, NO se bloquea. Es un refresco que
+      // fallo: el cuidador se queda con los datos de hace un momento y el
+      // aviso de arriba, que es mucho mejor que perder lo que ya estaba
+      // leyendo porque el ascensor se llevo la senal.
+      if (!fichaCargada.current) setBloqueo('FALLO_DE_CARGA');
     } finally {
       setCargando(false);
       setRefrescando(false);
@@ -160,7 +200,7 @@ export function ProveedorDePacienteObservado({
   }, [recargar]);
 
   const nombre = paciente?.nombre ?? 'Paciente';
-  const nombreCorto = nombre.split(' ')[0]!;
+  const nombreCorto = primerNombre(nombre);
 
   /**
    * El cuidador registra una toma en nombre del paciente.

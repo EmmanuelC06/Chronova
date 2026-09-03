@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
@@ -28,6 +28,7 @@ export default function Historial() {
 
   const [historial, setHistorial] = useState<HistorialModelo | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
@@ -40,6 +41,7 @@ export default function Historial() {
       );
     } finally {
       setCargando(false);
+      setRefrescando(false);
     }
   }, [api]);
 
@@ -51,9 +53,42 @@ export default function Historial() {
 
   if (cargando) return <Cargando mensaje="Revisando tu historial..." />;
 
-  if (!historial || historial.registros.length === 0) {
+  const recargar = (
+    <RefreshControl
+      refreshing={refrescando}
+      onRefresh={() => {
+        setRefrescando(true);
+        void cargar();
+      }}
+      tintColor={colores.primario}
+    />
+  );
+
+  // No pudimos traer el historial. Antes esta rama entraba por la misma
+  // puerta que "no hay nada todavia" —la condicion era `!historial ||
+  // registros.length === 0`— y a un paciente sin cobertura la app le
+  // decia que no habia confirmado ninguna toma en su vida. Son dos cosas
+  // distintas y solo una se arregla tomandose la medicina.
+  if (!historial) {
     return (
-      <ScrollView contentContainerStyle={{ padding: espacio.md }}>
+      <ScrollView
+        contentContainerStyle={{ padding: espacio.md, gap: espacio.md }}
+        refreshControl={recargar}
+      >
+        <Aviso
+          mensaje={error ?? 'No pudimos cargar tu historial. Baja para reintentar.'}
+          tono="error"
+        />
+      </ScrollView>
+    );
+  }
+
+  if (historial.registros.length === 0) {
+    return (
+      <ScrollView
+        contentContainerStyle={{ padding: espacio.md, gap: espacio.md }}
+        refreshControl={recargar}
+      >
         {error ? <Aviso mensaje={error} tono="error" /> : null}
         <EstadoVacio
           titulo="Todavia no hay historial"
@@ -73,6 +108,7 @@ export default function Historial() {
         gap: espacio.md,
         paddingBottom: espacio.xxl,
       }}
+      refreshControl={recargar}
     >
       {error ? <Aviso mensaje={error} tono="error" /> : null}
 

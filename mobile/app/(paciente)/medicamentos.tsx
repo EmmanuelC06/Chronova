@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
@@ -24,8 +24,18 @@ import { colores, espacio } from '../../src/ui/tema';
 export default function Medicamentos() {
   const { api } = useSesion();
 
-  const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
+  /**
+   * `null` mientras no se haya conseguido la lista ni una sola vez.
+   *
+   * La diferencia con una lista vacia no es un detalle: si al fallar la
+   * carga se dejaba en `[]`, la pantalla pintaba "Aun no tienes
+   * medicamentos" a una persona que si los tiene. Para alguien mayor que
+   * depende de esta lista para saber que tomarse, es un mensaje falso y
+   * alarmante, y ademas parece que la app le borro el tratamiento.
+   */
+  const [medicamentos, setMedicamentos] = useState<Medicamento[] | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
@@ -38,6 +48,7 @@ export default function Medicamentos() {
       );
     } finally {
       setCargando(false);
+      setRefrescando(false);
     }
   }, [api]);
 
@@ -91,6 +102,18 @@ export default function Medicamentos() {
         gap: espacio.md,
         paddingBottom: espacio.xxl,
       }}
+      // Sin esto, la unica forma de reintentar tras un fallo era cambiar
+      // de pestana y volver, que hay que saberla.
+      refreshControl={
+        <RefreshControl
+          refreshing={refrescando}
+          onRefresh={() => {
+            setRefrescando(true);
+            void cargar();
+          }}
+          tintColor={colores.primario}
+        />
+      }
     >
       {error ? <Aviso mensaje={error} tono="error" /> : null}
 
@@ -100,14 +123,14 @@ export default function Medicamentos() {
         onPress={() => router.push('/medicamento/nuevo')}
       />
 
-      {medicamentos.length === 0 ? (
+      {medicamentos !== null && medicamentos.length === 0 ? (
         <EstadoVacio
           titulo="Aun no tienes medicamentos"
           descripcion="Agrega el primero y Chronova te avisara a la hora exacta de cada toma."
         />
       ) : null}
 
-      {medicamentos.map((medicamento) => (
+      {(medicamentos ?? []).map((medicamento) => (
         <Tarjeta
           key={medicamento.id}
           // Solo se tine el borde de lo excepcional. Cuando TODAS las

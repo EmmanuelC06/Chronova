@@ -11,6 +11,7 @@ import type {
 import { Aviso, Boton, Campo, Insignia, Tarjeta, Texto } from '../../src/ui/componentes/basicos';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { ALTO_TACTIL_MINIMO, colores, espacio } from '../../src/ui/tema';
+import { primerNombre } from '../../src/ui/texto';
 
 /**
  * Los cuatro permisos, en el orden en que crece lo que conceden.
@@ -64,7 +65,16 @@ const ETIQUETAS_DE_TAMANO: Record<TamanoDeLetra, string> = {
 export default function Perfil() {
   const { perfil, preferencias, cambiarPreferencias, cerrarSesion, api } = useSesion();
 
-  const [cuidadores, setCuidadores] = useState<CuidadorDelPaciente[]>([]);
+  /**
+   * `null` mientras no se haya conseguido la lista.
+   *
+   * Se trataba como informacion secundaria y se dejaba fallar en
+   * silencio. No lo es: es la lista de QUIEN PUEDE VER LOS DATOS DE SALUD
+   * de esta persona. Vacia por un fallo de red se lee como "no le has
+   * dado acceso a nadie", y puede haber dos cuidadores viendolo todo.
+   */
+  const [cuidadores, setCuidadores] = useState<CuidadorDelPaciente[] | null>(null);
+  const [errorDeCuidadores, setErrorDeCuidadores] = useState(false);
   const [emailDelCuidador, setEmailDelCuidador] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);
@@ -73,8 +83,12 @@ export default function Perfil() {
   const cargar = useCallback(async () => {
     try {
       setCuidadores(await api.listarCuidadoresDelPaciente());
+      setErrorDeCuidadores(false);
     } catch {
-      // Es informacion secundaria: no vale la pena romper la pantalla.
+      // No rompe la pantalla —las preferencias de accesibilidad tienen
+      // que seguir siendo alcanzables aunque no haya red—, pero tampoco
+      // se calla: la seccion dice que no pudo comprobarse.
+      setErrorDeCuidadores(true);
     }
   }, [api]);
 
@@ -139,12 +153,13 @@ export default function Perfil() {
     setError(null);
 
     const anteriores = cuidadores;
-    setCuidadores((lista) =>
-      lista.map((c) =>
-        c.vinculoId === vinculo.vinculoId
-          ? { ...c, permisos: { ...c.permisos, [clave]: valor } }
-          : c,
-      ),
+    setCuidadores(
+      (lista) =>
+        lista?.map((c) =>
+          c.vinculoId === vinculo.vinculoId
+            ? { ...c, permisos: { ...c.permisos, [clave]: valor } }
+            : c,
+        ) ?? null,
     );
 
     try {
@@ -184,8 +199,8 @@ export default function Perfil() {
     }
   };
 
-  const pendientes = cuidadores.filter((c) => c.estado === 'PENDIENTE');
-  const activos = cuidadores.filter((c) => c.estado === 'ACEPTADO');
+  const pendientes = (cuidadores ?? []).filter((c) => c.estado === 'PENDIENTE');
+  const activos = (cuidadores ?? []).filter((c) => c.estado === 'ACEPTADO');
 
   return (
     <ScrollView
@@ -206,7 +221,7 @@ export default function Perfil() {
         <Texto color={colores.textoSuave}>{perfil?.email}</Texto>
         {perfil?.edad ? (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            {perfil.edad} años
+            {perfil.edad} anos
           </Texto>
         ) : null}
       </Tarjeta>
@@ -268,6 +283,17 @@ export default function Perfil() {
           Las personas que invites podran ver como va tu tratamiento. Tu decides quien entra y
           puedes quitarles el acceso en cualquier momento.
         </Texto>
+
+        {errorDeCuidadores ? (
+          <Aviso
+            mensaje="No pudimos comprobar quien tiene acceso a tu informacion. Revisa tu conexion y vuelve a entrar a esta pantalla."
+            tono="error"
+          />
+        ) : cuidadores !== null && cuidadores.length === 0 ? (
+          <Texto variante="pequeno" color={colores.textoSuave}>
+            Ahora mismo nadie tiene acceso a tu tratamiento.
+          </Texto>
+        ) : null}
 
         {pendientes.map((cuidador) => (
           <View key={cuidador.vinculoId} style={{ gap: espacio.sm, marginTop: espacio.md }}>
@@ -405,10 +431,6 @@ function Interruptor({
       />
     </Pressable>
   );
-}
-
-function primerNombre(nombre: string): string {
-  return nombre.split(' ')[0] ?? nombre;
 }
 
 function formatearGracia(minutos: number): string {
