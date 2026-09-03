@@ -8,12 +8,13 @@ skinparam backgroundColor #FFFFFF
 skinparam shadowing false
 skinparam defaultFontName Helvetica
 skinparam defaultFontSize 12
+skinparam ArrowColor #4E5C59
 skinparam roundcorner 6
 
 skinparam class {
-  BorderColor #0E6E62
+  BorderColor #185A66
   BackgroundColor #FFFFFF
-  HeaderBackgroundColor #DDEDE9
+  HeaderBackgroundColor #E1EFF2
   FontColor #101817
   AttributeFontColor #4E5C59
   BorderThickness 1.2

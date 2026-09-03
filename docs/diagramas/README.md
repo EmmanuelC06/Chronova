@@ -2,24 +2,24 @@
 
 Ocho diagramas generados **a partir del código real**, no de un boceto previo. Cada nombre de clase, método, columna y estado que aparece en ellos existe en el proyecto.
 
-Eso importa para la sustentación: si el profesor pregunta «¿dónde está esto en el código?», la respuesta existe. Pero lo contrario también importa, y por eso está la tabla de abajo: tres diagramas se han quedado **incompletos** —lo que dibujan es cierto, pero les falta funcionalidad que ya existe—.
+Eso importa para la sustentación: si el profesor pregunta «¿dónde está esto en el código?», la respuesta existe.
 
 > ### Estado de sincronización con el código
 >
 > Un diagrama desactualizado es peor que ninguno, porque se defiende con la misma confianza. Así que aquí va el estado real, diagrama por diagrama:
 >
-> | Diagrama | Al día | Qué le falta |
+> | Diagrama | Al día | Última revisión |
 > |---|---|---|
-> | 01 Casos de uso — Paciente | **No** | Recuperar la contraseña (RF-33, RF-34) |
-> | 02 Casos de uso — Cuidador | **No** | Registrar, modificar, suspender y reabastecer medicamentos; recuperar la contraseña |
-> | 03 Clases del dominio | Sí | — |
-> | 04 Estados de la Toma | Sí | — |
-> | 05 Secuencia — Confirmar toma | Sí | — |
-> | 06 Secuencia — Agenda del día | Sí | — |
-> | 07 Componentes | **No** | `Dispositivo` y `SolicitudDeRecuperacion`; los puertos de correo y códigos; los adaptadores de notificación |
-> | 08 Entidad-relación | Sí | — |
+> | 01 Casos de uso — Paciente | Sí | 3 sep 2026 |
+> | 02 Casos de uso — Cuidador | Sí | 3 sep 2026 |
+> | 03 Clases del dominio | Sí | 3 sep 2026 |
+> | 04 Estados de la Toma | Sí | 3 sep 2026 |
+> | 05 Secuencia — Confirmar toma | Sí | 3 sep 2026 |
+> | 06 Secuencia — Agenda del día | Sí | 3 sep 2026 |
+> | 07 Componentes | Sí | 3 sep 2026 |
+> | 08 Entidad-relación | Sí | 3 sep 2026 |
 >
-> Los tres que faltan quedaron atrás al añadir la recuperación de contraseña, los dispositivos y la gestión de medicación por parte del cuidador. Al añadir una entidad, una tabla o un caso de uso, actualizar aquí en el mismo commit.
+> Los ocho estuvieron desactualizados en algún momento —01, 02 y 07 quedaron atrás al añadir la recuperación de contraseña, los dispositivos y la gestión de medicación por parte del cuidador—, y por eso existe esta tabla. **Al añadir una entidad, una tabla o un caso de uso, actualizar el diagrama y esta fila en el mismo commit.**
 
 ---
 
@@ -40,19 +40,22 @@ Cada diagrama viene en tres formatos:
 ### 01 · Casos de uso — Paciente
 `01-casos-de-uso-paciente.png`
 
-Los 17 casos de uso del actor principal, agrupados en cuatro bloques: acceso y configuración, gestión del tratamiento, seguimiento diario y control de acompañamiento.
+Los 19 casos de uso del actor principal, agrupados en cuatro bloques: acceso y configuración, gestión del tratamiento, seguimiento diario y control de acompañamiento.
 
-Va separado del diagrama del cuidador a propósito. Un solo diagrama con los dos actores y 25 casos de uso resultaba ilegible: las líneas se cruzaban por toda la hoja. Dividirlo por actor es una práctica aceptada y aquí además refleja algo cierto del sistema — paciente y cuidador usan aplicaciones muy distintas dentro de la misma app.
+Dos de ellos son los últimos en incorporarse y conviene poder situarlos: `Recuperar el acceso con un código` (el paciente que olvida la contraseña recibe seis dígitos por correo, y la nota recoge las tres reglas que lo hacen seguro) y `Registrar este teléfono para los avisos`, que es lo que conecta la cuenta con el aparato concreto donde suenan las notificaciones.
+
+Va separado del diagrama del cuidador a propósito. Un solo diagrama con los dos actores y más de 30 casos de uso resultaba ilegible: las líneas se cruzaban por toda la hoja. Dividirlo por actor es una práctica aceptada y aquí además refleja algo cierto del sistema — paciente y cuidador usan aplicaciones muy distintas dentro de la misma app.
 
 ### 02 · Casos de uso — Cuidador y Sistema
 `02-casos-de-uso-cuidador.png`
 
-El cuidador y el actor «Sistema», que representa la tarea programada del servidor.
+Los 12 casos de uso del cuidador y los 2 del actor «Sistema», que representa la tarea programada del servidor.
 
-Dos detalles que conviene poder explicar:
+Tres detalles que conviene poder explicar:
 
 - `Solicitar acceso a un paciente` tiene una dependencia hacia el actor Paciente: el acceso no existe hasta que el paciente lo aprueba.
 - `Cerrar tomas sin respuesta` incluye `Notificar al cuidador`. Es la relación `<<include>>` porque el aviso ocurre siempre que hay tomas cerradas, no es opcional.
+- El bloque `Gestión del tratamiento` —registrar, modificar, suspender y reabastecer— **no está disponible por defecto**. Los cuatro exigen el permiso `puedeGestionarMedicamentos`, que nace desactivado al crear el vínculo y que solo el paciente puede conceder. Es la diferencia importante entre este diagrama y el del paciente: el cuidador puede hacer casi lo mismo, pero nada de ello ocurre sin que el paciente lo autorice antes. La nota del diagrama lo dice y vale la pena poder defenderlo, porque es una decisión de diseño, no una limitación técnica.
 
 ### 03 · Diagrama de clases del dominio
 `03-clases-dominio.png`
@@ -97,9 +100,13 @@ Documenta también la resolución del problema de concurrencia: qué pasa cuando
 ### 07 · Componentes — Arquitectura hexagonal
 `07-componentes-hexagonal.png`
 
-Las cinco capas y cómo se conectan mediante puertos e interfaces.
+Las cinco capas y cómo se conectan mediante los seis puertos.
 
 Es el diagrama que responde «¿por qué hexagonal?». Se ve que hay **dos adaptadores distintos cumpliendo el mismo puerto de repositorios** (PostgreSQL y en memoria), y que la aplicación funciona con cualquiera de los dos sin cambiar una línea del dominio.
+
+Hay un detalle que conviene notar porque es el que más se pregunta: **el puerto de repositorios lo declara el dominio; los otros cinco los declara la aplicación.** No es un descuido. Guardar un paciente es una necesidad de la propia entidad —el dominio no sabría existir sin poder recuperarse—, mientras que mandar un correo o firmar un token son necesidades del caso de uso. La carpeta donde vive cada interfaz dice a quién le hace falta.
+
+`NotificadorCompuesto` merece la misma atención: es un adaptador que cumple el puerto `Notificador` y que por dentro reparte el aviso entre otros notificadores, aislando el fallo de cada uno. Por eso en desarrollo el aviso se ve en la consola del servidor y en producción llega además al teléfono, sin que ningún caso de uso se entere del cambio. Es el patrón Composite, y funciona precisamente porque el compuesto cumple la misma interfaz que sus partes.
 
 ### 08 · Modelo entidad-relación
 `08-entidad-relacion.png`
@@ -159,11 +166,11 @@ Tamaños aproximados, por si necesitas planear la maquetación:
 
 | Diagrama | Proporción | Orientación sugerida |
 |---|---|---|
-| 01 Casos de uso — Paciente | 904 × 1350 | Vertical |
-| 02 Casos de uso — Cuidador | 1266 × 825 | Horizontal |
+| 01 Casos de uso — Paciente | 956 × 1512 | Vertical |
+| 02 Casos de uso — Cuidador | 1456 × 1164 | Vertical |
 | 03 Clases del dominio | 1576 × 2716 | Vertical, página completa |
 | 04 Estados de la Toma | 1618 × 657 | Horizontal, apaisado |
 | 05 Secuencia — Confirmar toma | 1932 × 1486 | Página completa |
 | 06 Secuencia — Agenda del día | 1654 × 1085 | Horizontal |
-| 07 Componentes | 1569 × 1112 | Horizontal |
+| 07 Componentes | 2569 × 1166 | Horizontal, apaisado |
 | 08 Entidad-relación | 2612 × 1309 | Horizontal, página completa |

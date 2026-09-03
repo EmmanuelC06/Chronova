@@ -10,11 +10,11 @@ skinparam defaultFontSize 13
 skinparam linetype ortho
 
 skinparam actor {
-  BorderColor #0E6E62
+  BorderColor #185A66
   BackgroundColor #FFFFFF
 }
 skinparam usecase {
-  BorderColor #0E6E62
+  BorderColor #185A66
   BackgroundColor #F2F8F7
   FontColor #101817
   BorderThickness 1.2
@@ -42,6 +42,8 @@ package "Acceso y configuracion" {
   usecase "Registrarse" as UC01
   usecase "Iniciar sesion" as UC02
   usecase "Ajustar preferencias\nde accesibilidad" as UC04
+  usecase "Recuperar el acceso\ncon un codigo" as UC33
+  usecase "Registrar este telefono\npara los avisos" as UC29
 }
 
 package "Gestion del tratamiento" {
@@ -70,6 +72,8 @@ package "Control de acompanamiento" {
 PAC --> UC01
 PAC --> UC02
 PAC --> UC04
+PAC --> UC33
+PAC --> UC29
 PAC --> UC05
 PAC --> UC06
 PAC --> UC07
@@ -98,6 +102,13 @@ note right of UC18
   Disponible siempre.
   El paciente es el dueno
   de sus datos de salud.
+end note
+
+
+note right of UC33
+  El codigo son seis digitos que llegan
+  por correo. Caduca a los 30 minutos,
+  sirve UNA vez y admite cinco intentos.
 end note
 
 @enduml

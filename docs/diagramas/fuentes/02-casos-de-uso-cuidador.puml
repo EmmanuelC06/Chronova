@@ -10,11 +10,11 @@ skinparam defaultFontSize 13
 skinparam linetype ortho
 
 skinparam actor {
-  BorderColor #0E6E62
+  BorderColor #185A66
   BackgroundColor #FFFFFF
 }
 skinparam usecase {
-  BorderColor #0E6E62
+  BorderColor #185A66
   BackgroundColor #F2F8F7
   FontColor #101817
   BorderThickness 1.2
@@ -43,6 +43,7 @@ actor "Paciente" as PAC
 package "Acceso" {
   usecase "Registrarse" as UC01
   usecase "Iniciar sesion" as UC02
+  usecase "Recuperar el acceso\ncon un codigo" as UC33
 }
 
 package "Vinculacion" {
@@ -54,6 +55,13 @@ package "Seguimiento" {
   usecase "Consultar medicamentos\ndel paciente" as UC06
   usecase "Consultar historial\nde adherencia" as UC14
   usecase "Registrar toma en\nnombre del paciente" as UC11
+}
+
+package "Gestion del tratamiento" {
+  usecase "Registrar medicamento" as UC05
+  usecase "Modificar medicamento" as UC07
+  usecase "Suspender medicamento" as UC08
+  usecase "Reabastecer inventario" as UC09
 }
 
 package "Procesos automaticos" {
@@ -68,6 +76,11 @@ CUI --> UC19
 CUI --> UC06
 CUI --> UC14
 CUI --> UC11
+CUI --> UC33
+CUI --> UC05
+CUI --> UC07
+CUI --> UC08
+CUI --> UC09
 
 SIS --> UC20
 UC20 ..> UC21 : <<include>>
@@ -81,10 +94,19 @@ note bottom of UC19
   luego por adherencia ascendente.
 end note
 
-note bottom of UC11
+note right of UC11
   Solo si el paciente concedio
   el permiso puedeRegistrarTomas.
   Por defecto NO lo tiene.
+end note
+
+note right of UC08
+  Los cuatro exigen el permiso
+  <b>puedeGestionarMedicamentos</b>, que
+  viene DESACTIVADO al crear el vinculo:
+  cambiar la medicacion de otra persona
+  es la accion mas delicada del sistema
+  y el paciente la concede a proposito.
 end note
 
 note bottom of UC20

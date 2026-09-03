@@ -7,8 +7,10 @@ const fs = require('fs');
 // Letter, margenes del entregable: 1.417" izq, 1" el resto.
 const ANCHO_CONTENIDO = 8760; // DXA
 const FUENTE = 'Cambria';
-const VERDE = '0B5563';
-const GRIS_CABECERA = 'E3EFF2';
+// El teal exacto del logo, el mismo de la interfaz (mobile/src/ui/tema.ts).
+// Si cambia alli, cambia aqui: el documento y la app se presentan juntos.
+const VERDE = '185A66';
+const GRIS_CABECERA = 'E1EFF2';
 const GRIS_ALTERNO = 'F7F9FA';
 
 const t = (text, opts = {}) => new TextRun({ text, font: FUENTE, size: opts.size ?? 24, bold: opts.bold, italics: opts.italics, color: opts.color });

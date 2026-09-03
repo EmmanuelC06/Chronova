@@ -14,10 +14,10 @@ skinparam sequence {
   ArrowColor #101817
   LifeLineBorderColor #A9BAB7
   LifeLineBackgroundColor #EDF2F1
-  ParticipantBorderColor #0E6E62
+  ParticipantBorderColor #185A66
   ParticipantBackgroundColor #FFFFFF
   ParticipantFontColor #101817
-  ActorBorderColor #0E6E62
+  ActorBorderColor #185A66
   ActorBackgroundColor #FFFFFF
   BoxBorderColor #C2CFCC
   BoxFontColor #4E5C59

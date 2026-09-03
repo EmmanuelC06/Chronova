@@ -11,9 +11,12 @@ skinparam defaultFontSize 12
 skinparam roundcorner 8
 skinparam nodesep 30
 skinparam ranksep 50
+' Lineas en angulo recto en vez de curvas: en un diagrama de capas
+' las curvas se cruzan y no se sabe de donde sale cada una.
+skinparam linetype ortho
 
 skinparam component {
-  BorderColor #0E6E62
+  BorderColor #185A66
   BackgroundColor #FFFFFF
   FontColor #101817
   BorderThickness 1.3
@@ -39,6 +42,11 @@ skinparam database {
   BorderColor #40606E
   BackgroundColor #F4F8FA
 }
+skinparam cloud {
+  BorderColor #40606E
+  BackgroundColor #F4F8FA
+  FontColor #40606E
+}
 
 title <b>Chronova — Arquitectura hexagonal (puertos y adaptadores)</b>\n<size:11>Las dependencias apuntan siempre hacia adentro: el dominio no conoce a nadie</size>
 
@@ -51,7 +59,7 @@ package "1 · Adaptadores de ENTRADA" as ENT #F7FAFB {
 
 ' ================= 2. APLICACION =================
 package "2 · APLICACION" as APL #FBF9F5 {
-  component "Casos de uso\n\nAuth · Medicamentos\nTomas · Cuidadores" as UC
+  component "Casos de uso\n\nAuth · Medicamentos · Tomas\nCuidadores · Dispositivos" as UC
   component "PoliticaDeAcceso\npunto unico de control" as POL
 }
 
@@ -62,6 +70,8 @@ package "3 · DOMINIO — cero dependencias externas" as DOM #F2F8F7 {
   component "Medicamento\nDosis · Stock · Frecuencia" as E3
   component "Toma\nResumenDeAdherencia" as E4
   component "Vinculo" as E5
+  component "Dispositivo" as E6
+  component "SolicitudDeRecuperacion" as E7
 }
 
 ' ================= 4. PUERTOS =================
@@ -70,6 +80,8 @@ package "4 · PUERTOS" as PUE #FBF1E6 {
   interface "Seguridad" as ISEG
   interface "Sistema" as ISIS
   interface "Notificador" as INOT
+  interface "Correo" as ICOR
+  interface "Codigos" as ICOD
 }
 
 ' ================= 5. SALIDA =================
@@ -78,10 +90,13 @@ package "5 · Adaptadores de SALIDA" as SAL #F7FAFB {
   component "Repositorios\nen memoria" as A2
   component "CifradorBcrypt\nServicioDeTokensJwt" as A3
   component "RelojDelSistema\nGeneradorDeIdsUuid" as A4
-  component "NotificadorEnConsola" as A5
+  component "NotificadorCompuesto\nExpoPush + Consola" as A5
+  component "CorreoResendHttp\nCorreoEnConsola" as A6
+  component "GeneradorDeCodigosSeguro" as A7
 }
 
 database "PostgreSQL 16" as DB
+cloud "Expo Push\nResend" as NUBE
 
 ' ---------------- 1 -> 2 ----------------
 APP --> HTTP
@@ -93,14 +108,18 @@ UC --> E1
 UC --> E2
 UC --> E3
 UC --> E4
+UC --> E6
+UC --> E7
 UC --> POL
 POL --> E5
 
 ' ---------------- 3/2 declaran puertos ----------------
-DOM ..> IREPO : declara
+DOM ..> IREPO
 UC ..> ISEG
 UC ..> ISIS
 UC ..> INOT
+UC ..> ICOR
+UC ..> ICOD
 
 ' ---------------- 5 implementa 4 ----------------
 IREPO <|.. A1
@@ -108,8 +127,12 @@ IREPO <|.. A2
 ISEG <|.. A3
 ISIS <|.. A4
 INOT <|.. A5
+ICOR <|.. A6
+ICOD <|.. A7
 
 A1 --> DB : SQL parametrizado
+A5 --> NUBE : HTTPS
+A6 --> NUBE : HTTPS
 
 ' ---------------- notas ----------------
 note right of DOM
@@ -124,14 +147,33 @@ note right of PUE
   Quien decide que adaptador se conecta a cada
   uno es un solo archivo: <b>contenedor.ts</b>
   (composition root).
+
+  Los nombres cortos son los de la familia; en el
+  codigo son <b>Notificador</b>, <b>EnviadorDeCorreo</b>,
+  <b>GeneradorDeCodigos</b>, <b>CifradorDeContrasenas</b>,
+  <b>ServicioDeTokens</b>, <b>Reloj</b> y <b>GeneradorDeIds</b>.
+
+  <b>Repositorios</b> los declara el DOMINIO
+  (src/domain/*/RepositorioDe*.ts); los otros
+  cinco los declara la APLICACION
+  (src/application/ports/). La diferencia importa:
+  guardar un paciente es una necesidad del dominio,
+  mandar un correo es una necesidad del caso de uso.
 end note
 
 note right of SAL
   Los repositorios en memoria cumplen los mismos
   puertos que los de PostgreSQL. Por eso la
   aplicacion corre entera sin base de datos
-  (PERSISTENCE=memory) y las 71 pruebas terminan
-  en menos de 2 segundos.
+  (PERSISTENCE=memory) y las 146 pruebas terminan
+  en menos de 3 segundos.
+
+  Cada puerto tiene una pareja: uno real y uno de
+  consola. <b>NotificadorCompuesto</b> es el mismo puerto
+  otra vez —reparte el aviso entre varios destinos y
+  aisla el fallo de cada uno—, de modo que en desarrollo
+  se ve el aviso en el servidor y en produccion llega
+  al telefono, sin cambiar un solo caso de uso.
 end note
 
 @enduml
