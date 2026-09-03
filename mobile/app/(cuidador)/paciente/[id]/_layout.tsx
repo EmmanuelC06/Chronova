@@ -1,8 +1,8 @@
-import { Text } from 'react-native';
 import { ScrollView } from 'react-native';
 import { Stack, Tabs, useLocalSearchParams } from 'expo-router';
 
 import { Aviso, Cargando } from '../../../../src/ui/componentes/basicos';
+import { Icono } from '../../../../src/ui/componentes/Icono';
 import {
   ProveedorDePacienteObservado,
   usePacienteObservado,
@@ -82,8 +82,16 @@ function Contenido() {
           headerShown: false,
           tabBarActiveTintColor: colores.primario,
           tabBarInactiveTintColor: colores.textoSuave,
-          tabBarLabelStyle: { fontSize: 13, fontWeight: '700', paddingBottom: 4 },
-          tabBarStyle: { height: 76, paddingTop: 8, backgroundColor: colores.superficie },
+          tabBarLabelStyle: {
+            fontSize: 13,
+            fontWeight: '700',
+            paddingBottom: 4,
+          },
+          tabBarStyle: {
+            height: 76,
+            paddingTop: 8,
+            backgroundColor: colores.superficie,
+          },
           sceneStyle: { backgroundColor: colores.fondo },
         }}
       >
@@ -91,21 +99,21 @@ function Contenido() {
           name="hoy"
           options={{
             title: 'Hoy',
-            tabBarIcon: ({ color }) => <IconoDeTexto simbolo="☀" color={color} />,
+            tabBarIcon: ({ color }) => <Icono nombre="hoy" color={color} />,
           }}
         />
         <Tabs.Screen
           name="tratamiento"
           options={{
             title: 'Tratamiento',
-            tabBarIcon: ({ color }) => <IconoDeTexto simbolo="💊" color={color} />,
+            tabBarIcon: ({ color }) => <Icono nombre="pastilla" color={color} />,
           }}
         />
         <Tabs.Screen
           name="historial"
           options={{
             title: 'Historial',
-            tabBarIcon: ({ color }) => <IconoDeTexto simbolo="📊" color={color} />,
+            tabBarIcon: ({ color }) => <Icono nombre="historial" color={color} />,
           }}
         />
       </Tabs>
@@ -136,7 +144,3 @@ const MENSAJE_DE_BLOQUEO: Record<
     tono: 'advertencia',
   }),
 };
-
-function IconoDeTexto({ simbolo, color }: { simbolo: string; color: string }) {
-  return <Text style={{ fontSize: 22, color }}>{simbolo}</Text>;
-}

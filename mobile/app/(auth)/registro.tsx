@@ -186,7 +186,6 @@ function OpcionDeRol({
       }}
     >
       <Texto negrita color={seleccionada ? colores.primarioOscuro : colores.texto}>
-        {seleccionada ? '● ' : '○ '}
         {titulo}
       </Texto>
       <Texto variante="pequeno" color={colores.textoSuave}>

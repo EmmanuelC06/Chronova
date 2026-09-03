@@ -67,7 +67,9 @@ export default function Pacientes() {
 
     setOcupado(true);
     try {
-      await api.solicitarVinculo({ emailDeLaOtraParte: emailDelPaciente.trim() });
+      await api.solicitarVinculo({
+        emailDeLaOtraParte: emailDelPaciente.trim(),
+      });
       setEmailDelPaciente('');
       setExito('Solicitud enviada. Podras ver su seguimiento cuando el paciente la acepte.');
       await cargar();
@@ -86,7 +88,11 @@ export default function Pacientes() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refrescando}
@@ -99,7 +105,7 @@ export default function Pacientes() {
       }
     >
       <View style={{ gap: espacio.xs }}>
-        <Texto variante="subtitulo" negrita>
+        <Texto variante="titulo" peso="negrita">
           Hola, {perfil?.nombre?.split(' ')[0] ?? 'cuidador'}
         </Texto>
         <Texto color={colores.textoSuave}>
@@ -126,7 +132,9 @@ export default function Pacientes() {
       ))}
 
       <Tarjeta>
-        <Texto negrita>Acompanar a otro paciente</Texto>
+        <Texto variante="subtitulo" peso="semi">
+          Acompanar a otro paciente
+        </Texto>
         <Texto variante="pequeno" color={colores.textoSuave}>
           El paciente debera aceptar tu solicitud antes de que puedas ver su informacion. Es su
           decision, no la tuya.
@@ -158,13 +166,10 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
 
   return (
     <Tarjeta
-      colorDeBorde={pendiente ? colores.textoSuave : nivel.color}
       // Mientras la solicitud no se acepte no hay nada que abrir, y una
       // tarjeta que se hunde al tocarla y no lleva a ningun lado se lee
       // como que la app fallo.
-      onPress={
-        pendiente ? undefined : () => router.push(`/paciente/${paciente.pacienteId}/hoy`)
-      }
+      onPress={pendiente ? undefined : () => router.push(`/paciente/${paciente.pacienteId}/hoy`)}
       // Una tarjeta pulsable se lee como UN solo elemento: el lector de
       // pantalla anuncia esta frase y ya no entra en su contenido. Por
       // eso la etiqueta tiene que traer los datos, no solo la accion.
@@ -174,14 +179,20 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
       // panel existe para contarle.
       descripcionAccesible={descripcionParaLector(paciente)}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Texto variante="subtitulo" negrita>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Texto variante="subtitulo" peso="semi">
           {paciente.nombre}
         </Texto>
         {paciente.requiereAtencion ? (
           <Insignia
             texto="Revisar"
-            icono="!"
+            icono="aviso"
             color={colores.peligro}
             fondo={colores.peligroSuave}
           />
@@ -195,16 +206,28 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
         />
       ) : (
         <>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: espacio.sm }}>
-            <Texto variante="titulo" negrita color={nivel.color}>
-              {paciente.adherencia.porcentaje}%
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'baseline',
+              gap: espacio.sm,
+            }}
+          >
+            <Texto variante="cifra" peso="negrita">
+              {paciente.adherencia.porcentaje}
             </Texto>
-            <Insignia texto={nivel.etiqueta} color={nivel.color} fondo={nivel.fondo} />
+            <Texto variante="subtitulo" peso="semi" color={colores.textoTenue}>
+              %
+            </Texto>
+            <View style={{ flex: 1 }} />
+            <Texto variante="rotulo" peso="semi" color={nivel.color}>
+              {nivel.etiqueta}
+            </Texto>
           </View>
 
           <Texto variante="pequeno" color={colores.textoSuave}>
-            Ultimos 7 dias: {paciente.adherencia.tomadas} tomadas,{' '}
-            {paciente.adherencia.omitidas} sin tomar, {paciente.adherencia.pendientes} pendientes.
+            Ultimos 7 dias: {paciente.adherencia.tomadas} tomadas, {paciente.adherencia.omitidas}{' '}
+            sin tomar, {paciente.adherencia.pendientes} pendientes.
           </Texto>
 
           <Texto variante="pequeno" color={colores.textoSuave}>
@@ -218,8 +241,8 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
             Ultima actividad: {tiempoRelativo(paciente.ultimaActividad)}
           </Texto>
 
-          <Texto variante="pequeno" negrita color={colores.primario}>
-            Toca para ver el detalle →
+          <Texto variante="pequeno" peso="media" color={colores.primario}>
+            Toca para ver el detalle
           </Texto>
         </>
       )}

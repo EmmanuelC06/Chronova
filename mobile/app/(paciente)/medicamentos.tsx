@@ -34,9 +34,7 @@ export default function Medicamentos() {
       setMedicamentos(await api.listarMedicamentos());
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi
-          ? problema.message
-          : 'No pudimos cargar tus medicamentos.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos cargar tus medicamentos.',
       );
     } finally {
       setCargando(false);
@@ -56,9 +54,7 @@ export default function Medicamentos() {
       await cargar();
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi
-          ? problema.message
-          : 'No pudimos actualizar el inventario.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos actualizar el inventario.',
       );
     }
   };
@@ -68,8 +64,10 @@ export default function Medicamentos() {
   // paciente o quien lo acompana. `null` significa "sobre mi mismo", y
   // es lo que hace que los mensajes vayan en segunda persona.
   const reabastecer = (medicamento: Medicamento) =>
-    pedirReabastecimiento(medicamento, null, (unidades) =>
-      void aplicarReabastecimiento(medicamento, unidades),
+    pedirReabastecimiento(
+      medicamento,
+      null,
+      (unidades) => void aplicarReabastecimiento(medicamento, unidades),
     );
 
   const suspender = (medicamento: Medicamento) =>
@@ -88,11 +86,19 @@ export default function Medicamentos() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
     >
       {error ? <Aviso mensaje={error} tono="error" /> : null}
 
-      <Boton titulo="+ Agregar medicamento" onPress={() => router.push('/medicamento/nuevo')} />
+      <Boton
+        titulo="Agregar medicamento"
+        icono="agregar"
+        onPress={() => router.push('/medicamento/nuevo')}
+      />
 
       {medicamentos.length === 0 ? (
         <EstadoVacio
@@ -104,9 +110,12 @@ export default function Medicamentos() {
       {medicamentos.map((medicamento) => (
         <Tarjeta
           key={medicamento.id}
-          colorDeBorde={medicamento.necesitaReabastecimiento ? colores.advertencia : colores.primario}
+          // Solo se tine el borde de lo excepcional. Cuando TODAS las
+          // tarjetas llevaban color, la de "por agotarse" no destacaba de
+          // nada: solo cambiaba de un color fuerte a otro.
+          colorDeBorde={medicamento.necesitaReabastecimiento ? colores.advertencia : undefined}
         >
-          <Texto variante="subtitulo" negrita>
+          <Texto variante="subtitulo" peso="semi">
             {medicamento.nombre}
           </Texto>
 

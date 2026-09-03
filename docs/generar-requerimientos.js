@@ -7,9 +7,9 @@ const fs = require('fs');
 // Letter, margenes del entregable: 1.417" izq, 1" el resto.
 const ANCHO_CONTENIDO = 8760; // DXA
 const FUENTE = 'Cambria';
-const VERDE = '0E6E62';
-const GRIS_CABECERA = 'DDEDE9';
-const GRIS_ALTERNO = 'F4F7F6';
+const VERDE = '0B5563';
+const GRIS_CABECERA = 'E3EFF2';
+const GRIS_ALTERNO = 'F7F9FA';
 
 const t = (text, opts = {}) => new TextRun({ text, font: FUENTE, size: opts.size ?? 24, bold: opts.bold, italics: opts.italics, color: opts.color });
 const p = (text, opts = {}) => new Paragraph({
@@ -139,7 +139,7 @@ const RNF = [
   ['RNF-14', 'Disponibilidad', 'Las alarmas de toma sonarán aunque el dispositivo no tenga conexión a internet.', 'Las alarmas se programan localmente en el teléfono, con siete días de antelación, de modo que suenan sin conexión y sin necesidad de abrir la aplicación. Verificado por diseño y en dispositivo.'],
   ['RNF-15', 'Portabilidad', 'El comportamiento del sistema no dependerá de la zona horaria en que corra el servidor.', 'La suite completa se ejecuta con idéntico resultado bajo seis husos, de UTC+14 a UTC−9. Verificado.'],
   ['RNF-16', 'Mantenibilidad', 'El núcleo de reglas de negocio no dependerá de ninguna librería externa.', 'Cero importaciones externas en el directorio del dominio. Verificado.'],
-  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '143 pruebas en menos de dos segundos. Verificado.'],
+  ['RNF-17', 'Mantenibilidad', 'El dominio y los casos de uso contarán con pruebas automatizadas que corran sin base de datos.', '146 pruebas en menos de dos segundos. Verificado.'],
   ['RNF-18', 'Mantenibilidad', 'Toda consulta SQL residirá en un único archivo del proyecto.', 'Inspección del directorio de persistencia. Verificado.'],
   ['RNF-19', 'Portabilidad', 'El mecanismo de persistencia será intercambiable sin modificar el dominio ni los casos de uso.', 'La aplicación funciona completa en memoria o con PostgreSQL cambiando una variable. Verificado.'],
   ['RNF-20', 'Compatibilidad', 'La aplicación móvil funcionará sobre Android mediante Expo y el servidor sobre Node.js 20 o superior.', 'Ejecución sobre un dispositivo Android real mediante una compilación de desarrollo, más verificación de tipos y compilación del backend. Verificado.'],
@@ -223,8 +223,8 @@ const doc = new Document({
       p('Los criterios están redactados de forma medible a propósito. Un requerimiento como «la aplicación debe ser fácil de usar» no se puede verificar ni discutir; «el texto base no será inferior a 18 puntos y será ampliable hasta un 145 %» se comprueba abriendo la aplicación.'),
 
       h1('Trazabilidad'),
-      p('Cada requerimiento funcional puede rastrearse hasta el archivo que lo implementa y hasta la prueba automatizada que lo verifica. Los nombres de la última columna corresponden a archivos TypeScript de los directorios de casos de uso y de dominio del backend, salvo AlarmasExpo, que pertenece a la aplicación móvil.'),
-      p('Las pruebas correspondientes se encuentran en los archivos dominio.test.ts, zonaHoraria.test.ts, casosDeUso.test.ts y notificaciones.test.ts del directorio de pruebas del backend, y se ejecutan con el comando npm test.'),
+      p('Cada requerimiento funcional puede rastrearse hasta el archivo que lo implementa y hasta la prueba automatizada que lo verifica. Los nombres de la última columna corresponden a archivos TypeScript de los directorios de casos de uso y de dominio del backend, con tres excepciones: NotificadorExpoPush pertenece a la capa de infraestructura del backend, y AlarmasExpo y NavegacionPorNotificaciones pertenecen a la aplicación móvil.'),
+      p('Las pruebas correspondientes se encuentran en los archivos dominio.test.ts, zonaHoraria.test.ts, casosDeUso.test.ts, notificaciones.test.ts, recuperacion.test.ts y sesiones.test.ts del directorio de pruebas del backend, y se ejecutan con el comando npm test.'),
     ],
   }],
 });

@@ -4,7 +4,8 @@ import type { ElementoDeAgenda } from '../../../../src/dominio/modelos';
 import {
   Aviso,
   Boton,
-  Insignia,
+  IconoDeEstado,
+  Rotulo,
   Tarjeta,
   Texto,
 } from '../../../../src/ui/componentes/basicos';
@@ -45,7 +46,11 @@ export default function Hoy() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refrescando}
@@ -57,11 +62,24 @@ export default function Hoy() {
       {error ? <Aviso mensaje={error} tono="error" /> : null}
 
       {/* ---- Como va ---- */}
-      <Tarjeta colorDeBorde={nivel.color}>
-        <Texto variante="titulo" negrita color={nivel.color}>
-          {paciente.adherencia.porcentaje}%
+      <Tarjeta>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'baseline',
+            gap: espacio.xs,
+          }}
+        >
+          <Texto variante="cifra" peso="negrita">
+            {paciente.adherencia.porcentaje}
+          </Texto>
+          <Texto variante="subtitulo" peso="semi" color={colores.textoTenue}>
+            %
+          </Texto>
+        </View>
+        <Texto variante="rotulo" peso="semi" color={nivel.color}>
+          {nivel.etiqueta}
         </Texto>
-        <Insignia texto={nivel.etiqueta} color={nivel.color} fondo={nivel.fondo} />
         <Texto variante="pequeno" color={colores.textoSuave}>
           Ultimos {DIAS_DE_RESUMEN} dias: {paciente.adherencia.tomadas} tomadas,{' '}
           {paciente.adherencia.omitidas} sin tomar, {paciente.adherencia.pendientes} pendientes.
@@ -86,16 +104,12 @@ export default function Hoy() {
       ) : null}
 
       {/* ---- Las tomas de hoy ---- */}
-      <Texto variante="subtitulo" negrita>
-        Tomas de hoy
-      </Texto>
+      <Rotulo>Tomas de hoy</Rotulo>
 
       {agenda === null ? (
         <Texto color={colores.textoSuave}>No pudimos cargar la agenda de hoy.</Texto>
       ) : agenda.elementos.length === 0 ? (
-        <Texto color={colores.textoSuave}>
-          {nombreCorto} no tiene tomas programadas para hoy.
-        </Texto>
+        <Texto color={colores.textoSuave}>{nombreCorto} no tiene tomas programadas para hoy.</Texto>
       ) : (
         <>
           {pendientes.map((elemento) => (
@@ -139,20 +153,26 @@ function TarjetaDeToma({
   const estilo = ESTILO_POR_ESTADO[elemento.estado];
 
   return (
-    <Tarjeta colorDeBorde={estilo.color}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Texto variante="subtitulo" negrita>
-          {elemento.horaProgramada}
-        </Texto>
-        <Insignia
-          texto={estilo.etiqueta}
-          icono={estilo.icono}
-          color={estilo.color}
-          fondo={estilo.fondo}
-        />
+    <Tarjeta>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: espacio.sm + espacio.xs,
+        }}
+      >
+        <IconoDeEstado nombre={estilo.icono} color={estilo.color} fondo={estilo.fondo} />
+        <View style={{ flex: 1, gap: 1 }}>
+          <Texto variante="subtitulo" peso="semi">
+            {elemento.horaProgramada}
+          </Texto>
+          <Texto variante="rotulo" peso="semi" color={estilo.color}>
+            {estilo.etiqueta}
+          </Texto>
+        </View>
       </View>
 
-      <Texto>{elemento.nombreDelMedicamento}</Texto>
+      <Texto peso="media">{elemento.nombreDelMedicamento}</Texto>
       <Texto variante="pequeno" color={colores.textoSuave}>
         {elemento.dosis}
       </Texto>
@@ -164,7 +184,13 @@ function TarjetaDeToma({
       ) : null}
 
       {puedeRegistrar && elemento.puedeConfirmarse && onAccion ? (
-        <View style={{ flexDirection: 'row', gap: espacio.sm, marginTop: espacio.sm }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: espacio.sm,
+            marginTop: espacio.sm,
+          }}
+        >
           <View style={{ flex: 1 }}>
             <Boton
               titulo="Ya la tomo"

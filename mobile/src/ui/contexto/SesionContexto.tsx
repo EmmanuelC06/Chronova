@@ -12,6 +12,7 @@ import type {
 import { ClienteChronova } from '../../infraestructura/api/ClienteChronova';
 import { SesionEnAsyncStorage } from '../../infraestructura/almacenamiento/SesionEnAsyncStorage';
 import { AlarmasExpo } from '../../infraestructura/notificaciones/AlarmasExpo';
+import { useFuenteDeLaApp } from '../tipografia';
 
 /**
  * Cuantos dias de agenda se traen para programar alarmas por adelantado.
@@ -37,6 +38,15 @@ interface ValorDeSesion {
   sesion: Sesion | null;
   perfil: Perfil | null;
   preferencias: Preferencias;
+  /**
+   * Si la tipografia de la aplicacion ya termino de cargar.
+   *
+   * Mientras es false los componentes usan la del sistema. No se bloquea
+   * la pantalla esperandola: una app de recordatorios de medicacion no
+   * puede quedarse en blanco porque una fuente tarde, y si la carga
+   * fallara del todo, la aplicacion sigue siendo perfectamente legible.
+   */
+  fuenteLista: boolean;
   api: ApiDeChronova;
   alarmas: ProgramadorDeAlarmas;
   push: RegistroDePush;
@@ -83,6 +93,11 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
   const notificacionesDelDispositivo = useMemo(() => new AlarmasExpo(), []);
   const alarmas: ProgramadorDeAlarmas = notificacionesDelDispositivo;
   const push: RegistroDePush = notificacionesDelDispositivo;
+
+  // La tipografia se pide aqui, en la raiz, y su estado viaja por el
+  // contexto igual que las preferencias: cualquier texto de la
+  // aplicacion necesita saber si ya puede usarla.
+  const fuenteLista = useFuenteDeLaApp();
 
   const [cargando, setCargando] = useState(true);
   const [sesion, setSesion] = useState<Sesion | null>(null);
@@ -295,6 +310,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       sesion,
       perfil,
       preferencias,
+      fuenteLista,
       api,
       alarmas,
       push,
@@ -310,6 +326,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       sesion,
       perfil,
       preferencias,
+      fuenteLista,
       api,
       alarmas,
       push,

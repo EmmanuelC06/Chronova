@@ -18,7 +18,13 @@ export default function Entrada() {
 
   if (cargando) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: colores.fondo }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          backgroundColor: colores.fondo,
+        }}
+      >
         <Cargando mensaje="Abriendo Chronova..." />
       </View>
     );

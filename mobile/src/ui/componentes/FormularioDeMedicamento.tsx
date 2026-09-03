@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import type { Medicamento } from '../../dominio/modelos';
-import { Aviso, Boton, Campo, Texto } from './basicos';
+import { Aviso, Boton, Campo, Rotulo, Texto } from './basicos';
 import { ALTO_TACTIL_MINIMO, colores, espacio, radio } from '../tema';
 
 /**
@@ -30,9 +30,7 @@ const HORAS_SUGERIDAS = ['07:00', '08:00', '12:00', '13:00', '18:00', '20:00', '
 export interface DatosDelFormulario {
   nombre: string;
   dosis: { cantidad: number; unidad: string };
-  frecuencia:
-    | { tipo: 'DIARIA' }
-    | { tipo: 'DIAS_DE_LA_SEMANA'; diasDeLaSemana: number[] };
+  frecuencia: { tipo: 'DIARIA' } | { tipo: 'DIAS_DE_LA_SEMANA'; diasDeLaSemana: number[] };
   horarios: string[];
   instrucciones: string | null;
   /** Solo al crear: al editar, el inventario tiene su propia pantalla. */
@@ -130,7 +128,10 @@ export function FormularioDeMedicamento({
         dosis: { cantidad: numeroDeCantidad, unidad },
         frecuencia: todosLosDias
           ? { tipo: 'DIARIA' }
-          : { tipo: 'DIAS_DE_LA_SEMANA', diasDeLaSemana: [...diasElegidos].sort() },
+          : {
+              tipo: 'DIAS_DE_LA_SEMANA',
+              diasDeLaSemana: [...diasElegidos].sort(),
+            },
         horarios,
         instrucciones: instrucciones.trim() || null,
         ...(llevaInventario
@@ -155,7 +156,11 @@ export function FormularioDeMedicamento({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={{ padding: espacio.md, gap: espacio.lg, paddingBottom: espacio.xxl }}
+        contentContainerStyle={{
+          padding: espacio.md,
+          gap: espacio.lg,
+          paddingBottom: espacio.xxl,
+        }}
         keyboardShouldPersistTaps="handled"
       >
         {error ? <Aviso mensaje={error} tono="error" /> : null}
@@ -177,9 +182,15 @@ export function FormularioDeMedicamento({
 
         {/* -------- Dosis -------- */}
         <View style={{ gap: espacio.sm }}>
-          <Texto negrita>¿Cuanto toma cada vez?</Texto>
+          <Rotulo>¿Cuanto toma cada vez?</Rotulo>
 
-          <View style={{ flexDirection: 'row', gap: espacio.sm, alignItems: 'flex-end' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: espacio.sm,
+              alignItems: 'flex-end',
+            }}
+          >
             <View style={{ width: 110 }}>
               <Campo
                 etiqueta="Cantidad"
@@ -189,11 +200,15 @@ export function FormularioDeMedicamento({
               />
             </View>
             <View style={{ flex: 1 }}>
-              <Texto variante="etiqueta" negrita color={colores.textoSuave}>
-                Unidad
-              </Texto>
+              <Rotulo>Unidad</Rotulo>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={{ flexDirection: 'row', gap: espacio.xs, paddingVertical: espacio.xs }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: espacio.xs,
+                    paddingVertical: espacio.xs,
+                  }}
+                >
                   {UNIDADES.map((opcion) => (
                     <Ficha
                       key={opcion}
@@ -210,10 +225,16 @@ export function FormularioDeMedicamento({
 
         {/* -------- Horarios -------- */}
         <View style={{ gap: espacio.sm }}>
-          <Texto negrita>¿A que horas?</Texto>
+          <Rotulo>¿A que horas?</Rotulo>
 
           {horarios.length > 0 ? (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: espacio.sm }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: espacio.sm,
+              }}
+            >
               {horarios.map((hora) => (
                 <Pressable
                   key={hora}
@@ -228,8 +249,8 @@ export function FormularioDeMedicamento({
                     backgroundColor: colores.primarioSuave,
                   }}
                 >
-                  <Texto negrita color={colores.primarioOscuro}>
-                    {hora}  ✕
+                  <Texto peso="semi" color={colores.primarioOscuro}>
+                    {hora}
                   </Texto>
                 </Pressable>
               ))}
@@ -246,7 +267,13 @@ export function FormularioDeMedicamento({
             ))}
           </View>
 
-          <View style={{ flexDirection: 'row', gap: espacio.sm, alignItems: 'flex-end' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: espacio.sm,
+              alignItems: 'flex-end',
+            }}
+          >
             <View style={{ flex: 1 }}>
               <Campo
                 etiqueta="Otra hora"
@@ -269,7 +296,7 @@ export function FormularioDeMedicamento({
 
         {/* -------- Frecuencia -------- */}
         <View style={{ gap: espacio.sm }}>
-          <Texto negrita>¿Que dias?</Texto>
+          <Rotulo>¿Que dias?</Rotulo>
 
           <View style={{ flexDirection: 'row', gap: espacio.sm }}>
             <View style={{ flex: 1 }}>
@@ -289,7 +316,13 @@ export function FormularioDeMedicamento({
           </View>
 
           {!todosLosDias ? (
-            <View style={{ flexDirection: 'row', gap: espacio.xs, justifyContent: 'space-between' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: espacio.xs,
+                justifyContent: 'space-between',
+              }}
+            >
               {DIAS.map((letra, indice) => {
                 const elegido = diasElegidos.includes(indice);
                 return (
@@ -313,12 +346,15 @@ export function FormularioDeMedicamento({
                       backgroundColor: elegido ? colores.primario : colores.superficie,
                     }}
                   >
-                    <Texto negrita color={elegido ? colores.textoInverso : colores.texto}>
+                    <Texto peso="semi" color={elegido ? colores.textoInverso : colores.texto}>
                       {letra}
                     </Texto>
                     {/* El estado nunca solo con color: tambien una marca. */}
-                    <Texto variante="pequeno" color={elegido ? colores.textoInverso : colores.borde}>
-                      {elegido ? '✓' : '·'}
+                    <Texto
+                      variante="pequeno"
+                      color={elegido ? colores.textoInverso : colores.borde}
+                    >
+                      {elegido ? 'Si' : 'No'}
                     </Texto>
                   </Pressable>
                 );
@@ -337,7 +373,7 @@ export function FormularioDeMedicamento({
 
         {!editando ? (
           <View style={{ gap: espacio.sm }}>
-            <Texto negrita>Inventario (opcional)</Texto>
+            <Rotulo>Inventario (opcional)</Rotulo>
             <Texto variante="pequeno" color={colores.textoSuave}>
               Si nos dices cuantas unidades tienes, Chronova las va descontando y te avisa antes de
               que se acaben.
@@ -402,7 +438,7 @@ function Ficha({
         backgroundColor: activa ? colores.primario : colores.superficie,
       }}
     >
-      <Texto negrita color={activa ? colores.textoInverso : colores.texto}>
+      <Texto peso="semi" color={activa ? colores.textoInverso : colores.texto}>
         {texto}
       </Texto>
     </Pressable>

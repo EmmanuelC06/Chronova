@@ -1,10 +1,25 @@
 # Diagramas UML de Chronova
 
-Ocho diagramas generados **a partir del código real**, no de un boceto previo. Cada nombre de clase, método, columna y estado que aparece en ellos existe en el proyecto: se verificó comparando los diagramas contra `backend/src/`.
+Ocho diagramas generados **a partir del código real**, no de un boceto previo. Cada nombre de clase, método, columna y estado que aparece en ellos existe en el proyecto.
 
-Eso importa para la sustentación. Si el profesor pregunta «¿dónde está esto en el código?», la respuesta siempre existe.
+Eso importa para la sustentación: si el profesor pregunta «¿dónde está esto en el código?», la respuesta existe. Pero lo contrario también importa, y por eso está la tabla de abajo: tres diagramas se han quedado **incompletos** —lo que dibujan es cierto, pero les falta funcionalidad que ya existe—.
 
-> **Última verificación contra el código: 3 de septiembre de 2026.** Los diagramas 03 y 08 se rehicieron ese día para incorporar `Dispositivo` y `SolicitudDeRecuperacion`, que se habían añadido al dominio después de dibujarlos. Esa desincronización es el riesgo real de esta carpeta: un diagrama desactualizado es peor que ninguno, porque se defiende con la misma confianza. Al añadir una entidad o una tabla, actualizar aquí en el mismo commit.
+> ### Estado de sincronización con el código
+>
+> Un diagrama desactualizado es peor que ninguno, porque se defiende con la misma confianza. Así que aquí va el estado real, diagrama por diagrama:
+>
+> | Diagrama | Al día | Qué le falta |
+> |---|---|---|
+> | 01 Casos de uso — Paciente | **No** | Recuperar la contraseña (RF-33, RF-34) |
+> | 02 Casos de uso — Cuidador | **No** | Registrar, modificar, suspender y reabastecer medicamentos; recuperar la contraseña |
+> | 03 Clases del dominio | Sí | — |
+> | 04 Estados de la Toma | Sí | — |
+> | 05 Secuencia — Confirmar toma | Sí | — |
+> | 06 Secuencia — Agenda del día | Sí | — |
+> | 07 Componentes | **No** | `Dispositivo` y `SolicitudDeRecuperacion`; los puertos de correo y códigos; los adaptadores de notificación |
+> | 08 Entidad-relación | Sí | — |
+>
+> Los tres que faltan quedaron atrás al añadir la recuperación de contraseña, los dispositivos y la gestión de medicación por parte del cuidador. Al añadir una entidad, una tabla o un caso de uso, actualizar aquí en el mismo commit.
 
 ---
 
@@ -146,9 +161,9 @@ Tamaños aproximados, por si necesitas planear la maquetación:
 |---|---|---|
 | 01 Casos de uso — Paciente | 904 × 1350 | Vertical |
 | 02 Casos de uso — Cuidador | 1266 × 825 | Horizontal |
-| 03 Clases del dominio | 1560 × 2716 | Vertical, página completa |
+| 03 Clases del dominio | 1576 × 2716 | Vertical, página completa |
 | 04 Estados de la Toma | 1618 × 657 | Horizontal, apaisado |
 | 05 Secuencia — Confirmar toma | 1932 × 1486 | Página completa |
 | 06 Secuencia — Agenda del día | 1654 × 1085 | Horizontal |
 | 07 Componentes | 1569 × 1112 | Horizontal |
-| 08 Entidad-relación | 2612 × 1218 | Horizontal, página completa |
+| 08 Entidad-relación | 2612 × 1309 | Horizontal, página completa |

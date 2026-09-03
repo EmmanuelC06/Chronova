@@ -31,7 +31,10 @@ import { espacio } from '../../src/ui/tema';
  * exige `puedeGestionarMedicamentos` sobre ese paciente.
  */
 export default function EditarMedicamento() {
-  const { id, pacienteId } = useLocalSearchParams<{ id: string; pacienteId?: string }>();
+  const { id, pacienteId } = useLocalSearchParams<{
+    id: string;
+    pacienteId?: string;
+  }>();
   const { api, sincronizarAlarmas } = useSesion();
 
   const [medicamento, setMedicamento] = useState<Medicamento | null>(null);
@@ -46,9 +49,7 @@ export default function EditarMedicamento() {
       setMedicamento(lista.find((m) => m.id === id) ?? null);
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi
-          ? problema.message
-          : 'No pudimos cargar este medicamento.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos cargar este medicamento.',
       );
     } finally {
       setCargando(false);

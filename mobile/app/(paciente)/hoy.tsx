@@ -9,7 +9,8 @@ import {
   Boton,
   Cargando,
   EstadoVacio,
-  Insignia,
+  IconoDeEstado,
+  Rotulo,
   Tarjeta,
   Texto,
 } from '../../src/ui/componentes/basicos';
@@ -45,9 +46,7 @@ export default function Hoy() {
       setAgenda(resultado);
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi
-          ? problema.message
-          : 'No pudimos cargar tu agenda de hoy.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos cargar tu agenda de hoy.',
       );
     } finally {
       setCargando(false);
@@ -85,9 +84,7 @@ export default function Hoy() {
       // dias, no solo las de hoy.
       void sincronizarAlarmas();
     } catch (problema) {
-      setError(
-        problema instanceof ErrorDeApi ? problema.message : 'No pudimos registrar la toma.',
-      );
+      setError(problema instanceof ErrorDeApi ? problema.message : 'No pudimos registrar la toma.');
     } finally {
       setProcesando(null);
     }
@@ -100,7 +97,11 @@ export default function Hoy() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refrescando}
@@ -112,11 +113,13 @@ export default function Hoy() {
         />
       }
     >
-      <View style={{ gap: espacio.xs }}>
-        <Texto variante="subtitulo" negrita>
+      <View style={{ gap: 2 }}>
+        <Texto variante="titulo" peso="negrita">
           Hola, {perfil?.nombre?.split(' ')[0] ?? 'que bueno verte'}
         </Texto>
-        <Texto color={colores.textoSuave}>{fechaEnPalabras(agenda?.fecha)}</Texto>
+        <Texto variante="etiqueta" color={colores.textoSuave}>
+          {fechaEnPalabras(agenda?.fecha)}
+        </Texto>
       </View>
 
       {error ? <Aviso mensaje={error} tono="error" /> : null}
@@ -137,9 +140,7 @@ export default function Hoy() {
 
       {pendientes.length > 0 ? (
         <View style={{ gap: espacio.md }}>
-          <Texto variante="subtitulo" negrita>
-            Por tomar
-          </Texto>
+          <Rotulo>Por tomar</Rotulo>
           {pendientes.map((elemento) => (
             <TarjetaDeToma
               key={elemento.tomaId}
@@ -153,9 +154,7 @@ export default function Hoy() {
 
       {resueltas.length > 0 ? (
         <View style={{ gap: espacio.md, marginTop: espacio.md }}>
-          <Texto variante="subtitulo" negrita color={colores.textoSuave}>
-            Ya registradas
-          </Texto>
+          <Rotulo>Ya registradas</Rotulo>
           {resueltas.map((elemento) => (
             <TarjetaDeToma key={elemento.tomaId} elemento={elemento} onAccion={() => {}} />
           ))}
@@ -171,33 +170,41 @@ function ResumenDelDia({ agenda }: { agenda: AgendaDelDia }) {
   const { resumen } = agenda;
   const total = resumen.totalProgramadas;
   const hechas = resumen.tomadas;
-  const proporcion = total === 0 ? 0 : hechas / total;
 
   return (
     <Tarjeta>
-      <Texto negrita>
-        {hechas} de {total} tomas de hoy
-      </Texto>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'baseline',
+          gap: espacio.sm,
+        }}
+      >
+        <Texto variante="cifra" peso="negrita">
+          {hechas}
+        </Texto>
+        <Texto color={colores.textoSuave}>de {total} tomas de hoy</Texto>
+      </View>
 
-      {/* Barra de progreso simple: se entiende de un vistazo y no
-          necesita ninguna libreria de graficas. */}
+      {/* Una barra por toma, no una barra continua. Contar tres bloques
+          es mas facil que estimar un porcentaje de una franja llena, y a
+          esta escala la diferencia entre "una de tres" y "dos de tres"
+          se ve sin fijarse. */}
       <View
         accessibilityRole="progressbar"
         accessibilityLabel={`Has completado ${hechas} de ${total} tomas de hoy.`}
-        style={{
-          height: 16,
-          borderRadius: radio.redondo,
-          backgroundColor: colores.superficieSuave,
-          overflow: 'hidden',
-        }}
+        style={{ flexDirection: 'row', gap: espacio.xs, height: 8 }}
       >
-        <View
-          style={{
-            width: `${Math.round(proporcion * 100)}%`,
-            height: '100%',
-            backgroundColor: colores.exito,
-          }}
-        />
+        {Array.from({ length: Math.max(total, 1) }, (_, i) => (
+          <View
+            key={i}
+            style={{
+              flex: 1,
+              borderRadius: radio.redondo,
+              backgroundColor: i < hechas ? colores.exito : colores.borde,
+            }}
+          />
+        ))}
       </View>
 
       {resumen.pendientes > 0 ? (
@@ -225,20 +232,31 @@ function TarjetaDeToma({
   const estilo = ESTILO_POR_ESTADO[elemento.estado];
 
   return (
-    <Tarjeta colorDeBorde={estilo.color}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Texto variante="subtitulo" negrita>
-          {elemento.horaProgramada}
-        </Texto>
-        <Insignia
-          texto={estilo.etiqueta}
-          icono={estilo.icono}
-          color={estilo.color}
-          fondo={estilo.fondo}
-        />
+    <Tarjeta>
+      {/* El estado ya no es una barra de color pegada al borde: es un
+          icono tenido con la palabra debajo. Ocupa lo mismo, se ve de
+          igual lejos y sigue sin depender solo del color. */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: espacio.sm + espacio.xs,
+        }}
+      >
+        <IconoDeEstado nombre={estilo.icono} color={estilo.color} fondo={estilo.fondo} />
+        <View style={{ flex: 1, gap: 1 }}>
+          <Texto variante="subtitulo" peso="semi">
+            {elemento.horaProgramada}
+          </Texto>
+          <Texto variante="rotulo" peso="semi" color={estilo.color}>
+            {estilo.etiqueta}
+          </Texto>
+        </View>
       </View>
 
-      <Texto variante="subtitulo">{elemento.nombreDelMedicamento}</Texto>
+      <Texto variante="subtitulo" peso="media">
+        {elemento.nombreDelMedicamento}
+      </Texto>
       <Texto color={colores.textoSuave}>{elemento.dosis}</Texto>
 
       {elemento.instrucciones ? (
@@ -262,6 +280,7 @@ function TarjetaDeToma({
           <Boton
             titulo="Ya la tome"
             variante="exito"
+            icono="check"
             ocupado={procesando}
             onPress={() => onAccion('CONFIRMAR')}
             descripcionAccesible={`Confirmar que tomaste ${elemento.nombreDelMedicamento} de las ${elemento.horaProgramada}`}

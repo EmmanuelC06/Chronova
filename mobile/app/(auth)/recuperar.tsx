@@ -82,9 +82,7 @@ export default function Recuperar() {
       router.replace('/');
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi
-          ? problema.message
-          : 'No pudimos cambiar tu contrasena.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos cambiar tu contrasena.',
       );
     } finally {
       setOcupado(false);
@@ -97,10 +95,14 @@ export default function Recuperar() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+        contentContainerStyle={{
+          padding: espacio.md,
+          gap: espacio.md,
+          paddingBottom: espacio.xxl,
+        }}
         keyboardShouldPersistTaps="handled"
       >
-        <Texto variante="subtitulo" negrita>
+        <Texto variante="subtitulo" peso="semi">
           Recuperar tu contrasena
         </Texto>
 

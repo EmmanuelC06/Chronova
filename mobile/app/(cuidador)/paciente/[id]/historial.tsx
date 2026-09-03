@@ -1,7 +1,7 @@
 import { RefreshControl, ScrollView, View } from 'react-native';
 
 import type { RegistroDeHistorial } from '../../../../src/dominio/modelos';
-import { Aviso, Insignia, Tarjeta, Texto } from '../../../../src/ui/componentes/basicos';
+import { Aviso, Insignia, Rotulo, Tarjeta, Texto } from '../../../../src/ui/componentes/basicos';
 import {
   DIAS_DE_RESUMEN,
   usePacienteObservado,
@@ -20,14 +20,16 @@ export default function HistorialDelPaciente() {
   const { historial, nombreCorto, error, refrescando, alTirarParaRefrescar } =
     usePacienteObservado();
 
-  const sinTomar = (historial?.registros ?? [])
-    .filter((r) => r.estado === 'OMITIDA')
-    .slice(0, 10);
+  const sinTomar = (historial?.registros ?? []).filter((r) => r.estado === 'OMITIDA').slice(0, 10);
   const ultimosDias = (historial?.porDia ?? []).slice(-DIAS_DE_RESUMEN);
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refrescando}
@@ -45,9 +47,7 @@ export default function HistorialDelPaciente() {
       {/* ---- Lo que fallo ---- */}
       {sinTomar.length > 0 ? (
         <>
-          <Texto variante="subtitulo" negrita>
-            Tomas sin tomar
-          </Texto>
+          <Rotulo>Tomas sin tomar</Rotulo>
           <Texto variante="pequeno" color={colores.textoSuave}>
             Las mas recientes. Es lo que conviene revisar con {nombreCorto}.
           </Texto>
@@ -69,7 +69,7 @@ export default function HistorialDelPaciente() {
       {/* ---- Evolucion ---- */}
       {ultimosDias.length > 1 ? (
         <Tarjeta>
-          <Texto negrita>Ultimos dias</Texto>
+          <Rotulo>Ultimos dias</Rotulo>
           <View
             accessibilityLabel={`Grafica de cumplimiento de ${nombreCorto} en los ultimos ${ultimosDias.length} dias.`}
             style={{
@@ -119,9 +119,15 @@ function TarjetaDeOmision({
   const estilo = ESTILO_POR_ESTADO.OMITIDA;
 
   return (
-    <Tarjeta colorDeBorde={estilo.color}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Texto negrita>{registro.nombreDelMedicamento}</Texto>
+    <Tarjeta>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Texto peso="media">{registro.nombreDelMedicamento}</Texto>
         <Insignia
           texto={estilo.etiqueta}
           icono={estilo.icono}

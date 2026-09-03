@@ -9,17 +9,12 @@ import {
   Cargando,
   EstadoVacio,
   Insignia,
+  Rotulo,
   Tarjeta,
   Texto,
 } from '../../src/ui/componentes/basicos';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
-import {
-  colores,
-  espacio,
-  ESTILO_POR_ESTADO,
-  ESTILO_POR_NIVEL,
-  radio,
-} from '../../src/ui/tema';
+import { colores, espacio, ESTILO_POR_ESTADO, ESTILO_POR_NIVEL, radio } from '../../src/ui/tema';
 
 /**
  * Historial de adherencia del paciente.
@@ -73,19 +68,42 @@ export default function Historial() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
     >
       {error ? <Aviso mensaje={error} tono="error" /> : null}
 
       {/* ---- Resumen ---- */}
-      <Tarjeta colorDeBorde={nivel.color}>
-        <Texto variante="titulo" negrita color={nivel.color}>
-          {historial.resumen.porcentaje}%
+      <Tarjeta>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'baseline',
+            gap: espacio.xs,
+          }}
+        >
+          <Texto variante="cifra" peso="negrita">
+            {historial.resumen.porcentaje}
+          </Texto>
+          <Texto variante="subtitulo" peso="semi" color={colores.textoTenue}>
+            %
+          </Texto>
+        </View>
+        <Texto variante="rotulo" peso="semi" color={nivel.color}>
+          {nivel.etiqueta}
         </Texto>
-        <Insignia texto={nivel.etiqueta} color={nivel.color} fondo={nivel.fondo} />
         <Texto color={colores.textoSuave}>{historial.resumen.mensaje}</Texto>
 
-        <View style={{ flexDirection: 'row', gap: espacio.lg, marginTop: espacio.sm }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: espacio.lg,
+            marginTop: espacio.sm,
+          }}
+        >
           <Dato etiqueta="Tomadas" valor={historial.resumen.tomadas} color={colores.exito} />
           <Dato etiqueta="No tomadas" valor={historial.resumen.omitidas} color={colores.peligro} />
           <Dato
@@ -99,7 +117,7 @@ export default function Historial() {
       {/* ---- Grafica por dia ---- */}
       {ultimosDias.length > 1 ? (
         <Tarjeta>
-          <Texto negrita>Ultimos dias</Texto>
+          <Rotulo>Ultimos dias</Rotulo>
           <View
             accessibilityLabel={`Grafica de cumplimiento de los ultimos ${ultimosDias.length} dias.`}
             style={{
@@ -135,18 +153,20 @@ export default function Historial() {
       ) : null}
 
       {/* ---- Detalle ---- */}
-      <Texto variante="subtitulo" negrita>
-        Detalle
-      </Texto>
+      <Rotulo>Detalle</Rotulo>
 
       {historial.registros.slice(0, 60).map((registro) => {
         const estilo = ESTILO_POR_ESTADO[registro.estado];
         return (
-          <Tarjeta key={registro.tomaId} colorDeBorde={estilo.color}>
+          <Tarjeta key={registro.tomaId}>
             <View
-              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
-              <Texto negrita>{registro.nombreDelMedicamento}</Texto>
+              <Texto peso="media">{registro.nombreDelMedicamento}</Texto>
               <Insignia
                 texto={estilo.etiqueta}
                 icono={estilo.icono}
@@ -194,7 +214,7 @@ function Dato({
 }) {
   return (
     <View>
-      <Texto variante="subtitulo" negrita color={color}>
+      <Texto variante="subtitulo" peso="semi" color={color}>
         {valor}
       </Texto>
       <Texto variante="pequeno" color={colores.textoSuave}>

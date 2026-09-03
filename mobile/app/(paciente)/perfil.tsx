@@ -8,14 +8,7 @@ import type {
   PermisosDelCuidador,
   TamanoDeLetra,
 } from '../../src/dominio/modelos';
-import {
-  Aviso,
-  Boton,
-  Campo,
-  Insignia,
-  Tarjeta,
-  Texto,
-} from '../../src/ui/componentes/basicos';
+import { Aviso, Boton, Campo, Insignia, Tarjeta, Texto } from '../../src/ui/componentes/basicos';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { ALTO_TACTIL_MINIMO, colores, espacio } from '../../src/ui/tema';
 
@@ -102,15 +95,15 @@ export default function Perfil() {
 
     setOcupado(true);
     try {
-      await api.solicitarVinculo({ emailDeLaOtraParte: emailDelCuidador.trim() });
+      await api.solicitarVinculo({
+        emailDeLaOtraParte: emailDelCuidador.trim(),
+      });
       setEmailDelCuidador('');
       setExito('Listo. Esa persona ya puede acompanarte en tu tratamiento.');
       await cargar();
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi
-          ? problema.message
-          : 'No pudimos enviar la invitacion.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos enviar la invitacion.',
       );
     } finally {
       setOcupado(false);
@@ -155,7 +148,9 @@ export default function Perfil() {
     );
 
     try {
-      await api.cambiarPermisosDelVinculo(vinculo.vinculoId, { [clave]: valor });
+      await api.cambiarPermisosDelVinculo(vinculo.vinculoId, {
+        [clave]: valor,
+      });
     } catch (problema) {
       setCuidadores(anteriores);
       setError(
@@ -194,14 +189,18 @@ export default function Perfil() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
     >
       {error ? <Aviso mensaje={error} tono="error" /> : null}
       {exito ? <Aviso mensaje={exito} tono="exito" /> : null}
 
       {/* ---- Datos ---- */}
       <Tarjeta>
-        <Texto variante="subtitulo" negrita>
+        <Texto variante="subtitulo" peso="semi">
           {perfil?.nombre ?? 'Mi cuenta'}
         </Texto>
         <Texto color={colores.textoSuave}>{perfil?.email}</Texto>
@@ -214,11 +213,11 @@ export default function Perfil() {
 
       {/* ---- Accesibilidad ---- */}
       <Tarjeta>
-        <Texto variante="subtitulo" negrita>
+        <Texto variante="subtitulo" peso="semi">
           Como se ve la aplicacion
         </Texto>
 
-        <Texto variante="etiqueta" negrita color={colores.textoSuave}>
+        <Texto variante="etiqueta" peso="semi" color={colores.textoSuave}>
           Tamano de la letra
         </Texto>
         <View style={{ gap: espacio.sm }}>
@@ -262,7 +261,7 @@ export default function Perfil() {
 
       {/* ---- Cuidadores ---- */}
       <Tarjeta>
-        <Texto variante="subtitulo" negrita>
+        <Texto variante="subtitulo" peso="semi">
           Quien me acompana
         </Texto>
         <Texto variante="pequeno" color={colores.textoSuave}>
@@ -271,10 +270,7 @@ export default function Perfil() {
         </Texto>
 
         {pendientes.map((cuidador) => (
-          <View
-            key={cuidador.vinculoId}
-            style={{ gap: espacio.sm, marginTop: espacio.md }}
-          >
+          <View key={cuidador.vinculoId} style={{ gap: espacio.sm, marginTop: espacio.md }}>
             <Texto negrita>{cuidador.nombre} quiere acompanarte</Texto>
             <Texto variante="pequeno" color={colores.textoSuave}>
               {cuidador.email}
@@ -302,7 +298,11 @@ export default function Perfil() {
         {activos.map((cuidador) => (
           <View key={cuidador.vinculoId} style={{ gap: espacio.xs, marginTop: espacio.lg }}>
             <View
-              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
               <Texto negrita>{cuidador.nombre}</Texto>
               <Insignia texto="Con acceso" color={colores.exito} fondo={colores.exitoSuave} />
@@ -311,7 +311,7 @@ export default function Perfil() {
               {cuidador.rol ?? cuidador.email}
             </Texto>
 
-            <Texto variante="etiqueta" negrita color={colores.textoSuave} style={{ marginTop: espacio.sm }}>
+            <Texto variante="etiqueta" peso="semi" color={colores.textoSuave}>
               Que puede hacer {primerNombre(cuidador.nombre)}
             </Texto>
 

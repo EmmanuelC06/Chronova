@@ -171,7 +171,7 @@ El `catch` no distingue entre un token inválido y un fallo de conexión, y en a
 
 ## G-6. Cualquiera puede robar el dispositivo push de otra persona
 
-**Dónde:** `backend/src/infrastructure/http/routes/autenticacion.ts:87-98`
+**Dónde:** `backend/src/infrastructure/http/routes/autenticacion.ts`, ruta `POST /dispositivos`
 
 La ruta acepta cualquier token de Expo y lo reasigna a quien llama, sin comprobar que lo posea.
 
@@ -187,7 +187,7 @@ La reasignación es intencionada (una hija reutiliza el teléfono de su madre), 
 
 ## M-1. El `JWT_SECRET` de ejemplo pasa el guardarraíl salvo con `NODE_ENV` exacto
 
-`backend/src/config/entorno.ts:32,46`. El valor por defecto es `development` y la comprobación exige `production` literal.
+`backend/src/config/entorno.ts`, en la comprobación de `JWT_SECRET`. El valor por defecto es `development` y la comprobación exige `production` literal.
 
 | NODE_ENV | Clave de ejemplo | Resultado |
 |---|---|---|
@@ -211,7 +211,7 @@ Una toma confirmada **13 horas antes** se reporta como 100 % de puntualidad, y d
 
 ## M-3. El cuidador ve las horas en su zona, no en la del paciente  **[CORREGIDO]**
 
-`mobile/app/(cuidador)/paciente/[id].tsx` e `historial.tsx`: `toLocaleString` sin `timeZone`, aunque el servidor envía `zonaHoraria` en la respuesta y el modelo ya lo declara.
+`mobile/app/(cuidador)/paciente/[id]/` e `historial.tsx`: `toLocaleString` sin `timeZone`, aunque el servidor envía `zonaHoraria` en la respuesta y el modelo ya lo declara.
 
 **Escenario:** Julián en Madrid, Rosa en Medellín. Rosa se salta la dosis del lunes a las 20:00; Julián lee *"martes, 03:00"* y llama a su madre por una dosis de madrugada que nunca existió. El backend se arregló en su momento; la vista no.
 
@@ -225,7 +225,7 @@ Esto **solo era seguro después de M-8**. Alargar indefinidamente unas sesiones 
 
 ## M-5. Un fallo de red en la pantalla de detalle dice "el vínculo se revocó"  **[CORREGIDO]**
 
-`paciente/[id].tsx:159-171`. Si falla la carga, `paciente` queda en `null` y se muestra *"No encontramos a este paciente. Puede que el vínculo se haya revocado"* — un mensaje **falso y alarmante**. Esa rama no muestra el error real ni tiene forma de reintentar.
+`paciente/[id]/_layout.tsx`. Si falla la carga, `paciente` queda en `null` y se muestra *"No encontramos a este paciente. Puede que el vínculo se haya revocado"* — un mensaje **falso y alarmante**. Esa rama no muestra el error real ni tiene forma de reintentar.
 
 ## M-6. TalkBack no lee nada del estado de la tarjeta del paciente  **[CORREGIDO]**
 
@@ -252,7 +252,7 @@ El middleware valida la firma y la caducidad del token, y nada más. No consulta
 
 **Cómo se arregló.** No guardando sesiones —eso obligaría a una tabla que crece sin parar y a limpiarla— sino guardando **una sola fecha por cuenta**: `sesiones_validas_desde`. El token lleva dentro la fecha que tenía la cuenta cuando se emitió; si al llegar una petición no coincide con la guardada, el token no vale. Cambiar la contraseña mueve esa fecha, y con ella caen todas las sesiones abiertas a la vez.
 
-La comprobación se hace en un caso de uso nuevo, `VerificarSesion`, y no en el middleware. El middleware solo lee la cabecera y escribe la respuesta; la regla —cuenta activa, token posterior al último cambio, renovación si toca— vive en la capa de aplicación, donde se puede probar sin levantar un servidor. Las siete pruebas de `tests/use-cases/sesiones.test.ts` no tocan Express.
+La comprobación se hace en un caso de uso nuevo, `VerificarSesion`, y no en el middleware. El middleware solo lee la cabecera y escribe la respuesta; la regla —cuenta activa, token posterior al último cambio, renovación si toca— vive en la capa de aplicación, donde se puede probar sin levantar un servidor. Las quince pruebas de `tests/use-cases/sesiones.test.ts` no tocan Express.
 
 Dos detalles que costaron y conviene poder explicar:
 
@@ -291,28 +291,23 @@ Menores del mismo tipo: RNF-07 dice «bcrypt» y la dependencia es `bcryptjs`; R
 
 Para que no se toque por error, y porque también es parte del resultado de la revisión:
 
-- **Inyección SQL: cero.** Las 36 consultas usan parámetros. La única interpolación es un formateador de fecha.
+- **Inyección SQL: cero.** Las 41 consultas usan parámetros. La única interpolación es un formateador de fecha.
 - **Columnas DATE y husos horarios en persistencia:** correcto. Se ejecutó el flujo completo contra memoria y contra PostgreSQL 16 bajo cuatro husos: salida idéntica en los cuatro, sin desplazamiento de fechas.
 - **Transacciones e idempotencia de la agenda:** `BEGIN`/`COMMIT`/`ROLLBACK` con `release()` en `finally`, y el `ON CONFLICT ... DO NOTHING` es el arbitraje correcto.
-- **Autenticación y autorización:** los nueve casos de uso que tocan datos del paciente llaman a `PoliticaDeAcceso` con el permiso correcto. Verificado sin token (401), tipo equivocado (403) y cuidador sin vínculo (403).
-- **RNF-16 (cero dependencias externas en el dominio):** comprobado archivo por archivo en los 40 del dominio. Cierto.
+- **Autenticación y autorización:** los ocho casos de uso que tocan datos del paciente llaman a `PoliticaDeAcceso` con el permiso correcto. Verificado sin token (401), tipo equivocado (403) y cuidador sin vínculo (403).
+- **RNF-16 (cero dependencias externas en el dominio):** comprobado archivo por archivo en los 38 del dominio. Cierto.
 - **RNF-18 (todo el SQL en un archivo):** cierto para las consultas. Matiz honesto: el DDL vive en `esquema.sql`.
 - **RNF-15 (seis husos):** 146 pruebas en verde bajo los seis, de Kiritimati (UTC+14) a Anchorage (UTC−9). Cierto, y vuelto a comprobar tras el trabajo de sesiones.
 - **Prueba 6 de ARQUITECTURA:** cierta y verificable con `git show`. En ese commit no cambió ningún archivo de `backend/src/`.
 - **Notificador de Expo:** nunca lanza, reparte en lotes de 100, da de baja los tokens muertos, y el compuesto aísla cada destino.
-- **API.md:** los 21 endpoints documentados existen con ese método y esa ruta, y no falta ninguno.
+- **API.md:** los 23 endpoints documentados existen con ese método y esa ruta, y no falta ninguno.
 - **No hay bucles de renderizado** en la app, ni rutas inexistentes, ni redirecciones circulares.
 - **Sin divisiones por cero** en los cálculos de adherencia.
 
 ---
 
-# Orden sugerido
+# Qué queda
 
-1. **B-1** (las alarmas) — es el producto.
-2. **B-2** y **G-2** (suspender y cambiar horario) — corrompen la métrica que el proyecto existe para mejorar.
-3. **D-1 a D-6** (la documentación falsa) — barato, y es lo que se refuta en la sustentación.
-4. **B-3**, **G-3**, **G-5** — cada uno es un arreglo pequeño y cierra un callejón sin salida.
-5. **G-1** — coherencia con el RNF-15 ya declarado.
-6. **G-4**, **M-4**, **M-8** (sesión) — los tres tocan la misma pieza; hacerlos por separado habría sido reescribirla tres veces.
-7. **M-6**, **M-7** (accesibilidad) — encajan bien con el trabajo de diseño cuando se retome.
-8. **G-6**, **M-1** (seguridad) — antes de cualquier despliegue real, no antes de la sustentación.
+Los ocho puntos del orden que proponía esta revisión se ejecutaron, en ese orden. Lo único que sigue abierto es el último, y sigue abierto **a propósito**:
+
+**G-6 y M-1 son los dos defectos de seguridad, y solo importan cuando el servidor esté en internet.** Hoy corre en una red local, donde el atacante tendría que estar sentado en la misma wifi. En cuanto haya una URL pública dejan de ser teóricos, así que van junto con el alojamiento y no antes.

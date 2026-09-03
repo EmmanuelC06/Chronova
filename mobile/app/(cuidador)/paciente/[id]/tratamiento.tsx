@@ -38,7 +38,11 @@ export default function Tratamiento() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: espacio.md, gap: espacio.md, paddingBottom: espacio.xxl }}
+      contentContainerStyle={{
+        padding: espacio.md,
+        gap: espacio.md,
+        paddingBottom: espacio.xxl,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refrescando}
@@ -51,7 +55,8 @@ export default function Tratamiento() {
 
       {puedeGestionar ? (
         <Boton
-          titulo="+ Agregar medicamento"
+          titulo="Agregar medicamento"
+          icono="agregar"
           onPress={() => router.push(`/medicamento/nuevo?pacienteId=${paciente.pacienteId}`)}
           descripcionAccesible={`Agregar un medicamento al tratamiento de ${nombre}`}
         />
@@ -73,7 +78,7 @@ export default function Tratamiento() {
           key={medicamento.id}
           colorDeBorde={medicamento.necesitaReabastecimiento ? colores.advertencia : undefined}
         >
-          <Texto variante="subtitulo" negrita>
+          <Texto variante="subtitulo" peso="semi">
             {medicamento.nombre}
           </Texto>
 
