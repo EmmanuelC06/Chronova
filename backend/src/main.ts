@@ -9,6 +9,8 @@ import { crearServidor } from './infrastructure/http/servidor.js';
  * el contenedor, levantar el servidor y programar la tarea periodica.
  */
 const MINUTOS_ENTRE_CIERRES = 15;
+/** Margen para que el servidor termine de levantarse antes de la primera pasada. */
+const SEGUNDOS_ANTES_DEL_PRIMER_CIERRE = 10;
 
 async function arrancar(): Promise<void> {
   const entorno = cargarEntorno();
@@ -37,7 +39,7 @@ async function arrancar(): Promise<void> {
    * temporizador dentro del servidor web, para que no se duplique si hay
    * varias instancias. Para el alcance del proyecto es suficiente.
    */
-  const temporizador = setInterval(() => {
+  const cerrarVencidas = () => {
     contenedor.casosDeUso.cerrarTomasVencidas
       .ejecutar()
       .then(({ tomasCerradas, avisosEnviados }) => {
@@ -48,7 +50,21 @@ async function arrancar(): Promise<void> {
         }
       })
       .catch((error) => console.error('[tarea] Fallo el cierre de tomas vencidas:', error));
-  }, MINUTOS_ENTRE_CIERRES * 60_000);
+  };
+
+  // Una pasada al arrancar, ademas de las periodicas.
+  //
+  // Sin esto, un servidor que se reinicia deja sin cerrar las tomas que
+  // vencieron mientras estaba apagado hasta que pasan quince minutos, y
+  // el cuidador recibe su aviso con ese retraso. Tambien hace practicable
+  // probar las notificaciones: reiniciar el servidor las dispara en vez
+  // de obligar a esperar el siguiente ciclo.
+  //
+  // La operacion es idempotente: solo toca tomas realmente vencidas, asi
+  // que repetirla no tiene efecto.
+  setTimeout(cerrarVencidas, SEGUNDOS_ANTES_DEL_PRIMER_CIERRE * 1_000);
+
+  const temporizador = setInterval(cerrarVencidas, MINUTOS_ENTRE_CIERRES * 60_000);
 
   // Apagado ordenado: se deja de aceptar peticiones y se cierran las
   // conexiones a la base de datos antes de terminar el proceso.

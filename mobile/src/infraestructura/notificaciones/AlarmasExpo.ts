@@ -27,6 +27,16 @@ import type {
 
 const CANAL_ANDROID = 'chronova-tomas';
 
+/**
+ * Tope de alarmas programadas a la vez.
+ *
+ * iOS no admite mas de 64 notificaciones locales pendientes por
+ * aplicacion y descarta en silencio las que sobran. Se deja margen por
+ * debajo de ese limite para no depender de un comportamiento que no
+ * avisa cuando falla.
+ */
+const MAXIMO_DE_ALARMAS = 60;
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -158,19 +168,28 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
   // Puerto ProgramadorDeAlarmas
   // ---------------------------------------------------------------
 
-  async sincronizar(agenda: AgendaDelDia, preferencias: Preferencias): Promise<void> {
+  async sincronizar(
+    agendas: readonly AgendaDelDia[],
+    preferencias: Preferencias,
+  ): Promise<void> {
     try {
       await this.prepararCanal();
       await this.cancelarTodas();
 
       const ahora = Date.now();
 
-      for (const elemento of agenda.elementos) {
-        if (elemento.estado === 'TOMADA' || elemento.estado === 'OMITIDA') continue;
+      // Se juntan todos los dias y se ordenan por hora: si hubiera mas
+      // tomas que el tope del sistema, las que se programan son las mas
+      // proximas, que son las que de verdad importan.
+      const pendientes = agendas
+        .flatMap((agenda) => agenda.elementos)
+        .filter((e) => e.estado !== 'TOMADA' && e.estado !== 'OMITIDA')
+        .map((e) => ({ elemento: e, instante: new Date(e.programadaPara).getTime() }))
+        .filter((x) => x.instante > ahora)
+        .sort((a, b) => a.instante - b.instante)
+        .slice(0, MAXIMO_DE_ALARMAS);
 
-        const instante = new Date(elemento.programadaPara).getTime();
-        if (instante <= ahora) continue; // ya paso: no tiene sentido programarla
-
+      for (const { elemento, instante } of pendientes) {
         await Notifications.scheduleNotificationAsync({
           content: {
             title: `Hora de tu ${elemento.nombreDelMedicamento}`,

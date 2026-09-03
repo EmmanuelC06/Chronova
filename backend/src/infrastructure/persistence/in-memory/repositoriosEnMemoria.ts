@@ -196,6 +196,25 @@ export class RepositorioDeTomasEnMemoria implements RepositorioDeTomas {
     }
   }
 
+  async eliminarPendientesDesde(medicamentoId: Identificador, desde: Date): Promise<number> {
+    let retiradas = 0;
+    for (const [id, plano] of this.datos) {
+      const sinResolver = plano.estado === 'PENDIENTE' || plano.estado === 'POSPUESTA';
+      // Se compara contra la hora ORIGINAL, que es la casilla por la que
+      // la agenda identifica cada toma. Una toma pospuesta cuyo horario
+      // original ya paso pertenece al pasado, aunque su nueva hora sea
+      // dentro de un rato.
+      const enElFuturo =
+        new Date(plano.programadaOriginalmentePara).getTime() >= desde.getTime();
+
+      if (plano.medicamentoId === medicamentoId.valor && sinResolver && enElFuturo) {
+        this.datos.delete(id);
+        retiradas += 1;
+      }
+    }
+    return retiradas;
+  }
+
   private filtrarEnRango(
     predicado: (t: TomaPlana) => boolean,
     rango: RangoDeFechas,

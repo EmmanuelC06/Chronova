@@ -61,11 +61,14 @@ Sin autenticación. Comprueba que el servidor responde.
   "contrasena": "rosa123456",
   "telefono": "+573001112233",
   "fechaDeNacimiento": "1952-04-18",
+  "zonaHoraria": "America/Bogota",
   "preferencias": { "tamanoDeLetra": "MUY_GRANDE", "minutosDeGracia": 90 }
 }
 ```
 
-`telefono`, `fechaDeNacimiento` y `preferencias` son opcionales.
+`telefono`, `fechaDeNacimiento`, `zonaHoraria` y `preferencias` son opcionales.
+
+**`zonaHoraria` merece atención**: es un identificador IANA (`America/Bogota`, `Europe/Madrid`) y es la pieza de la que depende que "las 8 de la mañana" signifique las 8 donde vive el paciente, y no donde está el servidor. La app la toma del propio teléfono. Si no se envía, se usa `America/Bogota`.
 
 **201:**
 
@@ -187,11 +190,15 @@ Los días van de 0 (domingo) a 6 (sábado).
 
 ### `PATCH /api/medicamentos/:id`
 
-Solo los campos que cambian. Mismo formato que la creación.
+Solo los campos que cambian. Se aceptan `nombre`, `dosis`, `frecuencia`, `horarios`, `fechaFin` e `instrucciones`; **no** `fechaInicio` ni `pacienteId`, y el inventario tiene su propio endpoint (`/stock`).
+
+Si el cambio afecta a *cuándo* se toma —`horarios`, `frecuencia` o `fechaFin`— se retiran además las tomas futuras que ya se habían generado con el horario anterior, y la agenda las vuelve a crear a partir del nuevo. Las que ya ocurrieron no se tocan, aunque nadie las haya confirmado: que el paciente no se tomara su medicina esta mañana es un dato clínico y no deja de ser cierto porque por la tarde cambie el horario.
 
 ### `DELETE /api/medicamentos/:id`
 
-**Suspende, no borra.** El medicamento deja de generar agenda y de aparecer en la lista, pero el historial de tomas se conserva. Las tomas futuras aún pendientes se cierran.
+**Suspende, no borra.** El medicamento deja de generar agenda y de aparecer en la lista, pero el historial de tomas se conserva.
+
+Las tomas futuras que aún estaban pendientes se **retiran**, no se marcan como omitidas. La diferencia importa: una toma omitida es un incumplimiento, y suspender un tratamiento no es incumplirlo. Marcarlas dejaba a un paciente al que le suspendían la medicación por la mañana con 0 % de adherencia y una alerta enviada a su cuidador.
 
 ### `POST /api/medicamentos/:id/stock`
 

@@ -43,4 +43,20 @@ export interface RepositorioDeTomas {
   listarVencidas(limite: Date): Promise<Toma[]>;
 
   eliminarPorMedicamento(medicamentoId: Identificador): Promise<void>;
+
+  /**
+   * Retira las tomas de un medicamento que nadie ha resuelto todavia y
+   * cuya hora original aun no ha llegado. Devuelve cuantas retiro.
+   *
+   * Existe para cuando el tratamiento CAMBIA: se suspende el medicamento,
+   * o se mueven sus horarios. Las tomas que ya se habian generado para el
+   * horario viejo dejan de tener sentido, y si se quedan cuentan como
+   * incumplimientos de algo que el paciente nunca tuvo que tomar.
+   *
+   * Se borran en vez de marcarlas OMITIDAS justamente por eso: una toma
+   * omitida es un dato clinico —alguien no se tomo su medicina— y esto
+   * no lo es. Solo se van las FUTURAS y SIN RESOLVER: lo que ya paso es
+   * historial y no se toca.
+   */
+  eliminarPendientesDesde(medicamentoId: Identificador, desde: Date): Promise<number>;
 }

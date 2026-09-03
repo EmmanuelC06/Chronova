@@ -17,6 +17,12 @@ export interface ComandoSuspenderMedicamento {
  * historial de tomas, que es la evidencia del tratamiento. Lo que si se
  * limpia son las tomas futuras que aun estaban pendientes, para que no
  * sigan sonando alarmas de algo que el medico ya suspendio.
+ *
+ * Esas tomas se RETIRAN, no se marcan como omitidas. Marcarlas omitidas
+ * las contaba como incumplimientos: un paciente al que le suspendian el
+ * tratamiento por la manana terminaba el dia con 0% de adherencia, en
+ * cabeza del panel de su cuidador y con dos faltas falsas en su
+ * historial clinico, por haber hecho exactamente lo que le mandaron.
  */
 export class SuspenderMedicamento {
   constructor(
@@ -40,18 +46,9 @@ export class SuspenderMedicamento {
     medicamento.suspender();
     await this.medicamentos.guardar(medicamento);
 
-    // Se eliminan solo las tomas futuras aun sin resolver.
-    const ahora = this.reloj.ahora();
-    const futuras = await this.tomas.listarPorMedicamentoEnRango(medicamentoId, {
-      desde: ahora,
-      hasta: new Date(ahora.getTime() + 365 * 24 * 60 * 60 * 1000),
-    });
-    for (const toma of futuras) {
-      if (!toma.estaResuelta) {
-        toma.cerrarPorFaltaDeRespuesta(ahora);
-        await this.tomas.guardar(toma);
-      }
-    }
+    // Se retiran solo las tomas futuras aun sin resolver. Lo ya ocurrido
+    // es historial clinico y no se toca.
+    await this.tomas.eliminarPendientesDesde(medicamentoId, this.reloj.ahora());
 
     return { suspendido: true };
   }

@@ -85,7 +85,7 @@ Las reglas que serían ciertas aunque Chronova fuera una libreta de papel.
 | `toma/ResumenDeAdherencia.ts` | Adherencia = tomadas ÷ resueltas. Buena a partir del 80% |
 | `vinculo/Vinculo.ts` | Un cuidador solo accede si el paciente aceptó |
 
-Cada entidad tiene `crear()` (nace validada), `desdePlano()` (se reconstruye desde la base de datos) y `aPlano()` (se convierte en datos simples para guardar o enviar).
+Cada entidad se construye con una fábrica que la valida al nacer —`Medicamento.crear()`, `Paciente.registrar()`, `Toma.programar()`, `Vinculo.solicitar()`— y todas tienen `desdePlano()` (se reconstruye desde la base de datos) y `aPlano()` (se convierte en datos simples para guardar o enviar). Los constructores son privados: no hay forma de fabricar una entidad en un estado inválido.
 
 ### Aplicación — `backend/src/application/`
 
@@ -122,7 +122,8 @@ Todo lo que se puede reemplazar.
 | `persistence/postgres/` | Todas las consultas SQL del proyecto. Absolutamente todas. |
 | `persistence/in-memory/` | Los mismos repositorios, con arreglos en memoria |
 | `security/` | bcrypt y JWT |
-| `system/` | Reloj del sistema, generador de UUID, notificador |
+| `system/` | Reloj del sistema y generador de UUID |
+| `notificaciones/` | Los tres notificadores (consola, push de Expo y el compuesto) y el cliente HTTP de Expo |
 | `http/` | Express: rutas, middlewares, validación, traducción de errores |
 
 ---
@@ -133,11 +134,11 @@ Todo lo que se puede reemplazar.
 
 Con `PERSISTENCE=memory` en el `.env`, Chronova funciona completa sin instalar PostgreSQL. Registro, medicamentos, agenda, adherencia, cuidadores: todo.
 
-Eso solo es posible porque el dominio nunca supo que existía una base de datos. El cambio ocurre en **una línea** del archivo `contenedor.ts`.
+Eso solo es posible porque el dominio nunca supo que existía una base de datos. Lo que cambia el usuario es **una línea del `.env`**; en `contenedor.ts` la elección ya está escrita, y es el único sitio de todo el proyecto donde aparece.
 
 ### Prueba 2: las pruebas corren en milisegundos
 
-Las 104 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
+Las 114 pruebas de `backend/tests/` ejercitan la aplicación entera —incluidos los casos de uso completos— y terminan en menos de dos segundos, sin base de datos, sin servidor y sin red.
 
 Con la arquitectura del MVP anterior, donde la lógica vivía dentro de las rutas de Express y hablaba directamente con PostgreSQL, cada prueba habría necesitado una base de datos levantada, datos sembrados y limpieza posterior. En la práctica, eso significa que nadie escribe pruebas.
 
@@ -145,11 +146,13 @@ Con la arquitectura del MVP anterior, donde la lógica vivía dentro de las ruta
 
 Para probar "¿qué pasa si el paciente no confirma la toma en dos horas?" no hay que esperar dos horas: se inyecta un `RelojFijo` y se mueve. Mira `backend/tests/use-cases/casosDeUso.test.ts`, la prueba del cierre automático.
 
-### Prueba 4: se añadieron notificaciones push sin tocar el dominio
+### Prueba 4: las notificaciones push no obligaron a tocar nada de lo que ya existía
 
-El puerto `Notificador` existía desde el primer día con un solo adaptador que escribía en consola. Añadir notificaciones reales consistió en escribir un adaptador nuevo (`NotificadorExpoPush`) y una línea en `contenedor.ts`.
+El puerto `Notificador` existía desde el primer día con un solo adaptador que escribía en consola. Añadir el envío real consistió en escribir un adaptador nuevo (`NotificadorExpoPush`) y enchufarlo en `contenedor.ts`.
 
-Ni una sola línea del dominio ni de los casos de uso cambió. `CerrarTomasVencidas` sigue diciendo «avisa esto a esta persona» sin saber que ahora eso llega a un teléfono.
+Conviene ser preciso con lo que eso significa, porque es comprobable con `git show`. **Ninguna entidad ni caso de uso ya existente se modificó**: `CerrarTomasVencidas` sigue diciendo «avisa esto a esta persona» sin saber que ahora eso llega a un teléfono, y no cambió ni una línea. Lo que sí se añadió fue material nuevo —el agregado `Dispositivo`, dos casos de uso para dar de alta y de baja un teléfono, y el cableado en el contenedor—, porque guardar en qué aparatos hay que entregar el aviso es una responsabilidad que antes no existía en el sistema.
+
+Esa es la diferencia que importa: crecer añadiendo piezas nuevas, sin volver a abrir las que ya funcionaban.
 
 Y como los adaptadores cumplen el mismo contrato, se pueden combinar: `NOTIFICACIONES=ambos` usa un `NotificadorCompuesto` que contiene a los dos y cumple, él también, la misma interfaz.
 
@@ -158,9 +161,9 @@ Y como los adaptadores cumplen el mismo contrato, se pueden combinar: `NOTIFICAC
 La suite completa se ejecuta bajo seis zonas horarias distintas —de Kiritimati (UTC+14) a Anchorage (UTC−9)— y da exactamente el mismo resultado:
 
 ```bash
-TZ=UTC              npm test    # 104 passed
-TZ=America/Bogota   npm test    # 104 passed
-TZ=Asia/Tokyo       npm test    # 104 passed
+TZ=UTC              npm test    # 114 passed
+TZ=America/Bogota   npm test    # 114 passed
+TZ=Asia/Tokyo       npm test    # 114 passed
 ```
 
 Esto no era así al principio. El dominio usaba objetos `Date` para representar días del calendario, y un `Date` siempre es un instante que se lee en la zona del proceso. La consecuencia: con el servidor en UTC, la pastilla de las 08:00 de una paciente colombiana se agendaba a las 03:00 de su madrugada.

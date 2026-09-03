@@ -182,7 +182,7 @@ export function construirContenedor(
 
     registrarMedicamento: new RegistrarMedicamento(medicamentos, pacientes, politica, ids, reloj),
     listarMedicamentos: new ListarMedicamentos(medicamentos, politica),
-    actualizarMedicamento: new ActualizarMedicamento(medicamentos, politica),
+    actualizarMedicamento: new ActualizarMedicamento(medicamentos, tomas, politica, reloj),
     suspenderMedicamento: new SuspenderMedicamento(medicamentos, tomas, politica, reloj),
     reabastecerStock: new ReabastecerStock(medicamentos, politica),
 

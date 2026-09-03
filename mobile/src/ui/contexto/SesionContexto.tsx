@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { ErrorDeApi } from '../../dominio/modelos';
 import type { Perfil, Preferencias, Sesion, TipoDeUsuario } from '../../dominio/modelos';
 import type {
   AlmacenDeSesion,
@@ -11,6 +12,17 @@ import type {
 import { ClienteChronova } from '../../infraestructura/api/ClienteChronova';
 import { SesionEnAsyncStorage } from '../../infraestructura/almacenamiento/SesionEnAsyncStorage';
 import { AlarmasExpo } from '../../infraestructura/notificaciones/AlarmasExpo';
+
+/**
+ * Cuantos dias de agenda se traen para programar alarmas por adelantado.
+ *
+ * Siete es el numero que hace que la aplicacion siga sirviendo a quien no
+ * la abre. Antes solo se programaba el dia en curso, y solo si el
+ * paciente entraba a la pestana "Hoy": el que pasaba una jornada sin
+ * abrirla se quedaba sin ningun recordatorio, para siempre, sin que nada
+ * lo avisara.
+ */
+const DIAS_DE_ALARMAS_POR_ADELANTADO = 7;
 
 const PREFERENCIAS_POR_DEFECTO: Preferencias = {
   tamanoDeLetra: 'GRANDE',
@@ -28,6 +40,8 @@ interface ValorDeSesion {
   api: ApiDeChronova;
   alarmas: ProgramadorDeAlarmas;
   push: RegistroDePush;
+  /** Vuelve a programar las alarmas de los proximos dias. Nunca falla. */
+  sincronizarAlarmas(): Promise<void>;
   iniciarSesion(email: string, contrasena: string, tipo?: TipoDeUsuario): Promise<void>;
   registrarPaciente(datos: {
     nombre: string;
@@ -95,6 +109,39 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
     }
   }, [api, push]);
 
+  /**
+   * Programa las alarmas de los proximos dias.
+   *
+   * Se hace aqui, y no en la pantalla "Hoy", porque no puede depender de
+   * que el paciente entre a ninguna pantalla: se llama al abrir la
+   * aplicacion y cada vez que la agenda cambia.
+   *
+   * Los dias siguientes se calculan a partir de la fecha que devuelve el
+   * servidor, que ya viene en la zona horaria del paciente. Derivarlos
+   * del reloj del telefono habria reintroducido, en el cliente, el mismo
+   * error de husos que se corrigio en el servidor.
+   *
+   * Solo aplica a los pacientes: las alarmas de toma son suyas. El
+   * cuidador recibe avisos remotos, que son otra cosa.
+   */
+  const sincronizarAlarmas = useCallback(async () => {
+    try {
+      const hoy = await api.obtenerAgenda();
+
+      const siguientes = await Promise.all(
+        Array.from({ length: DIAS_DE_ALARMAS_POR_ADELANTADO - 1 }, (_, i) =>
+          api.obtenerAgenda({ fecha: sumarDiasAFecha(hoy.fecha, i + 1) }).catch(() => null),
+        ),
+      );
+
+      const agendas = [hoy, ...siguientes.filter((a): a is NonNullable<typeof a> => a !== null)];
+      await alarmas.sincronizar(agendas, preferencias);
+    } catch {
+      // Sin conexion o sin permisos. Las alarmas ya programadas siguen
+      // en pie: no se cancelan hasta tener con que reemplazarlas.
+    }
+  }, [api, alarmas, preferencias]);
+
   /** Aplica una sesion recien obtenida y carga el perfil del servidor. */
   const activar = useCallback(
     async (nueva: Sesion) => {
@@ -112,8 +159,9 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       }
 
       void registrarEsteDispositivo();
+      if (nueva.usuario.tipo === 'PACIENTE') void sincronizarAlarmas();
     },
-    [api, almacen, registrarEsteDispositivo],
+    [api, almacen, registrarEsteDispositivo, sincronizarAlarmas],
   );
 
   // Al abrir la app: recuperar la sesion guardada, si la hay.
@@ -131,12 +179,22 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
           setPerfil(perfilCargado);
           if (perfilCargado.preferencias) setPreferencias(perfilCargado.preferencias);
           void registrarEsteDispositivo();
-        } catch {
-          // Token vencido o servidor caido: se descarta la sesion para
-          // que el usuario pueda entrar de nuevo sin quedar atrapado.
-          await almacen.borrar();
-          api.usarToken(null);
-          if (vigente) setSesion(null);
+          if (guardada.usuario.tipo === 'PACIENTE') void sincronizarAlarmas();
+        } catch (problema) {
+          // SOLO se descarta la sesion si el servidor dice que el token ya
+          // no vale. Antes se borraba ante cualquier fallo, asi que abrir
+          // la aplicacion sin cobertura —en el bus, en una sala de
+          // espera— expulsaba al usuario y le obligaba a teclear de nuevo
+          // su correo y su contrasena. Un problema de red no es un
+          // problema de credenciales.
+          const tokenInvalido =
+            problema instanceof ErrorDeApi && problema.exigeVolverAIniciarSesion;
+
+          if (tokenInvalido) {
+            await almacen.borrar();
+            api.usarToken(null);
+            if (vigente) setSesion(null);
+          }
         }
       }
       if (vigente) setCargando(false);
@@ -145,7 +203,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
     return () => {
       vigente = false;
     };
-  }, [api, almacen, registrarEsteDispositivo]);
+  }, [api, almacen, registrarEsteDispositivo, sincronizarAlarmas]);
 
   const iniciarSesion = useCallback(
     async (email: string, contrasena: string, tipo?: TipoDeUsuario) => {
@@ -215,6 +273,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       api,
       alarmas,
       push,
+      sincronizarAlarmas,
       iniciarSesion,
       registrarPaciente,
       registrarCuidador,
@@ -229,6 +288,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       api,
       alarmas,
       push,
+      sincronizarAlarmas,
       iniciarSesion,
       registrarPaciente,
       registrarCuidador,
@@ -246,4 +306,17 @@ export function useSesion(): ValorDeSesion {
     throw new Error('useSesion debe usarse dentro de <ProveedorDeSesion>.');
   }
   return valor;
+}
+
+/**
+ * Suma dias a una fecha "AAAA-MM-DD" y devuelve otra igual.
+ *
+ * Se hace con aritmetica UTC pura, sin pasar por la zona del telefono:
+ * un Date local en el dia del cambio de horario puede saltarse un dia o
+ * repetirlo. Es la misma leccion que FechaLocal en el servidor.
+ */
+export function sumarDiasAFecha(fecha: string, dias: number): string {
+  const [anio, mes, dia] = fecha.split('-').map(Number);
+  const base = Date.UTC(anio ?? 1970, (mes ?? 1) - 1, dia ?? 1);
+  return new Date(base + dias * 86_400_000).toISOString().slice(0, 10);
 }

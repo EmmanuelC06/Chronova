@@ -63,6 +63,7 @@ export class SolicitarVinculo {
     }
 
     const existente = await this.vinculos.buscarEntre(cuidadorId, pacienteId);
+
     if (existente && (existente.estado === 'PENDIENTE' || existente.estado === 'ACEPTADO')) {
       throw new ErrorDeConflicto(
         existente.estado === 'ACEPTADO'
@@ -71,18 +72,43 @@ export class SolicitarVinculo {
       );
     }
 
-    const vinculo = Vinculo.solicitar({
-      id: this.ids.nuevo(),
-      cuidadorId,
-      pacienteId,
-      solicitadoPor: comando.solicitante.tipo,
-      parentesco: comando.parentesco ?? null,
-      permisos: comando.permisos,
-      ahora,
-    });
+    // Si ya hubo un vinculo entre estas dos personas y se rechazo o se
+    // revoco, se REUTILIZA esa fila. Crear otra dejaba dos registros para
+    // el mismo par: las consultas devolvian el viejo y el paciente se
+    // quedaba sin poder volver a dar acceso nunca mas, ademas de ver a su
+    // cuidador duplicado en la lista.
+    let vinculo: Vinculo;
+
+    if (existente) {
+      existente.volverASolicitar({
+        solicitadoPor: comando.solicitante.tipo,
+        parentesco: comando.parentesco,
+        permisos: comando.permisos,
+        ahora,
+      });
+      vinculo = existente;
+    } else {
+      vinculo = Vinculo.solicitar({
+        id: this.ids.nuevo(),
+        cuidadorId,
+        pacienteId,
+        solicitadoPor: comando.solicitante.tipo,
+        parentesco: comando.parentesco ?? null,
+        permisos: comando.permisos,
+        ahora,
+      });
+    }
 
     await this.vinculos.guardar(vinculo);
+    await this.avisar(vinculo, cuidadorId, pacienteId);
+    return vinculo.aPlano();
+  }
 
+  private async avisar(
+    vinculo: Vinculo,
+    cuidadorId: Identificador,
+    pacienteId: Identificador,
+  ): Promise<void> {
     if (vinculo.estado === 'PENDIENTE') {
       const cuidador = await this.cuidadores.buscarPorId(cuidadorId);
       await this.notificador.enviar({
@@ -103,7 +129,5 @@ export class SolicitarVinculo {
         datos: { vinculoId: vinculo.id.valor },
       });
     }
-
-    return vinculo.aPlano();
   }
 }

@@ -165,7 +165,14 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
       onPress={
         pendiente ? undefined : () => router.push(`/paciente/${paciente.pacienteId}`)
       }
-      descripcionAccesible={`Ver el tratamiento de ${paciente.nombre}`}
+      // Una tarjeta pulsable se lee como UN solo elemento: el lector de
+      // pantalla anuncia esta frase y ya no entra en su contenido. Por
+      // eso la etiqueta tiene que traer los datos, no solo la accion.
+      // Antes decia unicamente "Ver el tratamiento de Rosa", y un
+      // cuidador con baja vision no llegaba a enterarse del porcentaje ni
+      // de que su paciente necesitaba atencion, que es justo lo que el
+      // panel existe para contarle.
+      descripcionAccesible={descripcionParaLector(paciente)}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Texto variante="subtitulo" negrita>
@@ -218,6 +225,27 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
       )}
     </Tarjeta>
   );
+}
+
+/** Todo lo que la tarjeta muestra, en una frase que se pueda escuchar. */
+function descripcionParaLector(paciente: PacienteEnPanel): string {
+  if (paciente.estadoDelVinculo === 'PENDIENTE') {
+    return `${paciente.nombre}. Esperando que acepte tu solicitud.`;
+  }
+
+  const nivel = ESTILO_POR_NIVEL[paciente.adherencia.nivel];
+  const partes = [
+    paciente.nombre,
+    paciente.requiereAtencion ? 'Necesita que lo revises.' : '',
+    `${paciente.adherencia.porcentaje} por ciento de cumplimiento. ${nivel.etiqueta}.`,
+    `${paciente.adherencia.tomadas} tomadas, ${paciente.adherencia.omitidas} sin tomar.`,
+    paciente.medicamentosConStockBajo > 0
+      ? `${paciente.medicamentosConStockBajo} medicamentos por agotarse.`
+      : '',
+    'Toca para ver el detalle.',
+  ];
+
+  return partes.filter((p) => p !== '').join(' ');
 }
 
 function tiempoRelativo(iso: string | null): string {

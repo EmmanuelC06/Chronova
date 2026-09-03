@@ -5,6 +5,7 @@ import type {
   Medicamento,
   PacienteEnPanel,
   Perfil,
+  PermisosDelCuidador,
   Preferencias,
   Sesion,
   TipoDeUsuario,
@@ -52,6 +53,7 @@ export interface ApiDeChronova {
 
   listarMedicamentos(pacienteId?: string): Promise<Medicamento[]>;
   registrarMedicamento(datos: Record<string, unknown>): Promise<Medicamento>;
+  actualizarMedicamento(medicamentoId: string, cambios: Record<string, unknown>): Promise<Medicamento>;
   suspenderMedicamento(medicamentoId: string): Promise<void>;
   reabastecerStock(medicamentoId: string, unidades: number): Promise<Medicamento>;
 
@@ -77,6 +79,15 @@ export interface ApiDeChronova {
     parentesco?: string | null;
   }): Promise<unknown>;
   responderVinculo(vinculoId: string, respuesta: 'ACEPTAR' | 'RECHAZAR' | 'REVOCAR'): Promise<unknown>;
+
+  /**
+   * El paciente ajusta que puede hacer un cuidador concreto con su
+   * informacion. Solo el paciente: es su decision, no la del cuidador.
+   */
+  cambiarPermisosDelVinculo(
+    vinculoId: string,
+    permisos: Partial<PermisosDelCuidador>,
+  ): Promise<unknown>;
 }
 
 /** Guarda la sesion para que el usuario no tenga que entrar cada vez. */
@@ -139,7 +150,17 @@ export interface DatosDeNotificacion {
 /** Programa las alarmas locales del telefono. */
 export interface ProgramadorDeAlarmas {
   pedirPermiso(): Promise<boolean>;
-  /** Reemplaza todas las alarmas por las de la agenda recibida. */
-  sincronizar(agenda: AgendaDelDia, preferencias: Preferencias): Promise<void>;
+
+  /**
+   * Reemplaza todas las alarmas por las de las agendas recibidas.
+   *
+   * Recibe VARIOS dias, no uno. Con un solo dia, las alarmas dejaban de
+   * existir en cuanto el paciente pasaba una jornada sin abrir la
+   * aplicacion: no quedaba ninguna programada y nada las volvia a crear.
+   * Para una persona mayor que precisamente depende del recordatorio,
+   * eso apagaba en silencio la funcion principal del producto.
+   */
+  sincronizar(agendas: readonly AgendaDelDia[], preferencias: Preferencias): Promise<void>;
+
   cancelarTodas(): Promise<void>;
 }

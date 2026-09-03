@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, Platform, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
@@ -60,9 +60,12 @@ export default function Medicamentos() {
   };
 
   const reabastecer = (medicamento: Medicamento) => {
-    // Alert.prompt solo existe en iOS. En Android se ofrece la cantidad
-    // tipica de una caja mensual, para no dejar la funcion sin salida.
-    if (Alert.prompt) {
+    // Alert.prompt EXISTE en las dos plataformas —es un metodo estatico
+    // de la clase— pero su cuerpo entero esta dentro de un if de iOS, asi
+    // que en Android no hace nada y no avisa. Comprobar si la funcion
+    // existe daba siempre verdadero: el boton se quedaba mudo en Android,
+    // que es la plataforma en la que se prueba esta aplicacion.
+    if (Platform.OS === 'ios') {
       Alert.prompt(
         'Reabastecer',
         `¿Cuantas unidades de ${medicamento.nombre} agregaste?`,
@@ -170,16 +173,32 @@ export default function Medicamentos() {
             </Texto>
           ) : null}
 
-          <View style={{ flexDirection: 'row', gap: espacio.sm, marginTop: espacio.sm }}>
-            <View style={{ flex: 1 }}>
-              <Boton
-                titulo="Reabastecer"
-                variante="secundario"
-                onPress={() => reabastecer(medicamento)}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Boton titulo="Suspender" variante="peligro" onPress={() => suspender(medicamento)} />
+          <View style={{ gap: espacio.sm, marginTop: espacio.sm }}>
+            {/* Editar va arriba y solo: cambiar la dosis o la hora que
+                ajusto el medico es lo que se hace a menudo, y hasta ahora
+                obligaba a suspender el medicamento y crear otro, perdiendo
+                su historial de tomas. */}
+            <Boton
+              titulo="Editar"
+              variante="secundario"
+              onPress={() => router.push(`/medicamento/${medicamento.id}`)}
+              descripcionAccesible={`Editar ${medicamento.nombre}`}
+            />
+            <View style={{ flexDirection: 'row', gap: espacio.sm }}>
+              <View style={{ flex: 1 }}>
+                <Boton
+                  titulo="Reabastecer"
+                  variante="secundario"
+                  onPress={() => reabastecer(medicamento)}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Boton
+                  titulo="Suspender"
+                  variante="peligro"
+                  onPress={() => suspender(medicamento)}
+                />
+              </View>
             </View>
           </View>
         </Tarjeta>

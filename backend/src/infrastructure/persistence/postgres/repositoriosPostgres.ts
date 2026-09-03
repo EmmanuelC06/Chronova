@@ -444,6 +444,20 @@ export class RepositorioDeTomasPostgres implements RepositorioDeTomas {
     await this.pool.query('DELETE FROM tomas WHERE medicamento_id = $1', [medicamentoId.valor]);
   }
 
+  async eliminarPendientesDesde(medicamentoId: Identificador, desde: Date): Promise<number> {
+    // Se filtra por la hora ORIGINAL, que es la casilla por la que la
+    // agenda identifica cada toma: una toma pospuesta cuya hora original
+    // ya paso pertenece al pasado y no se toca.
+    const { rowCount } = await this.pool.query(
+      `DELETE FROM tomas
+        WHERE medicamento_id = $1
+          AND estado IN ('PENDIENTE', 'POSPUESTA')
+          AND programada_originalmente_para >= $2`,
+      [medicamentoId.valor, desde.toISOString()],
+    );
+    return rowCount ?? 0;
+  }
+
   private aEntidad(fila: Record<string, any>): Toma {
     return Toma.desdePlano({
       id: fila.id,

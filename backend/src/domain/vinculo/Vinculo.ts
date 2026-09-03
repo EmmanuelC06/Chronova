@@ -45,7 +45,10 @@ export class Vinculo {
     private _estado: EstadoDeVinculo,
     private _parentesco: string | null,
     private _permisos: PermisosDelCuidador,
-    readonly solicitadoPor: 'PACIENTE' | 'CUIDADOR',
+    // Deja de ser readonly porque un vinculo revocado se puede volver a
+    // pedir, y quien lo pide la segunda vez decide si nace aceptado o
+    // pendiente. Ver volverASolicitar().
+    private _solicitadoPor: 'PACIENTE' | 'CUIDADOR',
     readonly creadoEn: Date,
     private _resueltoEn: Date | null,
   ) {}
@@ -128,6 +131,9 @@ export class Vinculo {
   get resueltoEn(): Date | null {
     return this._resueltoEn ? new Date(this._resueltoEn) : null;
   }
+  get solicitadoPor(): 'PACIENTE' | 'CUIDADOR' {
+    return this._solicitadoPor;
+  }
 
   get estaActivo(): boolean {
     return this._estado === 'ACEPTADO';
@@ -160,6 +166,43 @@ export class Vinculo {
     if (this._estado === 'REVOCADO') return;
     this._estado = 'REVOCADO';
     this._resueltoEn = ahora;
+  }
+
+  /**
+   * Se vuelve a pedir un vinculo que estaba RECHAZADO o REVOCADO.
+   *
+   * Es la misma relacion entre las mismas dos personas, asi que se
+   * reutiliza esta entidad en lugar de crear otra. Crear una segunda
+   * dejaba dos filas para el mismo par y las consultas devolvian la
+   * vieja, de modo que el paciente no podia volver a dar acceso nunca.
+   *
+   * LOS PERMISOS VUELVEN AL MINIMO. El consentimiento anterior se
+   * retiro; lo que se conceda ahora es una decision nueva, no la
+   * resurreccion de la de antes. Que un cuidador recuperase por sorpresa
+   * el permiso de editar el tratamiento seria justo lo contrario de lo
+   * que significa revocar.
+   */
+  volverASolicitar(datos: {
+    solicitadoPor: 'PACIENTE' | 'CUIDADOR';
+    parentesco?: string | null;
+    permisos?: Partial<PermisosDelCuidador>;
+    ahora: Date;
+  }): void {
+    if (this._estado === 'PENDIENTE' || this._estado === 'ACEPTADO') {
+      throw new ErrorDeReglaDeNegocio('Este vinculo sigue vigente: no hay nada que volver a pedir.');
+    }
+
+    this._permisos = { ...Vinculo.permisosPorDefecto(), ...(datos.permisos ?? {}) };
+    this._solicitadoPor = datos.solicitadoPor;
+
+    if (datos.parentesco !== undefined) {
+      this._parentesco = Vinculo.validarParentesco(datos.parentesco);
+    }
+
+    // Misma regla que en solicitar(): si invita el dueno de los datos, el
+    // consentimiento ya esta dado.
+    this._estado = datos.solicitadoPor === 'PACIENTE' ? 'ACEPTADO' : 'PENDIENTE';
+    this._resueltoEn = this._estado === 'ACEPTADO' ? datos.ahora : null;
   }
 
   cambiarPermisos(nuevos: Partial<PermisosDelCuidador>): void {

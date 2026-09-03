@@ -35,6 +35,10 @@ export default function LayoutRaiz() {
             name="medicamento/nuevo"
             options={{ title: 'Nuevo medicamento', presentation: 'modal' }}
           />
+          <Stack.Screen
+            name="medicamento/[id]"
+            options={{ title: 'Editar medicamento', presentation: 'modal' }}
+          />
         </Stack>
       </ProveedorDeSesion>
     </SafeAreaProvider>

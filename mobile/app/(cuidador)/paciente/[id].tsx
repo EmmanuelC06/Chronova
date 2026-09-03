@@ -157,14 +157,36 @@ export default function DetalleDelPaciente() {
   // ---- Casos en los que no hay nada que mostrar ----
 
   if (!paciente) {
+    // Se distingue "no pudimos preguntar" de "no esta". Decirle a un
+    // cuidador que su madre le revoco el acceso cuando lo unico que pasa
+    // es que se cayo el wifi es un mensaje falso y alarmante.
     return (
       <>
         <Stack.Screen options={{ title: 'Paciente' }} />
-        <ScrollView contentContainerStyle={{ padding: espacio.md }}>
-          <EstadoVacio
-            titulo="No encontramos a este paciente"
-            descripcion="Puede que el vinculo se haya revocado. Vuelve al panel para ver a quienes acompanas."
-          />
+        <ScrollView
+          contentContainerStyle={{ padding: espacio.md, gap: espacio.md }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refrescando}
+              onRefresh={() => {
+                setRefrescando(true);
+                void cargar();
+              }}
+              tintColor={colores.primario}
+            />
+          }
+        >
+          {error ? (
+            <>
+              <Aviso mensaje={error} tono="error" />
+              <Boton titulo="Reintentar" onPress={() => void cargar()} />
+            </>
+          ) : (
+            <EstadoVacio
+              titulo="No encontramos a este paciente"
+              descripcion="Puede que el vinculo se haya revocado. Vuelve al panel para ver a quienes acompanas."
+            />
+          )}
         </ScrollView>
       </>
     );
@@ -309,7 +331,11 @@ export default function DetalleDelPaciente() {
               Las mas recientes. Es lo que conviene revisar con {nombre.split(' ')[0]}.
             </Texto>
             {sinTomar.map((registro) => (
-              <TarjetaDeOmision key={registro.tomaId} registro={registro} />
+              <TarjetaDeOmision
+                key={registro.tomaId}
+                registro={registro}
+                zonaHoraria={historial?.zonaHoraria}
+              />
             ))}
           </>
         ) : historial ? (
@@ -466,7 +492,13 @@ function TarjetaDeToma({
   );
 }
 
-function TarjetaDeOmision({ registro }: { registro: RegistroDeHistorial }) {
+function TarjetaDeOmision({
+  registro,
+  zonaHoraria,
+}: {
+  registro: RegistroDeHistorial;
+  zonaHoraria?: string;
+}) {
   const estilo = ESTILO_POR_ESTADO.OMITIDA;
 
   return (
@@ -481,7 +513,7 @@ function TarjetaDeOmision({ registro }: { registro: RegistroDeHistorial }) {
         />
       </View>
       <Texto variante="pequeno" color={colores.textoSuave}>
-        {momentoEnPalabras(registro.programadaPara)}
+        {momentoEnPalabras(registro.programadaPara, zonaHoraria)}
       </Texto>
       {registro.registradaPor === 'SISTEMA' ? (
         <Texto variante="pequeno" color={colores.textoSuave}>
@@ -501,13 +533,27 @@ function TarjetaDeOmision({ registro }: { registro: RegistroDeHistorial }) {
   );
 }
 
-function momentoEnPalabras(iso: string): string {
-  const fecha = new Date(iso);
-  return fecha.toLocaleString('es-CO', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+/**
+ * La hora SIEMPRE en la zona del paciente, no en la del cuidador.
+ *
+ * Un hijo que vive en Madrid y una madre en Medellin llevan siete horas
+ * de diferencia: sin esto, la dosis que ella se salto a las ocho de la
+ * noche le aparecia a el como "las tres de la madrugada", y llamaba a
+ * preguntar por una toma que nunca existio. El servidor ya envia la zona
+ * en cada respuesta; solo habia que usarla.
+ */
+function momentoEnPalabras(iso: string, zonaHoraria?: string): string {
+  try {
+    return new Date(iso).toLocaleString('es-CO', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: zonaHoraria,
+    });
+  } catch {
+    // Una zona que este motor no conozca no debe dejar la tarjeta vacia.
+    return new Date(iso).toLocaleString('es-CO');
+  }
 }

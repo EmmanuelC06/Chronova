@@ -29,7 +29,7 @@ import { colores, espacio, ESTILO_POR_ESTADO, radio } from '../../src/ui/tema';
  * anos.
  */
 export default function Hoy() {
-  const { api, alarmas, preferencias, perfil } = useSesion();
+  const { api, alarmas, sincronizarAlarmas, perfil } = useSesion();
 
   const [agenda, setAgenda] = useState<AgendaDelDia | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -43,8 +43,6 @@ export default function Hoy() {
       setError(null);
       const resultado = await api.obtenerAgenda();
       setAgenda(resultado);
-      // Las alarmas del telefono se ponen al dia con la agenda real.
-      await alarmas.sincronizar(resultado, preferencias);
     } catch (problema) {
       setError(
         problema instanceof ErrorDeApi
@@ -55,7 +53,7 @@ export default function Hoy() {
       setCargando(false);
       setRefrescando(false);
     }
-  }, [api, alarmas, preferencias]);
+  }, [api]);
 
   useEffect(() => {
     void alarmas.pedirPermiso();
@@ -83,6 +81,9 @@ export default function Hoy() {
       );
       if (resultado.avisoDeStock) setAviso(resultado.avisoDeStock);
       await cargar();
+      // La agenda cambio: hay que rehacer las alarmas de los proximos
+      // dias, no solo las de hoy.
+      void sincronizarAlarmas();
     } catch (problema) {
       setError(
         problema instanceof ErrorDeApi ? problema.message : 'No pudimos registrar la toma.',

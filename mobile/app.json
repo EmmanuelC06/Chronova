@@ -27,7 +27,7 @@
       "expo-notifications"
     ],
     "extra": {
-      "apiUrl": "http://10.11.19.129:4000",
+      "apiUrl": "http://192.168.1.6:4000",
       "router": {},
       "eas": {
         "projectId": "e0863e2f-ccb1-4db2-af1d-07e835cab14c"

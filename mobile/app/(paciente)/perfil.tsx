@@ -1,9 +1,13 @@
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, Switch, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Switch, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
-import type { CuidadorDelPaciente, TamanoDeLetra } from '../../src/dominio/modelos';
+import type {
+  CuidadorDelPaciente,
+  PermisosDelCuidador,
+  TamanoDeLetra,
+} from '../../src/dominio/modelos';
 import {
   Aviso,
   Boton,
@@ -13,7 +17,42 @@ import {
   Texto,
 } from '../../src/ui/componentes/basicos';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
-import { colores, espacio } from '../../src/ui/tema';
+import { ALTO_TACTIL_MINIMO, colores, espacio } from '../../src/ui/tema';
+
+/**
+ * Los cuatro permisos, en el orden en que crece lo que conceden.
+ *
+ * Cada uno se explica con lo que la otra persona PODRA HACER, no con el
+ * nombre tecnico del permiso. "puedeGestionarMedicamentos" no le dice
+ * nada a una mujer de 74 anos; "cambiar tu tratamiento" si, y es
+ * exactamente lo que esta autorizando.
+ */
+const PERMISOS: {
+  clave: keyof PermisosDelCuidador;
+  etiqueta: string;
+  ayuda: string;
+}[] = [
+  {
+    clave: 'puedeVerHistorial',
+    etiqueta: 'Ver mi tratamiento',
+    ayuda: 'Sus medicamentos, sus horarios y que tomas ha cumplido.',
+  },
+  {
+    clave: 'recibeAlertas',
+    etiqueta: 'Avisarle si me salto una toma',
+    ayuda: 'Recibira una notificacion en su telefono.',
+  },
+  {
+    clave: 'puedeRegistrarTomas',
+    etiqueta: 'Confirmar tomas por mi',
+    ayuda: 'Util si le avisas por telefono que ya te la tomaste.',
+  },
+  {
+    clave: 'puedeGestionarMedicamentos',
+    etiqueta: 'Cambiar mi tratamiento',
+    ayuda: 'Podra agregar, modificar y suspender medicamentos. Es el permiso mas amplio.',
+  },
+];
 
 const ETIQUETAS_DE_TAMANO: Record<TamanoDeLetra, string> = {
   NORMAL: 'Normal',
@@ -87,6 +126,43 @@ export default function Perfil() {
       await cargar();
     } catch {
       setError('No pudimos actualizar el acceso de esa persona.');
+    }
+  };
+
+  /**
+   * Cambia un permiso concreto de un cuidador.
+   *
+   * Se aplica en pantalla de inmediato y se confirma con el servidor; si
+   * el servidor falla, se revierte. Un interruptor que se queda encendido
+   * cuando el cambio no se guardo es peor que un error visible: la
+   * persona cree haber concedido —o retirado— un acceso que en realidad
+   * sigue como estaba.
+   */
+  const cambiarPermiso = async (
+    vinculo: CuidadorDelPaciente,
+    clave: keyof PermisosDelCuidador,
+    valor: boolean,
+  ) => {
+    setError(null);
+
+    const anteriores = cuidadores;
+    setCuidadores((lista) =>
+      lista.map((c) =>
+        c.vinculoId === vinculo.vinculoId
+          ? { ...c, permisos: { ...c.permisos, [clave]: valor } }
+          : c,
+      ),
+    );
+
+    try {
+      await api.cambiarPermisosDelVinculo(vinculo.vinculoId, { [clave]: valor });
+    } catch (problema) {
+      setCuidadores(anteriores);
+      setError(
+        problema instanceof ErrorDeApi
+          ? problema.message
+          : 'No pudimos cambiar ese permiso. Revisa tu conexion.',
+      );
     }
   };
 
@@ -224,7 +300,7 @@ export default function Perfil() {
         ))}
 
         {activos.map((cuidador) => (
-          <View key={cuidador.vinculoId} style={{ gap: espacio.xs, marginTop: espacio.md }}>
+          <View key={cuidador.vinculoId} style={{ gap: espacio.xs, marginTop: espacio.lg }}>
             <View
               style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
             >
@@ -234,6 +310,21 @@ export default function Perfil() {
             <Texto variante="pequeno" color={colores.textoSuave}>
               {cuidador.rol ?? cuidador.email}
             </Texto>
+
+            <Texto variante="etiqueta" negrita color={colores.textoSuave} style={{ marginTop: espacio.sm }}>
+              Que puede hacer {primerNombre(cuidador.nombre)}
+            </Texto>
+
+            {PERMISOS.map((permiso) => (
+              <Interruptor
+                key={permiso.clave}
+                etiqueta={permiso.etiqueta}
+                ayuda={permiso.ayuda}
+                valor={cuidador.permisos[permiso.clave]}
+                onCambio={(valor) => void cambiarPermiso(cuidador, permiso.clave, valor)}
+              />
+            ))}
+
             <Boton
               titulo="Quitar acceso"
               variante="peligro"
@@ -268,35 +359,56 @@ export default function Perfil() {
 
 function Interruptor({
   etiqueta,
+  ayuda,
   valor,
   onCambio,
 }: {
   etiqueta: string;
+  ayuda?: string;
   valor: boolean;
   onCambio: (valor: boolean) => void;
 }) {
   return (
-    <View
+    <Pressable
+      onPress={() => onCambio(!valor)}
+      accessibilityRole="switch"
+      accessibilityLabel={ayuda ? `${etiqueta}. ${ayuda}` : etiqueta}
+      accessibilityState={{ checked: valor }}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        minHeight: 56,
+        // La fila entera es tocable, no solo el interruptor: el control
+        // nativo mide unos 31 px de alto, muy por debajo de los 64 que
+        // exige el tema, y acertarle con temblor es dificil.
+        minHeight: ALTO_TACTIL_MINIMO,
+        paddingVertical: espacio.xs,
         gap: espacio.md,
       }}
     >
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, gap: 2 }}>
         <Texto>{etiqueta}</Texto>
+        {ayuda ? (
+          <Texto variante="pequeno" color={colores.textoSuave}>
+            {ayuda}
+          </Texto>
+        ) : null}
       </View>
       <Switch
         value={valor}
         onValueChange={onCambio}
-        accessibilityLabel={etiqueta}
+        // El contenedor ya expone el control al lector de pantalla.
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
         trackColor={{ true: colores.primario, false: colores.borde }}
         thumbColor={colores.superficie}
       />
-    </View>
+    </Pressable>
   );
+}
+
+function primerNombre(nombre: string): string {
+  return nombre.split(' ')[0] ?? nombre;
 }
 
 function formatearGracia(minutos: number): string {

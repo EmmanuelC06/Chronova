@@ -8,6 +8,7 @@ import type {
   Medicamento,
   PacienteEnPanel,
   Perfil,
+  PermisosDelCuidador,
   Preferencias,
   Sesion,
   TipoDeUsuario,
@@ -133,6 +134,13 @@ export class ClienteChronova implements ApiDeChronova {
     return this.pedir<Medicamento>('POST', '/api/medicamentos', datos);
   }
 
+  actualizarMedicamento(
+    medicamentoId: string,
+    cambios: Record<string, unknown>,
+  ): Promise<Medicamento> {
+    return this.pedir<Medicamento>('PATCH', `/api/medicamentos/${medicamentoId}`, cambios);
+  }
+
   async suspenderMedicamento(medicamentoId: string): Promise<void> {
     await this.pedir('DELETE', `/api/medicamentos/${medicamentoId}`);
   }
@@ -210,6 +218,13 @@ export class ClienteChronova implements ApiDeChronova {
     respuesta: 'ACEPTAR' | 'RECHAZAR' | 'REVOCAR',
   ): Promise<unknown> {
     return this.pedir('POST', `/api/vinculos/${vinculoId}/respuesta`, { respuesta });
+  }
+
+  cambiarPermisosDelVinculo(
+    vinculoId: string,
+    permisos: Partial<PermisosDelCuidador>,
+  ): Promise<unknown> {
+    return this.pedir('PATCH', `/api/vinculos/${vinculoId}/permisos`, permisos);
   }
 
   // ---------------------------------------------------------------

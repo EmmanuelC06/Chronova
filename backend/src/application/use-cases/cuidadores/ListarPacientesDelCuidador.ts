@@ -1,4 +1,3 @@
-import { aMedianoche, sumarDias } from '../../../domain/shared/fechas.js';
 import type { NivelDeAdherencia } from '../../../domain/toma/ResumenDeAdherencia.js';
 import { ResumenDeAdherencia } from '../../../domain/toma/ResumenDeAdherencia.js';
 import type { RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas.js';
@@ -64,14 +63,7 @@ export class ListarPacientesDelCuidador {
     if (relevantes.length === 0) return [];
 
     const ahora = this.reloj.ahora();
-
-    // El rango cubre dias completos, del primero al ULTIMO INSTANTE DE
-    // HOY. Cortarlo en "ahora" dejaria fuera las tomas de mas tarde del
-    // mismo dia, y el cuidador veria el panel vacio cada manana.
-    const rango = {
-      desde: aMedianoche(sumarDias(ahora, -(consulta.dias ?? DIAS_POR_DEFECTO))),
-      hasta: sumarDias(aMedianoche(ahora), 1),
-    };
+    const dias = consulta.dias ?? DIAS_POR_DEFECTO;
 
     const pacientes = await this.pacientes.listarPorIds(relevantes.map((v) => v.pacienteId));
     const porId = new Map(pacientes.map((p) => [p.id.valor, p]));
@@ -99,6 +91,21 @@ export class ListarPacientesDelCuidador {
         });
         continue;
       }
+
+      // El rango se calcula EN LA ZONA DE CADA PACIENTE, no en la del
+      // servidor. Cubre dias completos, del primero al ultimo instante de
+      // hoy: cortarlo en "ahora" dejaria fuera las tomas de mas tarde del
+      // mismo dia y el cuidador veria el panel vacio cada manana.
+      //
+      // Antes esto usaba la medianoche del proceso, y el mismo panel
+      // contaba una toma o dos segun el huso en que corriera el servidor,
+      // contradiciendo el RNF-15.
+      const zona = paciente.zonaHoraria;
+      const hoy = zona.fechaLocalDe(ahora);
+      const rango = {
+        desde: zona.inicioDelDia(hoy.sumarDias(-dias)),
+        hasta: zona.inicioDelDia(hoy.sumarDias(1)),
+      };
 
       const [tomasDelPeriodo, medicamentosActivos] = await Promise.all([
         this.tomas.listarPorPacienteEnRango(paciente.id, rango),

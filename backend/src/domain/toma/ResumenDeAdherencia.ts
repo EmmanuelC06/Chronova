@@ -26,6 +26,8 @@ export class ResumenDeAdherencia {
     readonly pendientes: number,
     readonly tomadasATiempo: number,
     readonly tomadasConRetraso: number,
+    /** Confirmadas antes de que llegara su hora. */
+    readonly tomadasAdelantadas: number,
   ) {}
 
   static calcular(tomas: readonly Toma[], ventanaDeToleranciaEnMinutos: number): ResumenDeAdherencia {
@@ -34,14 +36,21 @@ export class ResumenDeAdherencia {
     let pendientes = 0;
     let aTiempo = 0;
     let conRetraso = 0;
+    let adelantadas = 0;
 
     for (const toma of tomas) {
       switch (toma.estado) {
         case 'TOMADA': {
           tomadas += 1;
           const puntualidad = toma.puntualidad(ventanaDeToleranciaEnMinutos);
-          if (puntualidad === 'CON_RETRASO') conRetraso += 1;
-          else aTiempo += 1;
+          // Solo cuenta como puntual la que se hizo DENTRO de la ventana.
+          // Antes, cualquier cosa que no fuera CON_RETRASO sumaba a
+          // tiempo, asi que confirmar por error la toma de las 20:00 a las
+          // 07:00 de la manana —trece horas antes, un desliz de un pulgar
+          // en una pantalla de letra grande— daba 100% de puntualidad.
+          if (puntualidad === 'A_TIEMPO') aTiempo += 1;
+          else if (puntualidad === 'CON_RETRASO') conRetraso += 1;
+          else if (puntualidad === 'ADELANTADA') adelantadas += 1;
           break;
         }
         case 'OMITIDA':
@@ -52,7 +61,15 @@ export class ResumenDeAdherencia {
       }
     }
 
-    return new ResumenDeAdherencia(tomas.length, tomadas, omitidas, pendientes, aTiempo, conRetraso);
+    return new ResumenDeAdherencia(
+      tomas.length,
+      tomadas,
+      omitidas,
+      pendientes,
+      aTiempo,
+      conRetraso,
+      adelantadas,
+    );
   }
 
   /** Base del calculo: solo las tomas que ya se resolvieron. */
@@ -105,6 +122,7 @@ export class ResumenDeAdherencia {
       pendientes: this.pendientes,
       tomadasATiempo: this.tomadasATiempo,
       tomadasConRetraso: this.tomadasConRetraso,
+      tomadasAdelantadas: this.tomadasAdelantadas,
       porcentaje: this.porcentaje,
       porcentajeDePuntualidad: this.porcentajeDePuntualidad,
       nivel: this.nivel,

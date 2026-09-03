@@ -632,6 +632,107 @@ describe('Vinculo cuidador-paciente y control de acceso', () => {
     ).rejects.toThrow(/No tienes acceso/);
   });
 
+  it('el paciente puede volver a dar acceso despues de revocarlo', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+    await app.contenedor.casosDeUso.responderSolicitudDeVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      respuesta: 'REVOCAR',
+    });
+
+    // Rosa se arrepiente y vuelve a invitar a su hija.
+    const reinvitado = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+
+    // Es LA MISMA fila. Crear otra dejaba dos registros para el mismo par:
+    // las consultas devolvian el viejo revocado y el acceso quedaba roto
+    // para siempre, por mas veces que Rosa la invitara.
+    expect(reinvitado.id).toBe(vinculo.id);
+    expect(reinvitado.estado).toBe('ACEPTADO');
+
+    const lista = await app.contenedor.casosDeUso.listarMedicamentos.ejecutar({
+      solicitante: cuidador.solicitante,
+      pacienteId: paciente.id,
+    });
+    expect(lista).toHaveLength(1);
+
+    const cuidadores = await app.contenedor.casosDeUso.listarCuidadoresDelPaciente.ejecutar({
+      solicitante: paciente.solicitante,
+    });
+    expect(cuidadores).toHaveLength(1);
+  });
+
+  it('al volver a dar acceso, los permisos ampliados no resucitan solos', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+    await app.contenedor.casosDeUso.cambiarPermisosDelVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      permisos: { puedeGestionarMedicamentos: true },
+    });
+    await app.contenedor.casosDeUso.responderSolicitudDeVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      respuesta: 'REVOCAR',
+    });
+
+    const reinvitado = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+
+    // Revocar significa retirar el consentimiento. Lo que se conceda
+    // despues es una decision nueva, no la resurreccion de la anterior:
+    // que el cuidador recuperase por sorpresa el permiso de editar el
+    // tratamiento seria lo contrario de lo que revocar significa.
+    expect(reinvitado.permisos.puedeGestionarMedicamentos).toBe(false);
+    expect(reinvitado.permisos.puedeVerHistorial).toBe(true);
+    void cuidador;
+  });
+
+  it('si vuelve a pedirlo el cuidador, queda pendiente otra vez', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+    await app.contenedor.casosDeUso.responderSolicitudDeVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      vinculoId: vinculo.id,
+      respuesta: 'REVOCAR',
+    });
+
+    const reintento = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: cuidador.solicitante,
+      emailDeLaOtraParte: 'rosa@test.com',
+    });
+
+    // Un cuidador al que le retiraron el acceso no puede recuperarlo solo.
+    expect(reintento.estado).toBe('PENDIENTE');
+    await expect(
+      app.contenedor.casosDeUso.listarMedicamentos.ejecutar({
+        solicitante: cuidador.solicitante,
+        pacienteId: paciente.id,
+      }),
+    ).rejects.toThrow(/No tienes acceso/);
+  });
+
   it('solo el paciente decide sobre el vinculo, nunca el cuidador', async () => {
     const paciente = await crearPacienteDePrueba(app);
     const cuidador = await crearCuidadorDePrueba(app);
@@ -755,6 +856,223 @@ describe('Preferencias de accesibilidad', () => {
     expect(preferencias.tamanoDeLetra).toBe('MUY_GRANDE');
     expect(preferencias.altoContraste).toBe(true);
     expect(preferencias.alertasSonoras).toBe(true);
+  });
+});
+
+// =================================================================
+describe('Cambios en el tratamiento y adherencia', () => {
+  /**
+   * Cuando el tratamiento cambia, las tomas que ya se habian generado con
+   * la definicion anterior tienen que desaparecer. Si se quedan, cuentan
+   * como incumplimientos de algo que el paciente nunca tuvo que tomar, y
+   * eso falsea la unica medida que este proyecto pretende mejorar.
+   */
+
+  it('suspender no deja incumplimientos falsos en el historial', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const medicamento = await registrarLosartan(paciente.solicitante, paciente.id);
+
+    // Se abre la agenda: las dos tomas del dia quedan materializadas.
+    await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // El medico suspende el tratamiento por la manana, antes de que
+    // ninguna toma venciera.
+    await app.contenedor.casosDeUso.suspenderMedicamento.ejecutar({
+      solicitante: paciente.solicitante,
+      medicamentoId: medicamento.id,
+    });
+
+    const historial = await app.contenedor.casosDeUso.consultarHistorial.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      desde: HOY,
+      hasta: HOY,
+    });
+
+    // Rosa hizo lo que le mandaron. No puede salir como paciente de riesgo.
+    expect(historial.resumen.omitidas).toBe(0);
+    expect(historial.resumen.nivel).toBe('SIN_DATOS');
+    expect(historial.resumen.requiereAtencionDelCuidador).toBe(false);
+  });
+
+  it('suspender conserva las tomas que ya se habian resuelto', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const medicamento = await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+    const manana = agenda.elementos[0]!;
+
+    // El paciente ya se tomo la de la manana.
+    await app.contenedor.casosDeUso.registrarToma.ejecutar({
+      solicitante: paciente.solicitante,
+      tomaId: manana.tomaId,
+      accion: 'CONFIRMAR',
+    });
+
+    app.reloj.mover(new Date('2026-08-31T14:00:00Z')); // 09:00 en Bogota
+    await app.contenedor.casosDeUso.suspenderMedicamento.ejecutar({
+      solicitante: paciente.solicitante,
+      medicamentoId: medicamento.id,
+    });
+
+    const historial = await app.contenedor.casosDeUso.consultarHistorial.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      desde: HOY,
+      hasta: HOY,
+    });
+
+    // Lo que ya paso es evidencia del tratamiento: se conserva.
+    expect(historial.registros).toHaveLength(1);
+    expect(historial.registros[0]?.estado).toBe('TOMADA');
+    expect(historial.resumen.porcentaje).toBe(100);
+  });
+
+  it('mover un horario no deja la toma vieja en la agenda', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const medicamento = await registrarLosartan(paciente.solicitante, paciente.id);
+
+    await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // El paciente mueve la toma de la manana una hora mas tarde.
+    await app.contenedor.casosDeUso.actualizarMedicamento.ejecutar({
+      solicitante: paciente.solicitante,
+      medicamentoId: medicamento.id,
+      horarios: ['09:00', '20:00'],
+    });
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // Dos horarios, dos tomas. Antes quedaban tres, y la huerfana de las
+    // 08:00 la cerraba el sistema como perdida.
+    expect(agenda.elementos.map((e) => e.horaProgramada)).toEqual(['09:00', '20:00']);
+  });
+
+  it('cambiar el horario no borra una toma de esta manana que quedo sin confirmar', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const medicamento = await registrarLosartan(paciente.solicitante, paciente.id);
+
+    await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // Son las 17:00 en Bogota: la toma de las 08:00 ya paso sin que nadie
+    // la registrara. El paciente reorganiza su horario a esta hora.
+    app.reloj.mover(new Date('2026-08-31T22:00:00Z'));
+    await app.contenedor.casosDeUso.actualizarMedicamento.ejecutar({
+      solicitante: paciente.solicitante,
+      medicamentoId: medicamento.id,
+      horarios: ['09:00', '21:00'],
+    });
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+    const horas = agenda.elementos.map((e) => e.horaProgramada);
+
+    // La de las 08:00 se conserva: que el paciente no se tomara su
+    // medicina esta manana es un dato clinico, y no deja de ser cierto
+    // porque por la tarde cambie el horario. La de las 20:00, que todavia
+    // no habia llegado, si se retira y la sustituye la de las 21:00.
+    expect(horas).toContain('08:00');
+    expect(horas).not.toContain('20:00');
+    expect(horas).toContain('21:00');
+  });
+
+  it('cambiar solo el nombre no toca la agenda', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const medicamento = await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const antes = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    await app.contenedor.casosDeUso.actualizarMedicamento.ejecutar({
+      solicitante: paciente.solicitante,
+      medicamentoId: medicamento.id,
+      nombre: 'Losartan potasico',
+    });
+
+    const despues = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // Las mismas tomas, con los mismos identificadores: nada que rehacer.
+    expect(despues.elementos.map((e) => e.tomaId)).toEqual(antes.elementos.map((e) => e.tomaId));
+  });
+
+  it('confirmar una toma antes de su hora no cuenta como puntual', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // Son las 07:00 y confirma por error la toma de las 20:00.
+    const noche = agenda.elementos.find((e) => e.horaProgramada === '20:00')!;
+    await app.contenedor.casosDeUso.registrarToma.ejecutar({
+      solicitante: paciente.solicitante,
+      tomaId: noche.tomaId,
+      accion: 'CONFIRMAR',
+    });
+
+    const historial = await app.contenedor.casosDeUso.consultarHistorial.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      desde: HOY,
+      hasta: HOY,
+    });
+
+    // Trece horas antes de su hora no es puntualidad, es un error de dedo.
+    expect(historial.resumen.tomadasATiempo).toBe(0);
+    expect(historial.resumen.porcentajeDePuntualidad).toBe(0);
+  });
+});
+
+// =================================================================
+describe('El panel del cuidador usa la zona del paciente', () => {
+  it('cuenta las tomas de todo el dia del paciente, no del servidor', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+
+    await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+    });
+
+    await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    const panel = await app.contenedor.casosDeUso.listarPacientesDelCuidador.ejecutar({
+      solicitante: cuidador.solicitante,
+    });
+
+    // Rosa vive en Bogota y tiene dos tomas hoy: 08:00 y 20:00. La de las
+    // 20:00 son las 01:00 UTC del dia siguiente, asi que con la medianoche
+    // del proceso se caia del rango y el panel contaba una sola. El
+    // resultado dependia del huso del servidor, contra el RNF-15.
+    expect(panel[0]?.adherencia.pendientes).toBe(2);
   });
 });
 
