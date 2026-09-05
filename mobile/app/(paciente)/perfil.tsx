@@ -221,7 +221,7 @@ export default function Perfil() {
         <Texto color={colores.textoSuave}>{perfil?.email}</Texto>
         {perfil?.edad ? (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            {perfil.edad} anos
+            {perfil.edad} años
           </Texto>
         ) : null}
       </Tarjeta>
@@ -233,7 +233,7 @@ export default function Perfil() {
         </Texto>
 
         <Texto variante="etiqueta" peso="semi" color={colores.textoSuave}>
-          Tamano de la letra
+          Tamaño de la letra
         </Texto>
         <View style={{ gap: espacio.sm }}>
           {(Object.keys(ETIQUETAS_DE_TAMANO) as TamanoDeLetra[]).map((opcion) => (

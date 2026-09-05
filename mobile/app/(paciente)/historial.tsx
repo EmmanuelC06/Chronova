@@ -142,12 +142,27 @@ export default function Historial() {
         >
           <Dato etiqueta="Tomadas" valor={historial.resumen.tomadas} color={colores.exito} />
           <Dato etiqueta="No tomadas" valor={historial.resumen.omitidas} color={colores.peligro} />
+          {/*
+            Se muestra "3 de 4" y no "75%" a proposito.
+            Los tres numeros de esta fila se leen como partes de un mismo
+            total, y no lo son: la puntualidad se calcula SOLO sobre las
+            tomas que si se hicieron. Con 4 tomadas y 27 sin tomar, un
+            "75% a tiempo" al lado de un "12.9%" de adherencia parece una
+            contradiccion, y lo unico que pasa es que los denominadores
+            son distintos. Ensenar el conteo trae el denominador a la
+            vista y la duda desaparece sin tener que explicar nada.
+          */}
           <Dato
             etiqueta="A tiempo"
-            valor={`${historial.resumen.porcentajeDePuntualidad}%`}
+            valor={`${historial.resumen.tomadasATiempo} de ${historial.resumen.tomadas}`}
             color={colores.primario}
           />
         </View>
+
+        <Texto variante="pequeno" color={colores.textoTenue}>
+          El cumplimiento compara las dosis tomadas con las que tocaban. La puntualidad solo mira
+          las que si se tomaron: de esas, cuantas fueron a su hora.
+        </Texto>
       </Tarjeta>
 
       {/* ---- Grafica por dia ---- */}
