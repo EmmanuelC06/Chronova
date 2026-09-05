@@ -357,6 +357,31 @@ Nada de esto rompe nada hoy; es funcionalidad a medias, y conviene tenerla escri
 
 ---
 
+---
+
+# Tratamiento de datos y versionado — 5 de septiembre
+
+Chronova trata **datos de salud**, que el artículo 5 de la Ley 1581 de 2012 clasifica como **sensibles**. Para ellos el artículo 6 exige autorización **explícita**, y el artículo 8 literal b) le da al titular derecho a **pedir prueba de lo que autorizó**. Hasta ahora la aplicación no pedía ninguna autorización ni guardaba constancia de nada.
+
+| Qué se hizo | Dónde |
+|---|---|
+| **Documentos legales**, versionados y con fecha de vigencia: política de tratamiento, términos y condiciones y aviso de privacidad | `docs/legal/` |
+| **Casilla de autorización en el registro**, sin marcar por defecto, que menciona explícitamente los datos de salud y la salida del país | `mobile/app/(auth)/registro.tsx` |
+| **La regla vive en el caso de uso, no en el formulario.** Un formulario es una sugerencia: cualquiera puede llamar a la API directamente. Sin `aceptaPoliticaDeDatos: true` el servidor no crea la cuenta | `application/services/politicaDeDatos.ts` |
+| **Constancia de qué versión se aceptó y cuándo**, como value object del dominio y dos columnas nuevas | `domain/shared/AutorizacionDeDatos.ts` |
+| **Pantalla «Mis datos y privacidad»**, alcanzable desde el registro —antes de aceptar— y desde Mi cuenta | `mobile/app/privacidad.tsx` |
+| **Versionado semántico**, `versionCode` de Android y `CHANGELOG.md` | raíz del proyecto |
+
+Tres decisiones que conviene poder defender:
+
+- **La casilla nace sin marcar.** Una casilla premarcada no es autorización expresa, es una suposición con forma de consentimiento.
+- **Se guarda la versión que el cliente declara haber mostrado, no la que el servidor considera vigente.** Lo que hay que poder probar es el texto que la persona tuvo delante.
+- **Las cuentas anteriores quedan marcadas como «no consta»**, sin inventarles una fecha. Es preferible que la aplicación admita que no lo sabe a fabricar una autorización que nadie otorgó.
+
+**Lo que sigue pendiente y no es código:** decidir quién figura como Responsable del Tratamiento —los autores o la universidad—, completar los campos entre corchetes de los documentos, y que **alguien con formación jurídica los revise antes de publicarlos**. Están redactados a partir de la ley y del código real, pero quien los redactó no es abogado.
+
+---
+
 # Qué queda
 
 Los ocho puntos del orden que proponía esta revisión se ejecutaron, en ese orden. Lo único que sigue abierto es el último, y sigue abierto **a propósito**:

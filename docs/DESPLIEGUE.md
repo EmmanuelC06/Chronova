@@ -179,7 +179,7 @@ Contando hacia atrás desde el día de la sustentación:
 | Cuándo | Qué |
 |---|---|
 | **Cuando quieras, cuesta 0** | Desplegar en Render **en la capa gratuita**. Lo que puede fallar es el despliegue, no el pago: la compilación, una variable de entorno, el SSL de Neon. Descubrirlo con meses de margen es gratis; descubrirlo la última semana, no. Pasar a los 7 USD es después un clic, sin volver a desplegar |
-| **1 mes antes** | Crear la cuenta de Play (25 USD, pago único, no caduca) y **empezar la verificación de identidad**. Ver el aviso de abajo. Publicar la política de privacidad |
+| **1 mes antes** | Crear la cuenta de Play (25 USD, pago único, no caduca) y **empezar la verificación de identidad**. Ver el aviso de abajo. **Publicar en una URL la política de tratamiento y los términos** (`docs/legal/`), y poner esas URL en `mobile/src/dominio/politicaDeDatos.ts`. Google exige la política publicada para aceptar la ficha, y la app enlaza a ella desde la pantalla de privacidad |
 | **2 semanas antes** | Subir el servicio de Render a **Starter** para que deje de dormirse. Cambiar `apiUrl` a la URL con HTTPS. Comprobar la app **con datos móviles, no con wifi**: es la prueba de que ya no depende de tu red |
 | **1 semana antes** | Declaración de seguridad de datos. Compilar con `eas build --profile production` y subir a prueba interna |
 | **3 días antes** | Enviar la invitación a los evaluadores y **pedirle a alguien ajeno que la instale**. Si falla, hay margen |
