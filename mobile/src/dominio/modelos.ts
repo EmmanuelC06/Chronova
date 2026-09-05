@@ -47,6 +47,19 @@ export interface Perfil extends UsuarioAutenticado {
   zonaHoraria?: string;
   preferencias?: Preferencias;
   rol?: string | null;
+  /**
+   * Constancia de la autorizacion de tratamiento de datos que otorgo.
+   *
+   * La Ley 1581 de 2012 da derecho a pedir prueba de lo que se autorizo.
+   * Viene en el perfil para que ese derecho se pueda ejercer desde la
+   * propia app, sin escribirle a nadie.
+   */
+  autorizacionDeDatos?: {
+    consta: boolean;
+    versionDePolitica: string | null;
+    otorgadaEn: string | null;
+    hayVersionMasReciente: boolean;
+  };
 }
 
 export interface Dosis {

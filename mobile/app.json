@@ -2,7 +2,7 @@
   "expo": {
     "name": "Chronova",
     "slug": "chronova",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "scheme": "chronova",
     "userInterfaceStyle": "light",
@@ -17,18 +17,20 @@
         "SCHEDULE_EXACT_ALARM",
         "POST_NOTIFICATIONS",
         "VIBRATE"
-      ]
+      ],
+      "versionCode": 2
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chronova.app"
+      "bundleIdentifier": "com.chronova.app",
+      "buildNumber": "2"
     },
     "plugins": [
       "expo-router",
       "expo-notifications"
     ],
     "extra": {
-      "apiUrl": "http://10.60.60.68:4000",
+      "apiUrl": "http://192.168.1.6:4000",
       "router": {},
       "eas": {
         "projectId": "e0863e2f-ccb1-4db2-af1d-07e835cab14c"

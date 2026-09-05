@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import { ErrorDeApi } from '../../dominio/modelos';
 import type { Perfil, Preferencias, Sesion, TipoDeUsuario } from '../../dominio/modelos';
+import { VERSION_DE_LA_POLITICA } from '../../dominio/politicaDeDatos';
 import type {
   AlmacenDeSesion,
   ApiDeChronova,
@@ -60,6 +61,16 @@ interface ValorDeSesion {
     telefono?: string | null;
     fechaDeNacimiento?: string | null;
     zonaHoraria?: string | null;
+    /**
+     * Que la persona marco la casilla de autorizacion.
+     *
+     * La VERSION del texto no se pide aqui a proposito: la pone el
+     * propio contexto desde `VERSION_DE_LA_POLITICA`, de modo que no
+     * pueda desincronizarse del texto que la app tiene compilado. Una
+     * pantalla que declarara la version a mano seria una version que
+     * algun dia se olvida de subir.
+     */
+    aceptaPoliticaDeDatos: boolean;
   }): Promise<void>;
   registrarCuidador(datos: {
     nombre: string;
@@ -67,6 +78,7 @@ interface ValorDeSesion {
     contrasena: string;
     telefono?: string | null;
     rol?: string | null;
+    aceptaPoliticaDeDatos: boolean;
   }): Promise<void>;
   cambiarPreferencias(cambios: Partial<Preferencias>): Promise<void>;
   cerrarSesion(): Promise<void>;
@@ -254,14 +266,18 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
 
   const registrarPaciente = useCallback<ValorDeSesion['registrarPaciente']>(
     async (datos) => {
-      await activar(await api.registrarPaciente(datos));
+      await activar(
+        await api.registrarPaciente({ ...datos, versionDePolitica: VERSION_DE_LA_POLITICA }),
+      );
     },
     [api, activar],
   );
 
   const registrarCuidador = useCallback<ValorDeSesion['registrarCuidador']>(
     async (datos) => {
-      await activar(await api.registrarCuidador(datos));
+      await activar(
+        await api.registrarCuidador({ ...datos, versionDePolitica: VERSION_DE_LA_POLITICA }),
+      );
     },
     [api, activar],
   );

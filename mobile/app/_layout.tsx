@@ -39,6 +39,15 @@ export default function LayoutRaiz() {
             name="medicamento/[id]"
             options={{ title: 'Editar medicamento', presentation: 'modal' }}
           />
+          {/*
+            Va aqui, fuera de los grupos de paciente y cuidador, porque
+            se abre desde los dos y tambien desde el registro, cuando
+            todavia no hay sesion ni se sabe que tipo de cuenta sera.
+          */}
+          <Stack.Screen
+            name="privacidad"
+            options={{ title: 'Mis datos y privacidad', presentation: 'modal' }}
+          />
         </Stack>
       </ProveedorDeSesion>
     </SafeAreaProvider>

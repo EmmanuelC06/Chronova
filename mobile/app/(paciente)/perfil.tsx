@@ -221,7 +221,7 @@ export default function Perfil() {
         <Texto color={colores.textoSuave}>{perfil?.email}</Texto>
         {perfil?.edad ? (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            {perfil.edad} años
+            {perfil.edad} anos
           </Texto>
         ) : null}
       </Tarjeta>
@@ -233,7 +233,7 @@ export default function Perfil() {
         </Texto>
 
         <Texto variante="etiqueta" peso="semi" color={colores.textoSuave}>
-          Tamaño de la letra
+          Tamano de la letra
         </Texto>
         <View style={{ gap: espacio.sm }}>
           {(Object.keys(ETIQUETAS_DE_TAMANO) as TamanoDeLetra[]).map((opcion) => (
@@ -272,6 +272,23 @@ export default function Perfil() {
             </View>
           ))}
         </View>
+      </Tarjeta>
+
+      {/* ---- Privacidad ---- */}
+      <Tarjeta>
+        <Texto variante="subtitulo" peso="semi">
+          Mis datos y privacidad
+        </Texto>
+        <Texto variante="pequeno" color={colores.textoSuave}>
+          Que guardamos, para que lo usamos, que autorizaste y cuando. Y lo que puedes pedirnos en
+          cualquier momento.
+        </Texto>
+        <Boton
+          titulo="Ver mis datos y privacidad"
+          variante="secundario"
+          icono="cuenta"
+          onPress={() => router.push('/privacidad')}
+        />
       </Tarjeta>
 
       {/* ---- Cuidadores ---- */}

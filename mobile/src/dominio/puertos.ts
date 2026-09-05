@@ -45,6 +45,10 @@ export interface ApiDeChronova {
     fechaDeNacimiento?: string | null;
     /** Zona horaria del telefono. Es la que dara sentido a sus horarios. */
     zonaHoraria?: string | null;
+    /** Autorizacion expresa del titular. Sin ella el servidor no crea la cuenta. */
+    aceptaPoliticaDeDatos: boolean;
+    /** Version del texto que se le mostro, para poder probar que acepto eso. */
+    versionDePolitica: string;
   }): Promise<Sesion>;
 
   registrarCuidador(datos: {
@@ -53,6 +57,10 @@ export interface ApiDeChronova {
     contrasena: string;
     telefono?: string | null;
     rol?: string | null;
+    /** Autorizacion expresa del titular. Sin ella el servidor no crea la cuenta. */
+    aceptaPoliticaDeDatos: boolean;
+    /** Version del texto que se le mostro, para poder probar que acepto eso. */
+    versionDePolitica: string;
   }): Promise<Sesion>;
 
   iniciarSesion(datos: {
@@ -80,7 +88,10 @@ export interface ApiDeChronova {
 
   listarMedicamentos(pacienteId?: string): Promise<Medicamento[]>;
   registrarMedicamento(datos: Record<string, unknown>): Promise<Medicamento>;
-  actualizarMedicamento(medicamentoId: string, cambios: Record<string, unknown>): Promise<Medicamento>;
+  actualizarMedicamento(
+    medicamentoId: string,
+    cambios: Record<string, unknown>,
+  ): Promise<Medicamento>;
   suspenderMedicamento(medicamentoId: string): Promise<void>;
   reabastecerStock(medicamentoId: string, unidades: number): Promise<Medicamento>;
 
@@ -105,7 +116,10 @@ export interface ApiDeChronova {
     emailDeLaOtraParte: string;
     parentesco?: string | null;
   }): Promise<unknown>;
-  responderVinculo(vinculoId: string, respuesta: 'ACEPTAR' | 'RECHAZAR' | 'REVOCAR'): Promise<unknown>;
+  responderVinculo(
+    vinculoId: string,
+    respuesta: 'ACEPTAR' | 'RECHAZAR' | 'REVOCAR',
+  ): Promise<unknown>;
 
   /**
    * El paciente ajusta que puede hacer un cuidador concreto con su

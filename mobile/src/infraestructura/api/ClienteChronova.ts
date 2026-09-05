@@ -87,6 +87,8 @@ export class ClienteChronova implements ApiDeChronova {
     telefono?: string | null;
     fechaDeNacimiento?: string | null;
     zonaHoraria?: string | null;
+    aceptaPoliticaDeDatos: boolean;
+    versionDePolitica: string;
   }): Promise<Sesion> {
     return this.pedir<Sesion>('POST', '/api/auth/registro/paciente', {
       ...datos,
@@ -102,6 +104,8 @@ export class ClienteChronova implements ApiDeChronova {
     contrasena: string;
     telefono?: string | null;
     rol?: string | null;
+    aceptaPoliticaDeDatos: boolean;
+    versionDePolitica: string;
   }): Promise<Sesion> {
     return this.pedir<Sesion>('POST', '/api/auth/registro/cuidador', datos);
   }
@@ -118,9 +122,7 @@ export class ClienteChronova implements ApiDeChronova {
     return this.pedir<Perfil>('GET', '/api/auth/perfil');
   }
 
-  solicitarRecuperacion(
-    email: string,
-  ): Promise<{ mensaje: string; minutosDeVigencia: number }> {
+  solicitarRecuperacion(email: string): Promise<{ mensaje: string; minutosDeVigencia: number }> {
     return this.pedir('POST', '/api/auth/recuperacion', { email });
   }
 
@@ -198,11 +200,10 @@ export class ClienteChronova implements ApiDeChronova {
     accion: 'CONFIRMAR' | 'OMITIR' | 'POSPONER',
     extras: { observaciones?: string; minutos?: number } = {},
   ): Promise<{ avisoDeStock: string | null }> {
-    return this.pedir<{ avisoDeStock: string | null }>(
-      'POST',
-      `/api/tomas/${tomaId}/registro`,
-      { accion, ...extras },
-    );
+    return this.pedir<{ avisoDeStock: string | null }>('POST', `/api/tomas/${tomaId}/registro`, {
+      accion,
+      ...extras,
+    });
   }
 
   consultarHistorial(

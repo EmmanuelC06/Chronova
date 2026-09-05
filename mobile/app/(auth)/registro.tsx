@@ -3,7 +3,12 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'rea
 import { router } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
+import {
+  TEXTO_DE_LA_ADVERTENCIA,
+  TEXTO_DE_LA_AUTORIZACION,
+} from '../../src/dominio/politicaDeDatos';
 import { Aviso, Boton, Campo, Texto } from '../../src/ui/componentes/basicos';
+import { Icono } from '../../src/ui/componentes/Icono';
 import { Logo } from '../../src/ui/componentes/Logo';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { ALTO_TACTIL_MINIMO, colores, espacio, radio } from '../../src/ui/tema';
@@ -30,6 +35,16 @@ export default function Registro() {
   const [error, setError] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
 
+  /**
+   * Empieza SIN marcar, y no es un descuido.
+   *
+   * Una casilla premarcada no es autorizacion expresa: es una suposicion
+   * con forma de consentimiento. Para datos de salud —sensibles segun el
+   * articulo 5 de la Ley 1581— la autorizacion tiene que ser un acto
+   * deliberado de la persona.
+   */
+  const [autoriza, setAutoriza] = useState(false);
+
   const crear = async () => {
     setError(null);
 
@@ -39,6 +54,13 @@ export default function Registro() {
     }
     if (contrasena.length < 8) {
       setError('La contrasena debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (!autoriza) {
+      setError(
+        'Para crear la cuenta necesitamos que autorices el tratamiento de tus datos. ' +
+          'Marca la casilla del final si estas de acuerdo.',
+      );
       return;
     }
     if (fechaDeNacimiento && !/^\d{4}-\d{2}-\d{2}$/.test(fechaDeNacimiento)) {
@@ -59,9 +81,10 @@ export default function Registro() {
         await registrarPaciente({
           ...comunes,
           fechaDeNacimiento: fechaDeNacimiento || null,
+          aceptaPoliticaDeDatos: autoriza,
         });
       } else {
-        await registrarCuidador(comunes);
+        await registrarCuidador({ ...comunes, aceptaPoliticaDeDatos: autoriza });
       }
       router.replace('/');
     } catch (problema) {
@@ -154,10 +177,84 @@ export default function Registro() {
           />
         ) : null}
 
+        <CasillaDeAutorizacion marcada={autoriza} onCambiar={() => setAutoriza((v) => !v)} />
+
         <Boton titulo="Crear mi cuenta" onPress={crear} ocupado={ocupado} />
         <Boton titulo="Ya tengo cuenta" variante="texto" onPress={() => router.back()} />
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+}
+
+/**
+ * La casilla de autorizacion de tratamiento de datos.
+ *
+ * Tres cosas la hacen valida y no decorativa:
+ *
+ *  - Empieza SIN marcar. Una casilla premarcada no es autorizacion.
+ *  - Dice explicitamente que incluye datos de SALUD y que salen del
+ *    pais, porque son las dos cosas que la ley exige informar y las dos
+ *    que la gente no se imagina.
+ *  - Avisa de que NO esta obligada a autorizarlo (paragrafo del art. 6).
+ *    Es la frase que casi ninguna aplicacion incluye, y es justo la que
+ *    convierte una casilla en una decision.
+ */
+function CasillaDeAutorizacion({
+  marcada,
+  onCambiar,
+}: {
+  marcada: boolean;
+  onCambiar: () => void;
+}) {
+  return (
+    <View style={{ gap: espacio.sm }}>
+      <Pressable
+        onPress={onCambiar}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: marcada }}
+        accessibilityLabel={TEXTO_DE_LA_AUTORIZACION}
+        accessibilityHint={TEXTO_DE_LA_ADVERTENCIA}
+        style={{
+          minHeight: ALTO_TACTIL_MINIMO,
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          gap: espacio.sm,
+          padding: espacio.md,
+          borderRadius: radio.md,
+          borderWidth: 2,
+          borderColor: marcada ? colores.primario : colores.bordeFuerte,
+          backgroundColor: marcada ? colores.primarioSuave : colores.superficie,
+        }}
+      >
+        <View
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: radio.sm,
+            borderWidth: 2,
+            borderColor: marcada ? colores.primario : colores.bordeFuerte,
+            backgroundColor: marcada ? colores.primario : colores.superficie,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {marcada ? <Icono nombre="check" tamano={20} color={colores.textoInverso} /> : null}
+        </View>
+        <View style={{ flex: 1 }}>
+          <Texto variante="pequeno">{TEXTO_DE_LA_AUTORIZACION}</Texto>
+        </View>
+      </Pressable>
+
+      <Texto variante="pequeno" color={colores.textoSuave}>
+        {TEXTO_DE_LA_ADVERTENCIA}
+      </Texto>
+
+      <Boton
+        titulo="Leer que datos guardamos y por que"
+        variante="texto"
+        onPress={() => router.push('/privacidad')}
+      />
+    </View>
   );
 }
 
