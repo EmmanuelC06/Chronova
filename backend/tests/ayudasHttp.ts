@@ -89,6 +89,7 @@ export async function pacienteDePrueba(api: ApiDePrueba, sufijo = 'a') {
       email: `rosa.${sufijo}@prueba.test`,
       contrasena: 'ClaveSegura123',
       zonaHoraria: 'America/Bogota',
+      aceptaPoliticaDeDatos: true,
     },
   });
   return { token: cuerpo.token as string, id: cuerpo.usuario.id as string };
@@ -101,6 +102,7 @@ export async function cuidadorDePrueba(api: ApiDePrueba, sufijo = 'a') {
       nombre: 'Ana Correa',
       email: `ana.${sufijo}@prueba.test`,
       contrasena: 'ClaveSegura123',
+      aceptaPoliticaDeDatos: true,
     },
   });
   return { token: cuerpo.token as string, id: cuerpo.usuario.id as string };

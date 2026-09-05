@@ -163,6 +163,7 @@ export async function crearPacienteDePrueba(
       contrasena: "contrasena-segura",
       fechaDeNacimiento: "1952-04-18",
       zonaHoraria,
+      aceptaPoliticaDeDatos: true,
     });
   return {
     id: resultado.usuario.id,
@@ -181,6 +182,7 @@ export async function crearCuidadorDePrueba(
       email,
       contrasena: "contrasena-segura",
       rol: "Hija",
+      aceptaPoliticaDeDatos: true,
     });
   return {
     id: resultado.usuario.id,

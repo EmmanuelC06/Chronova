@@ -4,6 +4,30 @@ import type { RepositorioDeCuidadores } from '../../../domain/cuidador/Repositor
 import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
 import type { TipoDeUsuario } from '../../ports/ServicioDeTokens.js';
 import type { Reloj } from '../../ports/Reloj.js';
+import { VERSION_VIGENTE_DE_LA_POLITICA } from '../../services/politicaDeDatos.js';
+
+/** Traduce la autorizacion guardada a lo que la app necesita mostrar. */
+function aVistaDeAutorizacion(autorizacion: {
+  constaOtorgada: boolean;
+  versionDePolitica: string;
+  otorgadaEn: Date;
+  esAnteriorA(version: string): boolean;
+}) {
+  if (!autorizacion.constaOtorgada) {
+    return {
+      consta: false,
+      versionDePolitica: null,
+      otorgadaEn: null,
+      hayVersionMasReciente: true,
+    };
+  }
+  return {
+    consta: true,
+    versionDePolitica: autorizacion.versionDePolitica,
+    otorgadaEn: autorizacion.otorgadaEn.toISOString(),
+    hayVersionMasReciente: autorizacion.esAnteriorA(VERSION_VIGENTE_DE_LA_POLITICA),
+  };
+}
 
 /**
  * Quien pide su perfil.
@@ -30,6 +54,25 @@ export interface PerfilDeUsuario {
   preferencias?: Record<string, unknown>;
   /** Solo para cuidadores. */
   rol?: string | null;
+  /**
+   * La autorizacion de tratamiento que otorgo, para que pueda verla.
+   *
+   * Va en el perfil, y no en un endpoint aparte, porque el articulo 8
+   * literal b) de la Ley 1581 da derecho a pedir prueba de lo que se
+   * autorizo: si esta a un toque en "Mi cuenta", ese derecho se ejerce
+   * solo, sin escribirle a nadie ni esperar diez dias habiles.
+   *
+   * `consta` en falso significa que la cuenta es anterior a que esto se
+   * registrara. No es lo mismo que no haber autorizado, y por eso se
+   * dice asi en vez de inventar una fecha.
+   */
+  autorizacionDeDatos: {
+    consta: boolean;
+    versionDePolitica: string | null;
+    otorgadaEn: string | null;
+    /** Verdadero si acepto un texto distinto del que rige hoy. */
+    hayVersionMasReciente: boolean;
+  };
 }
 
 /** CASO DE USO: devolver el perfil de quien tiene la sesion abierta. */
@@ -58,6 +101,7 @@ export class ObtenerPerfil {
         edad: paciente.edadEn(paciente.zonaHoraria.fechaLocalDe(this.reloj.ahora())),
         zonaHoraria: paciente.zonaHoraria.valor,
         preferencias: paciente.preferencias.toJSON(),
+        autorizacionDeDatos: aVistaDeAutorizacion(paciente.autorizacionDeDatos),
       };
     }
 
@@ -71,6 +115,7 @@ export class ObtenerPerfil {
       tipo: 'CUIDADOR',
       creadoEn: cuidador.creadoEn.toISOString(),
       rol: cuidador.rol,
+      autorizacionDeDatos: aVistaDeAutorizacion(cuidador.autorizacionDeDatos),
     };
   }
 }

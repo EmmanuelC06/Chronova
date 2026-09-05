@@ -11,6 +11,7 @@ import type { GeneradorDeIds } from '../../ports/GeneradorDeIds.js';
 import type { Reloj } from '../../ports/Reloj.js';
 import type { ServicioDeTokens } from '../../ports/ServicioDeTokens.js';
 import { validarFortalezaDeContrasena } from '../../services/politicaDeContrasenas.js';
+import { versionAutorizadaOFallar } from '../../services/politicaDeDatos.js';
 
 /** Datos que entran al caso de uso (un "comando"). */
 export interface ComandoRegistrarPaciente {
@@ -28,6 +29,13 @@ export interface ComandoRegistrarPaciente {
     alertasVibracion?: boolean;
     minutosDeGracia?: number;
   };
+  /**
+   * Autorizacion del titular. Obligatoria: sin ella no hay cuenta.
+   * Ver application/services/politicaDeDatos.ts.
+   */
+  aceptaPoliticaDeDatos?: boolean;
+  /** Version del texto que la persona tuvo delante al aceptar. */
+  versionDePolitica?: string | null;
 }
 
 export interface ResultadoDeAutenticacion {
@@ -61,6 +69,10 @@ export class RegistrarPaciente {
     const email = Email.desde(comando.email);
     validarFortalezaDeContrasena(comando.contrasena);
 
+    // Antes de nada: sin autorizacion no se crea la cuenta, y no se
+    // llega siquiera a cifrar la contrasena.
+    const versionDePolitica = versionAutorizadaOFallar(comando);
+
     if (await this.pacientes.existeConEmail(email)) {
       throw new ErrorDeConflicto('Ya existe una cuenta registrada con ese correo electronico.');
     }
@@ -79,6 +91,7 @@ export class RegistrarPaciente {
         ? FechaLocal.desde(comando.fechaDeNacimiento)
         : null,
       contrasenaCifrada: await this.cifrador.cifrar(comando.contrasena),
+      versionDePolitica,
       zonaHoraria,
       preferencias: comando.preferencias
         ? PreferenciasDeAccesibilidad.desde(comando.preferencias)

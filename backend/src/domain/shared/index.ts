@@ -6,3 +6,4 @@ export * from './Hora.js';
 export * from './fechas.js';
 export * from './FechaLocal.js';
 export * from './ZonaHoraria.js';
+export * from './AutorizacionDeDatos.js';

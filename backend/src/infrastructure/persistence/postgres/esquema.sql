@@ -155,6 +155,30 @@ ALTER TABLE cuidadores
   ADD COLUMN IF NOT EXISTS sesiones_validas_desde TIMESTAMPTZ NOT NULL DEFAULT NOW();
 
 -- ---------------------------------------------------------------
+-- Autorizacion de tratamiento de datos
+-- ---------------------------------------------------------------
+-- El articulo 8, literal b) de la Ley 1581 de 2012 le da al titular el
+-- derecho a pedir PRUEBA de la autorizacion que otorgo. Una casilla
+-- marcada en una pantalla no es prueba de nada si no deja rastro.
+--
+-- Se guardan dos cosas: la VERSION del documento que acepto y el
+-- INSTANTE exacto. Como cada version del texto se conserva en
+-- docs/legal/, con esas dos columnas se reconstruye que leyo esa
+-- persona, palabra por palabra, y cuando.
+--
+-- Se dejan NULL a proposito, sin valor por defecto: las cuentas creadas
+-- antes de esto NO otorgaron nada, y ponerles una fecha inventada seria
+-- fabricar una autorizacion que nadie dio. NULL significa "no consta",
+-- y a esas cuentas hay que volver a preguntarles.
+ALTER TABLE pacientes
+  ADD COLUMN IF NOT EXISTS politica_version TEXT,
+  ADD COLUMN IF NOT EXISTS politica_aceptada_en TIMESTAMPTZ;
+
+ALTER TABLE cuidadores
+  ADD COLUMN IF NOT EXISTS politica_version TEXT,
+  ADD COLUMN IF NOT EXISTS politica_aceptada_en TIMESTAMPTZ;
+
+-- ---------------------------------------------------------------
 -- Recuperaciones de contrasena
 -- ---------------------------------------------------------------
 -- El codigo se guarda CIFRADO, igual que una contrasena: quien leyera

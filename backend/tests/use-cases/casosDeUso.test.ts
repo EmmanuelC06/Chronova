@@ -37,6 +37,7 @@ describe('Registro e inicio de sesion', () => {
       nombre: 'Rosa Valencia',
       email: 'rosa@test.com',
       contrasena: 'contrasena-segura',
+      aceptaPoliticaDeDatos: true,
     });
 
     expect(resultado.usuario.tipo).toBe('PACIENTE');

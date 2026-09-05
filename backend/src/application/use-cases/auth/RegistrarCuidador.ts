@@ -8,6 +8,7 @@ import type { GeneradorDeIds } from '../../ports/GeneradorDeIds.js';
 import type { Reloj } from '../../ports/Reloj.js';
 import type { ServicioDeTokens } from '../../ports/ServicioDeTokens.js';
 import { validarFortalezaDeContrasena } from '../../services/politicaDeContrasenas.js';
+import { versionAutorizadaOFallar } from '../../services/politicaDeDatos.js';
 import type { ResultadoDeAutenticacion } from './RegistrarPaciente.js';
 
 export interface ComandoRegistrarCuidador {
@@ -16,6 +17,13 @@ export interface ComandoRegistrarCuidador {
   contrasena: string;
   telefono?: string | null;
   rol?: string | null;
+  /**
+   * Autorizacion del titular. Obligatoria: sin ella no hay cuenta.
+   * Ver application/services/politicaDeDatos.ts.
+   */
+  aceptaPoliticaDeDatos?: boolean;
+  /** Version del texto que la persona tuvo delante al aceptar. */
+  versionDePolitica?: string | null;
 }
 
 /** CASO DE USO: registrar un cuidador (familiar o profesional de la salud). */
@@ -32,6 +40,8 @@ export class RegistrarCuidador {
     const email = Email.desde(comando.email);
     validarFortalezaDeContrasena(comando.contrasena);
 
+    const versionDePolitica = versionAutorizadaOFallar(comando);
+
     if (await this.cuidadores.existeConEmail(email)) {
       throw new ErrorDeConflicto('Ya existe una cuenta de cuidador con ese correo electronico.');
     }
@@ -42,6 +52,7 @@ export class RegistrarCuidador {
       email,
       telefono: Telefono.opcional(comando.telefono),
       contrasenaCifrada: await this.cifrador.cifrar(comando.contrasena),
+      versionDePolitica,
       rol: comando.rol ?? null,
       ahora: this.reloj.ahora(),
     });

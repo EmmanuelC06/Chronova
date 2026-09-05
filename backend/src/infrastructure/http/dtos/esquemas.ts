@@ -30,6 +30,20 @@ export const esquemaDeRegistroDePaciente = z.object({
   // La app envia la zona del telefono. Si no llega, el dominio usa
   // America/Bogota, que es el contexto del proyecto.
   zonaHoraria: z.string().max(64).nullish(),
+  /**
+   * Autorizacion del titular para tratar sus datos, los de salud
+   * incluidos. Tiene que llegar en `true`: una casilla premarcada o un
+   * campo ausente no son autorizacion expresa (art. 6, Ley 1581/2012).
+   */
+  aceptaPoliticaDeDatos: z.literal(true, {
+    errorMap: () => ({
+      message:
+        'Para crear la cuenta hace falta autorizar el tratamiento de los datos personales.',
+    }),
+  }),
+  /** Version del texto que la persona vio, para poder probar que acepto eso. */
+  versionDePolitica: z.string().regex(/^\d+\.\d+$/).max(10).optional(),
+
   preferencias: z
     .object({
       tamanoDeLetra: z.enum(['NORMAL', 'GRANDE', 'MUY_GRANDE']).optional(),
@@ -44,6 +58,20 @@ export const esquemaDeRegistroDePaciente = z.object({
 export const esquemaDeRegistroDeCuidador = z.object({
   nombre: z.string().min(2).max(120),
   email: z.string().min(1),
+  /**
+   * Autorizacion del titular para tratar sus datos, los de salud
+   * incluidos. Tiene que llegar en `true`: una casilla premarcada o un
+   * campo ausente no son autorizacion expresa (art. 6, Ley 1581/2012).
+   */
+  aceptaPoliticaDeDatos: z.literal(true, {
+    errorMap: () => ({
+      message:
+        'Para crear la cuenta hace falta autorizar el tratamiento de los datos personales.',
+    }),
+  }),
+  /** Version del texto que la persona vio, para poder probar que acepto eso. */
+  versionDePolitica: z.string().regex(/^\d+\.\d+$/).max(10).optional(),
+
   contrasena: z.string().min(1),
   telefono: z.string().nullish(),
   rol: z.string().max(60).nullish(),

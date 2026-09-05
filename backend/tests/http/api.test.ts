@@ -330,6 +330,53 @@ describe('API HTTP', () => {
     });
   });
 
+  describe('la API no crea cuentas sin autorizacion', () => {
+    /**
+     * El formulario puede tener la casilla, pero un formulario es una
+     * sugerencia: cualquiera puede llamar a la API directamente. Estas
+     * pruebas comprueban que la regla esta donde no se puede rodear.
+     */
+    it('rechaza el registro si no llega la autorizacion', async () => {
+      const { estado, cuerpo } = await api.peticion('POST', '/api/auth/registro/paciente', {
+        cuerpo: {
+          nombre: 'Rosa Valencia',
+          email: 'sin.autorizacion@prueba.test',
+          contrasena: 'ClaveSegura123',
+          zonaHoraria: 'America/Bogota',
+        },
+      });
+
+      expect(estado).toBe(400);
+      expect(JSON.stringify(cuerpo)).toMatch(/autoriza/i);
+    });
+
+    it('rechaza una casilla enviada en falso', async () => {
+      const { estado } = await api.peticion('POST', '/api/auth/registro/paciente', {
+        cuerpo: {
+          nombre: 'Rosa Valencia',
+          email: 'falso@prueba.test',
+          contrasena: 'ClaveSegura123',
+          aceptaPoliticaDeDatos: false,
+        },
+      });
+
+      expect(estado).toBe(400);
+    });
+
+    it('el perfil devuelve la constancia de lo que se autorizo', async () => {
+      const paciente = await pacienteDePrueba(api);
+
+      const { estado, cuerpo } = await api.peticion('GET', '/api/auth/perfil', {
+        token: paciente.token,
+      });
+
+      expect(estado).toBe(200);
+      expect(cuerpo.autorizacionDeDatos.consta).toBe(true);
+      expect(cuerpo.autorizacionDeDatos.versionDePolitica).toMatch(/^\d+\.\d+$/);
+      expect(cuerpo.autorizacionDeDatos.otorgadaEn).not.toBeNull();
+    });
+  });
+
   describe('las puertas de entrada estan cerradas', () => {
     it('sin token, los datos de un paciente devuelven 401', async () => {
       const { estado } = await api.peticion('GET', '/api/tomas/agenda');

@@ -1,4 +1,6 @@
 import { Email } from '../shared/Email.js';
+import { AutorizacionDeDatos } from '../shared/AutorizacionDeDatos.js';
+import type { AutorizacionDeDatosPlana } from '../shared/AutorizacionDeDatos.js';
 import { Identificador } from '../shared/Identificador.js';
 import { Telefono } from '../shared/Telefono.js';
 import { ErrorDeValidacion } from '../shared/errores.js';
@@ -13,6 +15,8 @@ export interface CuidadorPlano {
   rol: string | null;
   activo: boolean;
   creadoEn: string;
+  /** Version de la politica que acepto y cuando. Ausente en cuentas antiguas. */
+  autorizacionDeDatos?: AutorizacionDeDatosPlana | null;
   /**
    * Desde cuando valen las sesiones de esta persona.
    *
@@ -42,6 +46,7 @@ export class Cuidador {
     private _activo: boolean,
     readonly creadoEn: Date,
     private _sesionesValidasDesde: Date,
+    private readonly _autorizacionDeDatos: AutorizacionDeDatos,
   ) {}
 
   static registrar(datos: {
@@ -51,6 +56,8 @@ export class Cuidador {
     telefono?: Telefono | null;
     contrasenaCifrada: string;
     rol?: string | null;
+    /** Version de la politica de tratamiento que acepto. Obligatoria. */
+    versionDePolitica: string;
     ahora: Date;
   }): Cuidador {
     return new Cuidador(
@@ -63,6 +70,10 @@ export class Cuidador {
       true,
       datos.ahora,
       datos.ahora,
+      AutorizacionDeDatos.otorgar({
+        versionDePolitica: datos.versionDePolitica,
+        ahora: datos.ahora,
+      }),
     );
   }
 
@@ -77,6 +88,7 @@ export class Cuidador {
       plano.activo,
       new Date(plano.creadoEn),
       new Date(plano.sesionesValidasDesde ?? plano.creadoEn),
+      AutorizacionDeDatos.desdePlano(plano.autorizacionDeDatos, new Date(plano.creadoEn)),
     );
   }
 
@@ -91,7 +103,13 @@ export class Cuidador {
       activo: this._activo,
       creadoEn: this.creadoEn.toISOString(),
       sesionesValidasDesde: this._sesionesValidasDesde.toISOString(),
+      autorizacionDeDatos: this._autorizacionDeDatos.toJSON(),
     };
+  }
+
+  /** La autorizacion que otorgo, para poder mostrarsela y probarla. */
+  get autorizacionDeDatos(): AutorizacionDeDatos {
+    return this._autorizacionDeDatos;
   }
 
   get nombre(): string {

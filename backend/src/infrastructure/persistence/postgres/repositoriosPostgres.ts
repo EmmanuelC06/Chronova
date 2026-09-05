@@ -61,8 +61,9 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
     await this.pool.query(
       `INSERT INTO pacientes
          (id, nombre, email, telefono, fecha_de_nacimiento, contrasena_cifrada,
-          zona_horaria, preferencias, activo, creado_en, sesiones_validas_desde)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+          zona_horaria, preferencias, activo, creado_en, sesiones_validas_desde,
+          politica_version, politica_aceptada_en)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
        ON CONFLICT (id) DO UPDATE SET
          nombre = EXCLUDED.nombre,
          telefono = EXCLUDED.telefono,
@@ -71,7 +72,9 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
          zona_horaria = EXCLUDED.zona_horaria,
          preferencias = EXCLUDED.preferencias,
          activo = EXCLUDED.activo,
-         sesiones_validas_desde = EXCLUDED.sesiones_validas_desde`,
+         sesiones_validas_desde = EXCLUDED.sesiones_validas_desde,
+         politica_version = EXCLUDED.politica_version,
+         politica_aceptada_en = EXCLUDED.politica_aceptada_en`,
       [
         p.id,
         p.nombre,
@@ -84,6 +87,8 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
         p.activo,
         p.creadoEn,
         p.sesionesValidasDesde,
+        p.autorizacionDeDatos?.versionDePolitica ?? null,
+        p.autorizacionDeDatos?.otorgadaEn ?? null,
       ],
     );
   }
@@ -131,6 +136,14 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
       // fecha de creacion, que equivale a "ninguna sesion se ha cerrado".
       sesionesValidasDesde:
         aFechaIso(fila.sesiones_validas_desde ?? null) ?? aFechaIso(fila.creado_en)!,
+      // NULL significa "no consta": la cuenta es anterior a que se
+      // registrara la autorizacion. No se inventa una fecha.
+      autorizacionDeDatos: fila.politica_version
+        ? {
+            versionDePolitica: fila.politica_version,
+            otorgadaEn: aFechaIso(fila.politica_aceptada_en) ?? aFechaIso(fila.creado_en)!,
+          }
+        : null,
     });
   }
 }
@@ -147,15 +160,17 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
     await this.pool.query(
       `INSERT INTO cuidadores
          (id, nombre, email, telefono, contrasena_cifrada, rol, activo, creado_en,
-          sesiones_validas_desde)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+          sesiones_validas_desde, politica_version, politica_aceptada_en)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        ON CONFLICT (id) DO UPDATE SET
          nombre = EXCLUDED.nombre,
          telefono = EXCLUDED.telefono,
          contrasena_cifrada = EXCLUDED.contrasena_cifrada,
          rol = EXCLUDED.rol,
          activo = EXCLUDED.activo,
-         sesiones_validas_desde = EXCLUDED.sesiones_validas_desde`,
+         sesiones_validas_desde = EXCLUDED.sesiones_validas_desde,
+         politica_version = EXCLUDED.politica_version,
+         politica_aceptada_en = EXCLUDED.politica_aceptada_en`,
       [
         c.id,
         c.nombre,
@@ -166,6 +181,8 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
         c.activo,
         c.creadoEn,
         c.sesionesValidasDesde,
+        c.autorizacionDeDatos?.versionDePolitica ?? null,
+        c.autorizacionDeDatos?.otorgadaEn ?? null,
       ],
     );
   }
@@ -201,6 +218,12 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
       creadoEn: aFechaIso(fila.creado_en)!,
       sesionesValidasDesde:
         aFechaIso(fila.sesiones_validas_desde ?? null) ?? aFechaIso(fila.creado_en)!,
+      autorizacionDeDatos: fila.politica_version
+        ? {
+            versionDePolitica: fila.politica_version,
+            otorgadaEn: aFechaIso(fila.politica_aceptada_en) ?? aFechaIso(fila.creado_en)!,
+          }
+        : null,
     });
   }
 }

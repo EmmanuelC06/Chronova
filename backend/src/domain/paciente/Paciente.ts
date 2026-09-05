@@ -1,4 +1,6 @@
 import { Email } from '../shared/Email.js';
+import { AutorizacionDeDatos } from '../shared/AutorizacionDeDatos.js';
+import type { AutorizacionDeDatosPlana } from '../shared/AutorizacionDeDatos.js';
 import { Identificador } from '../shared/Identificador.js';
 import { Telefono } from '../shared/Telefono.js';
 import { ZonaHoraria } from '../shared/ZonaHoraria.js';
@@ -24,6 +26,8 @@ export interface PacientePlano {
   };
   activo: boolean;
   creadoEn: string;
+  /** Version de la politica que acepto y cuando. Ausente en cuentas antiguas. */
+  autorizacionDeDatos?: AutorizacionDeDatosPlana | null;
   /**
    * Desde cuando valen las sesiones de esta persona.
    *
@@ -53,6 +57,7 @@ export class Paciente {
     private _activo: boolean,
     readonly creadoEn: Date,
     private _sesionesValidasDesde: Date,
+    private readonly _autorizacionDeDatos: AutorizacionDeDatos,
   ) {}
 
   static registrar(datos: {
@@ -64,6 +69,15 @@ export class Paciente {
     contrasenaCifrada: string;
     zonaHoraria?: ZonaHoraria;
     preferencias?: PreferenciasDeAccesibilidad;
+    /**
+     * Version de la politica de tratamiento que la persona acepto.
+     *
+     * Es OBLIGATORIA. Los datos de salud son sensibles y el articulo 6
+     * de la Ley 1581 exige autorizacion explicita para tratarlos; sin
+     * ella no puede existir la cuenta. Al ser un parametro requerido,
+     * la regla la impone el tipo y no la buena memoria de quien llame.
+     */
+    versionDePolitica: string;
     ahora: Date;
     /** Dia de hoy en la zona del paciente, para validar la fecha de nacimiento. */
     hoy: FechaLocal;
@@ -80,6 +94,10 @@ export class Paciente {
       true,
       datos.ahora,
       datos.ahora,
+      AutorizacionDeDatos.otorgar({
+        versionDePolitica: datos.versionDePolitica,
+        ahora: datos.ahora,
+      }),
     );
   }
 
@@ -96,6 +114,7 @@ export class Paciente {
       plano.activo,
       new Date(plano.creadoEn),
       new Date(plano.sesionesValidasDesde ?? plano.creadoEn),
+      AutorizacionDeDatos.desdePlano(plano.autorizacionDeDatos, new Date(plano.creadoEn)),
     );
   }
 
@@ -114,7 +133,13 @@ export class Paciente {
       activo: this._activo,
       creadoEn: this.creadoEn.toISOString(),
       sesionesValidasDesde: this._sesionesValidasDesde.toISOString(),
+      autorizacionDeDatos: this._autorizacionDeDatos.toJSON(),
     };
+  }
+
+  /** La autorizacion que otorgo, para poder mostrarsela y probarla. */
+  get autorizacionDeDatos(): AutorizacionDeDatos {
+    return this._autorizacionDeDatos;
   }
 
   // --------------------------------------------------------------
