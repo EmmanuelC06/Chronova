@@ -192,10 +192,21 @@ export default function Perfil() {
   };
 
   const cambiar = async (cambios: Parameters<typeof cambiarPreferencias>[0]) => {
+    setError(null);
     try {
       await cambiarPreferencias(cambios);
-    } catch {
-      setError('No pudimos guardar ese cambio. Revisa tu conexion.');
+    } catch (problema) {
+      // Se muestra el motivo que da el servidor cuando lo hay. Este
+      // mensaje decia siempre "Revisa tu conexion", y cuando el fallo
+      // real fue que a la base de datos le faltaban unas columnas, lo
+      // que llego a quien probaba la app fue que revisara el wifi. Un
+      // mensaje que apunta al sitio equivocado cuesta mas que no tener
+      // mensaje.
+      setError(
+        problema instanceof Error && problema.message
+          ? problema.message
+          : 'No pudimos guardar ese cambio.',
+      );
     }
   };
 
@@ -221,7 +232,7 @@ export default function Perfil() {
         <Texto color={colores.textoSuave}>{perfil?.email}</Texto>
         {perfil?.edad ? (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            {perfil.edad} años
+            {perfil.edad} anos
           </Texto>
         ) : null}
       </Tarjeta>

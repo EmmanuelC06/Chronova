@@ -2,7 +2,7 @@
   "expo": {
     "name": "Chronova",
     "slug": "chronova",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "scheme": "chronova",
     "userInterfaceStyle": "light",
@@ -18,12 +18,12 @@
         "POST_NOTIFICATIONS",
         "VIBRATE"
       ],
-      "versionCode": 2
+      "versionCode": 3
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.chronova.app",
-      "buildNumber": "2"
+      "buildNumber": "3"
     },
     "plugins": [
       "expo-router",
