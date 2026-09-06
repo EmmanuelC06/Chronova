@@ -285,6 +285,7 @@ const DIC_CUIDADORES = [
   ['telefono', 'TEXT', 'Teléfono de contacto', 'Opcional', '—'],
   ['contrasena_cifrada', 'TEXT', 'Contraseña cifrada con bcrypt', 'NOT NULL', '—'],
   ['rol', 'TEXT', 'Rol o parentesco declarado (hija, enfermera…)', 'Opcional', '—'],
+  ['preferencias', 'JSONB', 'Tamaño de letra, contraste y alertas', "NOT NULL, DEFAULT '{}'", '—'],
   ['activo', 'BOOLEAN', 'Si la cuenta sigue vigente', 'NOT NULL, DEFAULT TRUE', '—'],
   ['creado_en', 'TIMESTAMPTZ', 'Fecha de creación', 'NOT NULL, DEFAULT NOW()', '—'],
   ['sesiones_validas_desde', 'TIMESTAMPTZ', 'Desde cuándo se aceptan sus tokens', 'NOT NULL, DEFAULT NOW()', '—'],

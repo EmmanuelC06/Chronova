@@ -29,6 +29,36 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.2.0] — 2026-09-06
+
+### Añadido
+
+- **Pestaña «Mi cuenta» para el cuidador.** Hasta ahora el cuidador solo podía cerrar sesión,
+  y para llegar al botón tenía que bajar por toda la lista de pacientes. No podía agrandar la
+  letra, ni abrir la política de privacidad, ni ver la constancia de la autorización que él
+  mismo otorgó al registrarse —y el artículo 8 de la Ley 1581 de 2012 le da ese derecho tanto
+  como al paciente—.
+- **El cuidador puede ajustar el tamaño de la letra**, y se le guarda en su cuenta, no en el
+  teléfono. El cuidador suele ser el hijo o la hija, pero «hija» de alguien de noventa años
+  quiere decir sesenta y cinco: dar por hecho que solo el paciente tiene la vista cansada era
+  una suposición sin fundamento. Las preferencias de accesibilidad dejaron de vivir dentro del
+  paciente y pasaron a `domain/shared/`, que es donde les corresponde.
+
+### Corregido
+
+- **El servidor arrancaba contra una base de datos a la que no podía escribir.** Se añadieron
+  columnas al esquema y aplicarlas dependía de que alguien se acordara de ejecutar
+  `npm run db:migrate`. Como no se ejecutó, el servidor levantó, `/api/salud` respondió «ok»,
+  y todo lo que solo lee siguió funcionando. El fallo salió por el punto más alejado de la
+  causa: cambiar el tamaño de la letra no hacía nada. **Ahora el esquema se pone al día antes
+  de aceptar la primera petición, y si no puede, el servidor no arranca.** Un servidor que no
+  puede guardar no está «ok».
+- **Los mensajes de error de las preferencias decían siempre «Revisa tu conexión».** Con la
+  base de datos desactualizada, lo que llegaba a quien probaba la aplicación era que mirara el
+  wifi. Ahora se muestra el motivo que da el servidor.
+
+---
+
 ## [1.1.0] — 2026-09-05
 
 ### Añadido

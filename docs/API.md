@@ -151,11 +151,11 @@ El mensaje de error es el mismo para código equivocado, caducado, ya usado o co
 
 ### `GET /api/auth/perfil`
 
-Devuelve el perfil de quien tiene la sesión abierta, con la edad calculada y las preferencias si es paciente.
+Devuelve el perfil de quien tiene la sesión abierta —paciente o cuidador—, con sus preferencias de accesibilidad y la constancia de su autorización de tratamiento de datos. La edad solo se calcula para pacientes.
 
 ### `PATCH /api/auth/preferencias`
 
-Solo pacientes. Solo se envían los campos que cambian:
+Pacientes y cuidadores. Solo se envían los campos que cambian; lo que no viene se conserva:
 
 ```json
 { "tamanoDeLetra": "MUY_GRANDE", "alertasSonoras": false }
@@ -167,7 +167,7 @@ Solo pacientes. Solo se envían los campos que cambian:
 | `altoContraste` | booleano |
 | `alertasSonoras` | booleano |
 | `alertasVibracion` | booleano |
-| `minutosDeGracia` | entero entre 15 y 720 |
+| `minutosDeGracia` | entero entre 15 y 720. Solo tiene efecto para el paciente: es el margen antes de dar una toma por perdida |
 
 ### `POST /api/auth/dispositivos`
 
