@@ -1,4 +1,4 @@
-import { ErrorDeValidacion } from '../shared/errores.js';
+import { ErrorDeValidacion } from './errores.js';
 
 export const TAMANOS_DE_LETRA = ['NORMAL', 'GRANDE', 'MUY_GRANDE'] as const;
 export type TamanoDeLetra = (typeof TAMANOS_DE_LETRA)[number];

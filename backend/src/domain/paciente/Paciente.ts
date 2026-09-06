@@ -6,7 +6,7 @@ import { Telefono } from '../shared/Telefono.js';
 import { ZonaHoraria } from '../shared/ZonaHoraria.js';
 import { FechaLocal } from '../shared/FechaLocal.js';
 import { ErrorDeValidacion } from '../shared/errores.js';
-import { PreferenciasDeAccesibilidad } from './PreferenciasDeAccesibilidad.js';
+import { PreferenciasDeAccesibilidad } from '../shared/PreferenciasDeAccesibilidad.js';
 
 export interface PacientePlano {
   id: string;

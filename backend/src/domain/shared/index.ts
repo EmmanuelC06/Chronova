@@ -1,3 +1,4 @@
+export * from './PreferenciasDeAccesibilidad.js';
 export * from './errores.js';
 export * from './Identificador.js';
 export * from './Email.js';

@@ -115,6 +115,7 @@ export class ObtenerPerfil {
       tipo: 'CUIDADOR',
       creadoEn: cuidador.creadoEn.toISOString(),
       rol: cuidador.rol,
+      preferencias: cuidador.preferencias.toJSON(),
       autorizacionDeDatos: aVistaDeAutorizacion(cuidador.autorizacionDeDatos),
     };
   }

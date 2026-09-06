@@ -2,6 +2,7 @@ import { Email } from '../shared/Email.js';
 import { AutorizacionDeDatos } from '../shared/AutorizacionDeDatos.js';
 import type { AutorizacionDeDatosPlana } from '../shared/AutorizacionDeDatos.js';
 import { Identificador } from '../shared/Identificador.js';
+import { PreferenciasDeAccesibilidad } from '../shared/PreferenciasDeAccesibilidad.js';
 import { Telefono } from '../shared/Telefono.js';
 import { ErrorDeValidacion } from '../shared/errores.js';
 
@@ -15,6 +16,12 @@ export interface CuidadorPlano {
   rol: string | null;
   activo: boolean;
   creadoEn: string;
+  /**
+   * Preferencias de accesibilidad. Opcional al leer, por las cuentas
+   * creadas antes de que la columna existiera: si falta, valen las de
+   * por defecto.
+   */
+  preferencias?: Record<string, unknown>;
   /** Version de la politica que acepto y cuando. Ausente en cuentas antiguas. */
   autorizacionDeDatos?: AutorizacionDeDatosPlana | null;
   /**
@@ -44,6 +51,7 @@ export class Cuidador {
     private _contrasenaCifrada: string,
     private _rol: string | null,
     private _activo: boolean,
+    private _preferencias: PreferenciasDeAccesibilidad,
     readonly creadoEn: Date,
     private _sesionesValidasDesde: Date,
     private readonly _autorizacionDeDatos: AutorizacionDeDatos,
@@ -68,6 +76,7 @@ export class Cuidador {
       datos.contrasenaCifrada,
       Cuidador.validarRol(datos.rol ?? null),
       true,
+      PreferenciasDeAccesibilidad.porDefecto(),
       datos.ahora,
       datos.ahora,
       AutorizacionDeDatos.otorgar({
@@ -86,6 +95,7 @@ export class Cuidador {
       plano.contrasenaCifrada,
       plano.rol,
       plano.activo,
+      PreferenciasDeAccesibilidad.desde(plano.preferencias ?? {}),
       new Date(plano.creadoEn),
       new Date(plano.sesionesValidasDesde ?? plano.creadoEn),
       AutorizacionDeDatos.desdePlano(plano.autorizacionDeDatos, new Date(plano.creadoEn)),
@@ -101,6 +111,7 @@ export class Cuidador {
       contrasenaCifrada: this._contrasenaCifrada,
       rol: this._rol,
       activo: this._activo,
+      preferencias: this._preferencias.toJSON(),
       creadoEn: this.creadoEn.toISOString(),
       sesionesValidasDesde: this._sesionesValidasDesde.toISOString(),
       autorizacionDeDatos: this._autorizacionDeDatos.toJSON(),
@@ -129,6 +140,26 @@ export class Cuidador {
   }
   get activo(): boolean {
     return this._activo;
+  }
+
+  /**
+   * Las mismas preferencias de accesibilidad que el paciente, y por el
+   * mismo motivo: un cuidador tambien puede tener setenta anos y ser
+   * quien peor ve de los dos. Que el value object viva en shared/ y no
+   * en paciente/ es justamente el reconocimiento de que no son una
+   * necesidad del paciente, sino de cualquiera que use la aplicacion.
+   *
+   * De los cinco ajustes, `minutosDeGracia` no significa nada para el
+   * cuidador —es el margen antes de dar por perdida una toma, y las
+   * tomas no son suyas—. Se guarda igual, en su valor por defecto, para
+   * no partir el value object en dos por un campo.
+   */
+  get preferencias(): PreferenciasDeAccesibilidad {
+    return this._preferencias;
+  }
+
+  cambiarPreferencias(preferencias: PreferenciasDeAccesibilidad): void {
+    this._preferencias = preferencias;
   }
 
   /**

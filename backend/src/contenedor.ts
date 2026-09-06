@@ -200,7 +200,7 @@ export function construirContenedor(
     iniciarSesion: new IniciarSesion(pacientes, cuidadores, cifrador, tokens),
     verificarSesion: new VerificarSesion(pacientes, cuidadores, tokens, reloj),
     obtenerPerfil: new ObtenerPerfil(pacientes, cuidadores, reloj),
-    actualizarPreferencias: new ActualizarPreferencias(pacientes),
+    actualizarPreferencias: new ActualizarPreferencias(pacientes, cuidadores),
 
     registrarMedicamento: new RegistrarMedicamento(medicamentos, pacientes, politica, ids, reloj),
     listarMedicamentos: new ListarMedicamentos(medicamentos, politica),

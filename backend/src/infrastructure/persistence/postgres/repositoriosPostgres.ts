@@ -159,14 +159,15 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
     const c = cuidador.aPlano();
     await this.pool.query(
       `INSERT INTO cuidadores
-         (id, nombre, email, telefono, contrasena_cifrada, rol, activo, creado_en,
-          sesiones_validas_desde, politica_version, politica_aceptada_en)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+         (id, nombre, email, telefono, contrasena_cifrada, rol, preferencias, activo,
+          creado_en, sesiones_validas_desde, politica_version, politica_aceptada_en)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        ON CONFLICT (id) DO UPDATE SET
          nombre = EXCLUDED.nombre,
          telefono = EXCLUDED.telefono,
          contrasena_cifrada = EXCLUDED.contrasena_cifrada,
          rol = EXCLUDED.rol,
+         preferencias = EXCLUDED.preferencias,
          activo = EXCLUDED.activo,
          sesiones_validas_desde = EXCLUDED.sesiones_validas_desde,
          politica_version = EXCLUDED.politica_version,
@@ -178,6 +179,7 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
         c.telefono,
         c.contrasenaCifrada,
         c.rol,
+        JSON.stringify(c.preferencias),
         c.activo,
         c.creadoEn,
         c.sesionesValidasDesde,
@@ -214,6 +216,7 @@ export class RepositorioDeCuidadoresPostgres implements RepositorioDeCuidadores 
       telefono: fila.telefono,
       contrasenaCifrada: fila.contrasena_cifrada,
       rol: fila.rol,
+      preferencias: fila.preferencias ?? {},
       activo: fila.activo,
       creadoEn: aFechaIso(fila.creado_en)!,
       sesionesValidasDesde:

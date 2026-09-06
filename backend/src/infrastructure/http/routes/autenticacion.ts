@@ -93,14 +93,18 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
   );
 
   // PATCH /api/auth/preferencias
+  // Sin exigirTipo: el cuidador tambien puede agrandar la letra. Era el
+  // unico ajuste de accesibilidad de la aplicacion que dependia de haber
+  // entrado como paciente.
   router.patch(
     '/preferencias',
     autenticar(casosDeUso.verificarSesion),
-    exigirTipo('PACIENTE'),
     asincrono(async (peticion, respuesta) => {
       const datos = esquemaDePreferencias.parse(peticion.body);
+      const solicitante = solicitanteDe(peticion);
       const preferencias = await casosDeUso.actualizarPreferencias.ejecutar({
-        pacienteId: solicitanteDe(peticion).id.valor,
+        usuarioId: solicitante.id.valor,
+        tipoDeCuenta: solicitante.tipo,
         ...datos,
       });
       respuesta.json(preferencias);

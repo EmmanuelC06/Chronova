@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS cuidadores (
   telefono             TEXT,
   contrasena_cifrada   TEXT        NOT NULL,
   rol                  TEXT,
+  preferencias         JSONB       NOT NULL DEFAULT '{}'::jsonb,
   activo               BOOLEAN     NOT NULL DEFAULT TRUE,
   creado_en            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   sesiones_validas_desde TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -177,6 +178,16 @@ ALTER TABLE pacientes
 ALTER TABLE cuidadores
   ADD COLUMN IF NOT EXISTS politica_version TEXT,
   ADD COLUMN IF NOT EXISTS politica_aceptada_en TIMESTAMPTZ;
+
+-- ---------------------------------------------------------------
+-- Preferencias de accesibilidad del cuidador
+-- ---------------------------------------------------------------
+-- El cuidador tambien es una persona que mira una pantalla, y muchas
+-- veces es la de mas edad de las dos: una hija de sesenta y cinco anos
+-- cuidando a su madre de noventa. Hasta ahora solo el paciente podia
+-- agrandar la letra, y el cuidador se quedaba con la que le tocara.
+ALTER TABLE cuidadores
+  ADD COLUMN IF NOT EXISTS preferencias JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 -- ---------------------------------------------------------------
 -- Recuperaciones de contrasena

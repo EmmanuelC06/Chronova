@@ -4,7 +4,7 @@ import { ZonaHoraria } from '../../../domain/shared/ZonaHoraria.js';
 import { Telefono } from '../../../domain/shared/Telefono.js';
 import { ErrorDeConflicto } from '../../../domain/shared/errores.js';
 import { Paciente } from '../../../domain/paciente/Paciente.js';
-import { PreferenciasDeAccesibilidad } from '../../../domain/paciente/PreferenciasDeAccesibilidad.js';
+import { PreferenciasDeAccesibilidad } from '../../../domain/shared/PreferenciasDeAccesibilidad.js';
 import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
 import type { CifradorDeContrasenas } from '../../ports/CifradorDeContrasenas.js';
 import type { GeneradorDeIds } from '../../ports/GeneradorDeIds.js';

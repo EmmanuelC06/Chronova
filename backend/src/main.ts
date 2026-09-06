@@ -1,6 +1,7 @@
 import { cargarEntorno } from './config/entorno.js';
 import { construirContenedor } from './contenedor.js';
 import { crearServidor } from './infrastructure/http/servidor.js';
+import { aplicarEsquema } from './infrastructure/persistence/postgres/esquema.js';
 
 /**
  * Punto de entrada del backend de Chronova.
@@ -15,13 +16,30 @@ const SEGUNDOS_ANTES_DEL_PRIMER_CIERRE = 10;
 async function arrancar(): Promise<void> {
   const entorno = cargarEntorno();
   const contenedor = construirContenedor(entorno);
+
+  // El esquema se pone al dia ANTES de escuchar. Si falla, no se levanta
+  // el servidor: mas vale un arranque que se cae con el motivo escrito
+  // que una API que responde "ok" y no puede guardar nada.
+  if (contenedor.pool) {
+    try {
+      await aplicarEsquema(contenedor.pool);
+    } catch (error) {
+      await contenedor.cerrar();
+      throw new Error(
+        'No se pudo poner al dia el esquema de la base de datos. ' +
+          'Comprueba DATABASE_URL y que el usuario tenga permiso para crear y alterar tablas.\n' +
+          `Detalle: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
   const app = crearServidor(contenedor);
 
   const servidor = app.listen(entorno.puerto, () => {
     console.log('');
     console.log('  Chronova API');
     console.log(`  Escuchando en   http://localhost:${entorno.puerto}`);
-    console.log(`  Persistencia    ${entorno.persistencia}`);
+    console.log(`  Persistencia    ${entorno.persistencia}${contenedor.pool ? ' (esquema al dia)' : ''}`);
     console.log(`  Entorno         ${entorno.entornoDeEjecucion}`);
     console.log(`  Comprobacion    http://localhost:${entorno.puerto}/api/salud`);
     if (entorno.persistencia === 'memory') {

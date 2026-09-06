@@ -946,11 +946,13 @@ describe('Preferencias de accesibilidad', () => {
     const paciente = await crearPacienteDePrueba(app);
 
     await app.contenedor.casosDeUso.actualizarPreferencias.ejecutar({
-      pacienteId: paciente.id,
+      usuarioId: paciente.id,
+      tipoDeCuenta: 'PACIENTE',
       tamanoDeLetra: 'MUY_GRANDE',
     });
     const preferencias = await app.contenedor.casosDeUso.actualizarPreferencias.ejecutar({
-      pacienteId: paciente.id,
+      usuarioId: paciente.id,
+      tipoDeCuenta: 'PACIENTE',
       altoContraste: true,
     });
 
