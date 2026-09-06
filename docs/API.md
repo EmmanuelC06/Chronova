@@ -296,6 +296,7 @@ Esta llamada **crea las tomas del día si aún no existen**, y es idempotente: l
       "estado": "PENDIENTE",
       "vecesPospuesta": 0,
       "puedeConfirmarse": true,
+      "disponibleDesde": null,
       "necesitaReabastecimiento": false
     }
   ],
@@ -306,6 +307,16 @@ Esta llamada **crea las tomas del día si aún no existen**, y es idempotente: l
   }
 }
 ```
+
+**`puedeConfirmarse` es «se puede registrar AHORA», no «sigue pendiente».** La ventana se
+abre 60 minutos antes de la hora programada y no se cierra nunca: llegar tarde se puede
+siempre, adelantarse tiene límite. Cuando está en `false` porque su hora aún no llegó,
+`disponibleDesde` trae la hora en que se abrirá (`"19:00"`), para que la interfaz pueda
+explicarlo en vez de mostrar un botón apagado y mudo.
+
+Un cliente que se salte esa comprobación y mande el registro igual recibe **422**: la regla
+vive en el dominio, no en la pantalla.
+
 
 ### `POST /api/tomas/:id/registro`
 

@@ -52,8 +52,23 @@ probar qué aceptó cada persona.
 - Cierre de sesiones abiertas al cambiar la contraseña, y renovación silenciosa del token.
 - Recuperación de contraseña mediante un código enviado al correo.
 
+### Cambiado
+
+- **Las horas se muestran en formato de 12 horas con a. m. / p. m.** El reloj de 24 horas
+  no es de uso corriente en Colombia, y menos entre adultos mayores: «16:30» obliga a una
+  resta mental que mucha gente no hace, y en una app de medicación una hora que no se
+  entiende a la primera es una dosis que se toma tarde. El cambio alcanza también a la
+  **entrada**: se escribe «8:30» y se toca «a. m.» o «p. m.», sin traducir nada. Internamente
+  y en la API las horas siguen siendo `"20:00"`, que es inequívoco y no depende del idioma.
+
 ### Corregido
 
+- **Se podía confirmar una toma cuya hora aún no había llegado.** A las nueve de la mañana
+  la agenda ofrecía el botón «Ya la tomé» también para la dosis de las ocho de la noche.
+  Contaba como cumplida al 100% aunque no como puntual, y —lo que más pesa— esa noche ya no
+  sonaba el recordatorio, porque la dosis constaba como resuelta. Una dosis perdida en
+  silencio. Ahora la ventana se abre 60 minutos antes de la hora y la tarjeta explica
+  desde cuándo estará disponible. Llegar tarde se sigue pudiendo siempre.
 - **El panel del cuidador ignoraba `puedeVerHistorial`.** Al retirar el permiso, tres
   endpoints respondían 403 y el panel seguía mostrando adherencia, medicamentos y última
   actividad. Era el único caso de uso que leía datos clínicos sin pasar por

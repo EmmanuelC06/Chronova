@@ -1,0 +1,164 @@
+@startuml 09-componentes-frontend
+' ============================================================
+'  Chronova — Diagrama de componentes de la aplicacion movil
+'  La app repite la misma idea del backend a menor escala.
+' ============================================================
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam roundcorner 8
+skinparam nodesep 25
+skinparam ranksep 45
+skinparam linetype ortho
+
+skinparam component {
+  BorderColor #185A66
+  BackgroundColor #FFFFFF
+  FontColor #101817
+  BorderThickness 1.3
+}
+skinparam interface {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontColor #7A3F06
+}
+skinparam package {
+  BorderColor #A9BAB7
+  BackgroundColor #FCFDFD
+  FontColor #4E5C59
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam ArrowColor #4E5C59
+skinparam cloud {
+  BorderColor #40606E
+  BackgroundColor #F4F8FA
+  FontColor #40606E
+}
+
+title <b>Chronova — Componentes de la aplicacion movil</b>\n<size:11>Expo + React Native. Las pantallas no saben que existe HTTP</size>
+
+' ================= PANTALLAS =================
+package "PANTALLAS  ·  app/" as PANT #F7FAFB {
+  component "(auth)\ningresar · registro\nrecuperar" as AUTH
+  component "(paciente)\nhoy · medicamentos\nhistorial · perfil" as PAC
+  component "(cuidador)\npacientes\npaciente/[id]/·3 pestanas" as CUI
+  component "medicamento/\nnuevo · [id]" as MED
+  component "privacidad" as PRIV
+}
+
+' ================= COMPONENTES =================
+package "COMPONENTES REUTILIZABLES  ·  src/ui/componentes/" as COMP #F7FAFB {
+  component "basicos\nBoton · Campo · Tarjeta\nTexto · Aviso · Insignia" as BAS
+  component "FormularioDeMedicamento" as FORM
+  component "Icono · Logo" as ICO
+  component "accionesDeMedicamento\ndialogos compartidos" as ACC
+}
+
+' ================= ESTADO =================
+package "ESTADO COMPARTIDO  ·  src/ui/contexto/" as CTX #FBF9F5 {
+  component "SesionContexto\nsesion · perfil · preferencias" as SES
+  component "PacienteObservadoContexto\ncarga una vez para 3 pestanas" as POB
+  component "NavegacionPorNotificaciones" as NAV
+}
+
+' ================= SISTEMA DE DISENO =================
+package "SISTEMA DE DISENO  ·  src/ui/" as DIS #F2F8F7 {
+  component "tema\ncolores · espacios · escalas" as TEMA
+  component "tipografia · texto · hora" as UTIL
+}
+
+' ================= DOMINIO =================
+package "DOMINIO DEL CLIENTE  ·  src/dominio/" as DOM #F2F8F7 {
+  component "modelos\nPaciente · Medicamento\nToma · Vinculo" as MOD
+  interface "ApiDeChronova" as PUERTO
+  component "politicaDeDatos" as POL
+}
+
+' ================= INFRAESTRUCTURA =================
+package "INFRAESTRUCTURA  ·  src/infraestructura/" as INF #F7FAFB {
+  component "ClienteChronova\nfetch · token · errores" as CLI
+  component "SesionEnAsyncStorage" as ALM
+  component "AlarmasExpo\nalarmas locales" as ALA
+}
+
+cloud "API de Chronova\n(backend)" as API
+
+' ---------------- relaciones ----------------
+AUTH --> SES
+PAC --> SES
+CUI --> POB
+MED --> SES
+PRIV --> SES
+
+PAC --> BAS
+CUI --> BAS
+MED --> FORM
+AUTH --> BAS
+PRIV --> BAS
+
+FORM --> BAS
+BAS --> ICO
+BAS --> TEMA
+BAS --> UTIL
+PAC --> ACC
+CUI --> ACC
+
+POB --> SES
+NAV --> SES
+
+SES --> PUERTO
+POB --> PUERTO
+SES --> MOD
+SES --> POL
+SES --> ALA
+SES --> ALM
+
+PUERTO <|.. CLI
+CLI --> API : HTTPS + JWT
+
+' ---------------- notas ----------------
+note right of MOD
+  <b>La misma idea del backend, a menor escala.</b>
+  Las pantallas dependen del PUERTO
+  <b>ApiDeChronova</b>, no del cliente HTTP.
+  Ninguna pantalla sabe que existe fetch,
+  ni una URL, ni un codigo de estado.
+
+  Los nombres son los mismos del backend
+  y de los documentos —Paciente, Toma,
+  Vinculo—, para no traducir nada
+  mentalmente al pasar de una capa a otra.
+end note
+
+note right of POB
+  <b>El estado vive en contextos, no en pantallas.</b>
+
+  <b>SesionContexto</b> guarda quien inicio sesion y
+  sus preferencias; envuelve toda la app.
+
+  <b>PacienteObservadoContexto</b> existe porque las
+  tres pestanas de la ficha necesitan los mismos
+  datos: se cargan UNA vez y las pestanas solo
+  pintan. Sin el serian tres veces las mismas
+  peticiones y tres sitios donde repetir la
+  comprobacion de permisos.
+end note
+
+note bottom of TEMA
+  Un solo archivo decide colores, espacios y
+  tamanos. El texto base son 18 pt —no 14— y
+  escala hasta un 45% mas desde las preferencias
+  del paciente; las zonas tocables miden 64 px.
+  No es estetica: la revision de literatura
+  senala la experiencia de uso como causa
+  principal de abandono en este publico.
+end note
+
+@enduml

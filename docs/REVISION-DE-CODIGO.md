@@ -382,6 +382,55 @@ Tres decisiones que conviene poder defender:
 
 ---
 
+---
+
+# Confirmación de tomas fuera de hora — 5 de septiembre
+
+Encontrado por Emmanuel al usar la aplicación, no por una revisión: **`Toma.confirmar()` no tenía ninguna guarda de hora.** Comprobado ejecutándolo — a las 09:00, la agenda entregaba `puedeConfirmarse: true` para la dosis de las 20:00, y confirmarla daba `TOMADA`, `puntualidad: ADELANTADA`, `desfase: 660 min`, adherencia **100%**.
+
+El sistema ya distinguía bien la puntualidad: 660 minutos antes no contaba como «a tiempo». Lo que faltaba era impedir afirmar que ocurrió algo que todavía no ha ocurrido.
+
+**Y el daño principal no era estadístico.** La causa más probable de una confirmación once horas antes no es que alguien se adelantara once horas: es un toque en la tarjeta equivocada, con temblor, baja visión y dos botones de 64 px uno debajo del otro. Esa noche no sonaba el recordatorio, porque para la aplicación la dosis ya estaba resuelta. Una dosis perdida en silencio, que es justo lo que Chronova existe para evitar.
+
+**La regla, y por qué es asimétrica:**
+
+- **Confirmar tarde se puede siempre.** Se te olvidó tocar el botón y lo haces por la noche; la dosis ocurrió de verdad y el sistema debe registrarla. Que llegó tarde lo dice la puntualidad, no un bloqueo.
+- **Confirmar pronto tiene límite:** 60 minutos antes de la hora programada.
+
+El margen es **la misma ventana de tolerancia** con la que ya se decidía qué cuenta como «a tiempo», y compartirla no es ahorro de código: hace que el sistema no se contradiga. Toda toma que se pueda confirmar es, por definición, una toma que todavía puede resultar puntual.
+
+Tres detalles que costaron atención:
+
+- **La ventana se mide contra `programadaPara`, no contra la hora original.** Si el paciente pospone de 20:00 a 21:00, la ventana se corre con ella. Usar la original permitiría confirmar de inmediato lo que se acaba de aplazar.
+- **La comprobación vive en la entidad**, no en la pantalla. El botón se puede desactivar; la petición se puede mandar igual. Una prueba de HTTP lo comprueba: 422.
+- **La app repartía las tarjetas por `puedeConfirmarse`**, y ese campo cambió de significado. Sin corregirlo, la toma de las 20:00 aparecía bajo «Ya registradas» a las nueve de la mañana. Ahora el reparto es por estado.
+
+La tarjeta bloqueada no muestra un botón apagado: dice **«Todavía no es hora. Podrás registrarla a partir de las 19:00»**, con su etiqueta para el lector de pantalla. Un control desactivado y mudo se lee como que la aplicación se rompió.
+
+Dos pruebas que ya existían fallaron con el cambio, y una de ellas afirmaba exactamente la conducta que se acaba de prohibir — su propio comentario decía *«trece horas antes de su hora no es puntualidad, es un error de dedo»*, y se conformaba con no contarlo como puntual. Ahora se rechaza.
+
+**Lo que NO se bloqueó:** omitir una toma antes de su hora. Declarar por anticipado «hoy no voy a poder tomarla» es un acto deliberado y legítimo, distinto de afirmar que ya se tomó algo que no ha pasado.
+
+---
+
+---
+
+# Formato de hora — 5 de septiembre
+
+Otro hallazgo de uso, no de revisión: **la aplicación mostraba las horas en formato de 24 horas.** «Tu próxima toma es a las 16:30» le pide a una persona de 74 años una resta que probablemente no va a hacer, y en una aplicación de medicación una hora que no se entiende a la primera es una dosis que se toma tarde o no se toma. Es el mismo criterio que el cuerpo de 18 pt y los botones de 64 px.
+
+**La regla del cambio: 24 horas es el formato interno, 12 horas es el formato que se enseña.** El dominio, la API y la base de datos siguen usando `"20:00"` —inequívoco, ordenable, independiente del idioma— y la traducción ocurre solo al pintar. Ningún caso de uso, ninguna prueba del backend y ningún endpoint cambiaron.
+
+Alcanza a la **entrada**, que era la mitad que faltaba: de nada sirve mostrar «8:00 p. m.» si para agregar esa hora hay que escribir `20:00`. Ahora se escribe «8:30» y se toca **a. m.** o **p. m.**, dos fichas grandes. Sin ellas la entrada sería ambigua, y en un tratamiento esa ambigüedad son doce horas.
+
+Tres decisiones que conviene poder explicar:
+
+- **El formateo está escrito a mano, no con `toLocaleTimeString`.** React Native corre sobre Hermes, y el soporte de `Intl` y de datos de idioma varía entre Android, iOS y las versiones del motor: un formateo que dependa de eso puede salir en inglés en unos teléfonos y en español en otros, **sin ningún error que lo delate**. Así el resultado es el mismo en todas partes y se puede probar. Donde sí se usa `toLocaleString` —las fechas del historial— se pasa `hour12: true` explícito por la misma razón.
+- **Se escribe «p. m.» y no «PM».** En mayúsculas se lee como una sigla en inglés; con puntos es la forma que recoge la RAE y la que esta generación reconoce.
+- **Hay una segunda función para los lectores de pantalla.** «8:00 p. m.» se pronuncia mal —los puntos se saltan o se deletrean según el motor de voz—, así que la etiqueta accesible dice «8 de la noche». Y los tramos son los del habla, no los de dividir el día en dos: medianoche es «12 de la noche», las 3:30 son «de la madrugada» y las 12:00 «del mediodía». «12 de la mañana» es lo que devolvería una traducción sin pensar, y no lo dice nadie.
+
+---
+
 # Qué queda
 
 Los ocho puntos del orden que proponía esta revisión se ejecutaron, en ese orden. Lo único que sigue abierto es el último, y sigue abierto **a propósito**:

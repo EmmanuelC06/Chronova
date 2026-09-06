@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="962px" preserveAspectRatio="none" style="width:2096px;height:962px;" version="1.1" viewBox="0 0 2096 962" width="2096px" zoomAndPan="magnify"><defs/><g><text fill="#000000" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="339" x="882" y="11.1387">Chronova — Componentes de la aplicacion movil</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="351" x="876" y="24.1792">Expo + React Native. Las pantallas no saben que existe HTTP</text><!--MD5=[994d0bddb310805660c31fe163de572e]
+cluster PANT--><path d="M249,50.7734 L378,50.7734 A6,6 0 0 1 382,54.7734 L389,70.7422 L1027,70.7422 A4,4 0 0 1 1031,74.7422 L1031,156.7734 A4,4 0 0 1 1027,160.7734 L249,160.7734 A4,4 0 0 1 245,156.7734 L245,54.7734 A4,4 0 0 1 249,50.7734 " fill="#F7FAFB" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="245" x2="389" y1="70.7422" y2="70.7422"/><text fill="#4E5C59" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="131" x="249" y="63.9121">PANTALLAS  ·  app/</text><!--MD5=[d3a3e034e8cd644b42bedcd04d8e1148]
+cluster COMP--><path d="M865,220.2734 L1239,220.2734 A6,6 0 0 1 1243,224.2734 L1250,240.2422 L1277,240.2422 A4,4 0 0 1 1281,244.2422 L1281,635.7734 A4,4 0 0 1 1277,639.7734 L865,639.7734 A4,4 0 0 1 861,635.7734 L861,224.2734 A4,4 0 0 1 865,220.2734 " fill="#F7FAFB" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="861" x2="1250" y1="240.2422" y2="240.2422"/><text fill="#4E5C59" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="376" x="865" y="233.4121">COMPONENTES REUTILIZABLES  ·  src/ui/componentes/</text><!--MD5=[d941cf231604a87ddfe73f937b11d2dc]
+cluster CTX--><path d="M152,212.2734 L430,212.2734 A6,6 0 0 1 434,216.2734 L441,232.2422 L644,232.2422 A4,4 0 0 1 648,236.2422 L648,473.7734 A4,4 0 0 1 644,477.7734 L152,477.7734 A4,4 0 0 1 148,473.7734 L148,216.2734 A4,4 0 0 1 152,212.2734 " fill="#FBF9F5" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="148" x2="441" y1="232.2422" y2="232.2422"/><text fill="#4E5C59" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="280" x="152" y="225.4121">ESTADO COMPARTIDO  ·  src/ui/contexto/</text><!--MD5=[a395edbc3cc9d4967ac56b9cfc7d0c3d]
+cluster DIS--><path d="M1317,542.7734 L1515,542.7734 A6,6 0 0 1 1519,546.7734 L1526,562.7422 L1751,562.7422 A4,4 0 0 1 1755,566.7422 L1755,650.7734 A4,4 0 0 1 1751,654.7734 L1317,654.7734 A4,4 0 0 1 1313,650.7734 L1313,546.7734 A4,4 0 0 1 1317,542.7734 " fill="#F2F8F7" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="1313" x2="1526" y1="562.7422" y2="562.7422"/><text fill="#4E5C59" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="200" x="1317" y="555.9121">SISTEMA DE DISENO  ·  src/ui/</text><!--MD5=[1f35fdfc0604f53473a210a307b278e7]
+cluster DOM--><path d="M189,526.7734 L444,526.7734 A6,6 0 0 1 448,530.7734 L455,546.7422 L689,546.7422 A4,4 0 0 1 693,550.7422 L693,666.7734 A4,4 0 0 1 689,670.7734 L189,670.7734 A4,4 0 0 1 185,666.7734 L185,530.7734 A4,4 0 0 1 189,526.7734 " fill="#F2F8F7" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="185" x2="455" y1="546.7422" y2="546.7422"/><text fill="#4E5C59" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="257" x="189" y="539.9121">DOMINIO DEL CLIENTE  ·  src/dominio/</text><!--MD5=[82f19f19384acb2b8e80a57c94cb4a64]
+cluster INF--><path d="M26,716.7734 L311,716.7734 A6,6 0 0 1 315,720.7734 L322,736.7422 L540,736.7422 A4,4 0 0 1 544,740.7422 L544,808.7734 A4,4 0 0 1 540,812.7734 L26,812.7734 A4,4 0 0 1 22,808.7734 L22,720.7734 A4,4 0 0 1 26,716.7734 " fill="#F7FAFB" style="stroke: #A9BAB7; stroke-width: 1.5;"/><line style="stroke: #A9BAB7; stroke-width: 1.5;" x1="22" x2="322" y1="736.7422" y2="736.7422"/><text fill="#4E5C59" font-family="Helvetica" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="287" x="26" y="729.9121">INFRAESTRUCTURA  ·  src/infraestructura/</text><!--MD5=[b3b47143243fa1deeb350c407ecae48b]
+entity AUTH--><rect fill="#FFFFFF" height="61.9063" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="133" x="261.5" y="82.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="256.5" y="87.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="256.5" y="134.6797"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="39" x="271.5" y="103.9121">(auth)</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="113" x="271.5" y="117.8809">ingresar · registro</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="62" x="271.5" y="131.8496">recuperar</text><!--MD5=[363c8216f9d6bd18ac5da32510276bd5]
+entity PAC--><rect fill="#FFFFFF" height="61.9063" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="146" x="664" y="82.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="659" y="87.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="659" y="134.6797"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="65" x="674" y="103.9121">(paciente)</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="126" x="674" y="117.8809">hoy · medicamentos</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="93" x="674" y="131.8496">historial · perfil</text><!--MD5=[00a53cdc1199406b772e5950891343c5]
+entity CUI--><rect fill="#FFFFFF" height="61.9063" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="179" x="835.5" y="82.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="830.5" y="87.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="830.5" y="134.6797"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="65" x="845.5" y="103.9121">(cuidador)</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="62" x="845.5" y="117.8809">pacientes</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="159" x="845.5" y="131.8496">paciente/[id]/·3 pestanas</text><!--MD5=[2481524924904afde78bfbc204de10e0]
+entity MED--><rect fill="#FFFFFF" height="47.9375" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="109" x="529.5" y="89.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="524.5" y="94.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="524.5" y="127.7109"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="89" x="539.5" y="110.9121">medicamento/</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="71" x="539.5" y="124.8809">nuevo · [id]</text><!--MD5=[60c83bae5ae32737fac1fc89300842d7]
+entity PRIV--><rect fill="#FFFFFF" height="33.9688" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="84" x="420" y="96.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="415" y="101.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="415" y="120.7422"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="64" x="430" y="117.9121">privacidad</text><!--MD5=[d1594113bf9c2ac8b42ae1fc4a034967]
+entity BAS--><rect fill="#FFFFFF" height="61.9063" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="168" x="877" y="398.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="872" y="403.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="872" y="450.6797"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="48" x="887" y="419.9121">basicos</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="148" x="887" y="433.8809">Boton · Campo · Tarjeta</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="138" x="887" y="447.8496">Texto · Aviso · Insignia</text><!--MD5=[c08981646c4f38c8f5fd6c475343a59f]
+entity FORM--><rect fill="#FFFFFF" height="33.9688" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="187" x="876.5" y="259.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="871.5" y="264.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="871.5" y="283.2422"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="167" x="886.5" y="280.4121">FormularioDeMedicamento</text><!--MD5=[32f12d4140be52debe0b956da6f46e48]
+entity ICO--><rect fill="#FFFFFF" height="33.9688" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="96" x="913" y="589.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="908" y="594.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="908" y="613.7422"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="76" x="923" y="610.9121">Icono · Logo</text><!--MD5=[51376273998787a9a477acf8ece725c6]
+entity ACC--><rect fill="#FFFFFF" height="47.9375" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="177" x="1088.5" y="252.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="1083.5" y="257.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="1083.5" y="290.2109"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="157" x="1098.5" y="273.4121">accionesDeMedicamento</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="135" x="1098.5" y="287.3809">dialogos compartidos</text><!--MD5=[15b96e5c755a000bd49ba47d661d1b11]
+entity SES--><rect fill="#FFFFFF" height="47.9375" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="195" x="180.5" y="405.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="175.5" y="410.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="175.5" y="443.7109"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="98" x="190.5" y="426.9121">SesionContexto</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="175" x="190.5" y="440.8809">sesion · perfil · preferencias</text><!--MD5=[e1263ef55f5c96faee9fed44dc97e893]
+entity POB--><rect fill="#FFFFFF" height="47.9375" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="215" x="408.5" y="252.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="403.5" y="257.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="403.5" y="290.2109"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="178" x="418.5" y="273.4121">PacienteObservadoContexto</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="195" x="418.5" y="287.3809">carga una vez para 3 pestanas</text><!--MD5=[8b72dec5e510c742b6301d5e3b9143d1]
+entity NAV--><rect fill="#FFFFFF" height="33.9688" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="202" x="181" y="259.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="176" y="264.2734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="176" y="283.2422"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="182" x="191" y="280.4121">NavegacionPorNotificaciones</text><!--MD5=[235699347bb87efd3161b9dc6cf94a03]
+entity TEMA--><rect fill="#FFFFFF" height="47.9375" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="194" x="1346" y="582.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="1341" y="587.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="1341" y="620.7109"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="32" x="1356" y="603.9121">tema</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="174" x="1356" y="617.8809">colores · espacios · escalas</text><!--MD5=[9388995ff95360b6d86cfe315b7443c4]
+entity UTIL--><rect fill="#FFFFFF" height="33.9688" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="165" x="1565.5" y="589.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="1560.5" y="594.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="1560.5" y="613.7422"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="145" x="1575.5" y="610.9121">tipografia · texto · hora</text><!--MD5=[b643aff2f6de854ee098fa19746d9d7e]
+entity MOD--><rect fill="#FFFFFF" height="61.9063" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="171" x="362.5" y="575.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="357.5" y="580.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="357.5" y="627.6797"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="53" x="372.5" y="596.9121">modelos</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="151" x="372.5" y="610.8809">Paciente · Medicamento</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="91" x="372.5" y="624.8496">Toma · Vinculo</text><!--MD5=[fa810381c95c691919b3e9a691b30d8e]
+entity PUERTO--><ellipse cx="614" cy="606.7734" fill="#FBF1E6" rx="8" ry="8" style="stroke: #A0530A; stroke-width: 2.0;"/><text fill="#7A3F06" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="95" x="566.5" y="634.9121">ApiDeChronova</text><text fill="#7A3F06" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="52" x="566.5" y="648.8809">(puerto)</text><!--MD5=[a022482a5048ecbf9d41ea443843bc4d]
+entity POL--><rect fill="#FFFFFF" height="33.9688" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="119" x="218.5" y="589.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="213.5" y="594.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="213.5" y="613.7422"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="99" x="228.5" y="610.9121">politicaDeDatos</text><!--MD5=[df6a39b053164d23cc3ecae9c3484a54]
+entity CLI--><rect fill="#FFFFFF" height="47.9375" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="158" x="370" y="748.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="365" y="753.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="365" y="786.7109"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="102" x="380" y="769.9121">ClienteChronova</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="138" x="380" y="783.8809">fetch · token · errores</text><!--MD5=[42b7b454ea2254097dfbb9db97067f3b]
+entity ALM--><rect fill="#FFFFFF" height="33.9688" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="164" x="181" y="755.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="176" y="760.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="176" y="779.7422"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="144" x="191" y="776.9121">SesionEnAsyncStorage</text><!--MD5=[678e278caaaad7b92c6a2da372f00c56]
+entity ALA--><rect fill="#FFFFFF" height="47.9375" rx="4" ry="4" style="stroke: #185A66; stroke-width: 1.3;" width="118" x="38" y="748.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="33" y="753.7734"/><rect fill="#FFFFFF" height="5" style="stroke: #185A66; stroke-width: 1.3;" width="10" x="33" y="786.7109"/><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="80" x="48" y="769.9121">AlarmasExpo</text><text fill="#101817" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="98" x="48" y="783.8809">alarmas locales</text><!--MD5=[645d8587175d8f7ad110cd370775931d]
+entity API--><path d="M392.5812,893.7783 C393.8026,886.9324 399.6945,885.898 404.251,890.3261 C406.6909,884.7253 412.4865,883.3548 416.0449,889.1707 C418.7998,884.1983 424.489,882.189 427.9303,888.444 C429.599,882.1787 432.6317,881.1476 437.7861,885.0728 C441.5449,878.2849 446.2376,879.1948 450.7914,884.1957 C453.8063,880.2324 458.8797,879.4251 460.9875,885.1504 C465.8535,880.3019 470.4728,882.176 472.6654,888.0593 C477.3151,882.2515 482.0332,882.1982 485.8662,888.9198 C490.2502,885.0837 494.5704,885.2669 496.5603,891.4701 C501.0445,885.1428 505.7509,886.3084 508.8185,892.8223 C515.6366,894.1808 516.4007,898.7186 512.2436,903.5736 C517.3823,904.5429 520.1938,907.9286 516.3823,912.8787 C520.4966,917.9741 518.8721,922.4254 512.429,923.6437 C515.6408,928.7891 515.5125,932.8439 508.4777,934.1274 C505.8442,939.4136 501.9099,940.9466 497.5124,936.0218 C495.7496,944.1599 489.3667,944.2501 484.2904,939.3932 C481.0298,945.0025 476.2837,944.6563 472.5139,939.9761 C470.8975,946.5978 465.144,947.2629 460.936,942.646 C457.9683,949.358 454.4362,949.6972 449.5503,944.4762 C445.7029,950.1739 440.3434,949.4818 437.7026,943.2753 C433.7828,947.3487 429.3859,946.3642 427.7688,940.8816 C423.0655,946.1939 418.0657,944.7064 415.6326,938.4915 C411.5182,943.1903 406.1642,943.7048 403.1611,937.2491 C398.079,942.6212 394.6777,941.1378 391.3771,935.3654 C385.0247,933.2202 385.5184,929.8124 388.792,925.2155 C381.5755,924.1902 380.5917,919.3887 383.9101,913.8417 C380.3302,908.4066 380.7482,904.7029 387.6832,902.8905 C384.7514,897.7258 387.0127,894.374 392.5812,893.7783 " fill="#F4F8FA" style="stroke: #40606E; stroke-width: 1.5;"/><text fill="#40606E" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="102" x="398" y="909.9121">API de Chronova</text><text fill="#40606E" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="64" x="398" y="923.8809">(backend)</text><path d="M1779.5,541.7734 L1779.5,671.8203 A4,4 0 0 0 1783.5,675.8203 L2080.5,675.8203 A4,4 0 0 0 2084.5,671.8203 L2084.5,547.7734 L2074.5,537.7734 L1783.5,537.7734 A4,4 0 0 0 1779.5,541.7734 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M2074.5,537.7734 L2074.5,545.7734 A2,2 0 0 0 2076.5,547.7734 L2084.5,547.7734 L2074.5,537.7734 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="284" x="1785.5" y="552.9839">La misma idea del backend, a menor escala.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="206" x="1785.5" y="565.7886">Las pantallas dependen del PUERTO</text><text fill="#000000" font-family="Helvetica" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="98" x="1785.5" y="578.5933">ApiDeChronova</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="121" x="1883.5" y="578.5933">, no del cliente HTTP.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="226" x="1785.5" y="591.3979">Ninguna pantalla sabe que existe fetch,</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="202" x="1785.5" y="604.2026">ni una URL, ni un codigo de estado.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="0" x="1789.5" y="617.0073"/><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="243" x="1785.5" y="629.812">Los nombres son los mismos del backend</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="226" x="1785.5" y="642.6167">y de los documentos —Paciente, Toma,</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="183" x="1785.5" y="655.4214">Vinculo—, para no traducir nada</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="242" x="1785.5" y="668.2261">mentalmente al pasar de una capa a otra.</text><path d="M1297,204.7734 L1297,347.625 A4,4 0 0 0 1301,351.625 L1603,351.625 A4,4 0 0 0 1607,347.625 L1607,210.7734 L1597,200.7734 L1301,200.7734 A4,4 0 0 0 1297,204.7734 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M1597,200.7734 L1597,208.7734 A2,2 0 0 0 1599,210.7734 L1607,210.7734 L1597,200.7734 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="289" x="1303" y="215.9839">El estado vive en contextos, no en pantallas.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="0" x="1307" y="228.7886"/><text fill="#000000" font-family="Helvetica" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="101" x="1303" y="241.5933">SesionContexto</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="160" x="1408" y="241.5933">guarda quien inicio sesion y</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="227" x="1303" y="254.3979">sus preferencias; envuelve toda la app.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="0" x="1307" y="267.2026"/><text fill="#000000" font-family="Helvetica" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="183" x="1303" y="280.0073">PacienteObservadoContexto</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="99" x="1490" y="280.0073">existe porque las</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="273" x="1303" y="292.812">tres pestanas de la ficha necesitan los mismos</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="262" x="1303" y="305.6167">datos: se cargan UNA vez y las pestanas solo</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="250" x="1303" y="318.4214">pintan. Sin el serian tres veces las mismas</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="225" x="1303" y="331.2261">peticiones y tres sitios donde repetir la</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="160" x="1303" y="344.0308">comprobacion de permisos.</text><path d="M1168.5,726.7734 L1168.5,818.4063 A4,4 0 0 0 1172.5,822.4063 L1469.5,822.4063 A4,4 0 0 0 1473.5,818.4063 L1473.5,732.7734 L1463.5,722.7734 L1172.5,722.7734 A4,4 0 0 0 1168.5,726.7734 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><path d="M1463.5,722.7734 L1463.5,730.7734 A2,2 0 0 0 1465.5,732.7734 L1473.5,732.7734 L1463.5,722.7734 " fill="#FBF1E6" style="stroke: #A0530A; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="244" x="1174.5" y="737.9839">Un solo archivo decide colores, espacios y</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="258" x="1174.5" y="750.7886">tamanos. El texto base son 18 pt —no 14— y</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="284" x="1174.5" y="763.5933">escala hasta un 45% mas desde las preferencias</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="261" x="1174.5" y="776.3979">del paciente; las zonas tocables miden 64 px.</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="223" x="1174.5" y="789.2026">No es estetica: la revision de literatura</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="237" x="1174.5" y="802.0073">senala la experiencia de uso como causa</text><text fill="#000000" font-family="Helvetica" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="221" x="1174.5" y="814.812">principal de abandono en este publico.</text><!--MD5=[d8bf4d1b760c242edb62d6ea5991030b]
+link AUTH to SES--><path d="M386.83,145.0334 C386.83,221.8634 386.83,413.7734 386.83,413.7734 C386.83,413.7734 380.6,413.7734 380.6,413.7734 " fill="none" id="AUTH-&gt;SES" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="375.6,413.7734,384.6,417.7734,380.6,413.7734,384.6,409.7734,375.6,413.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[649b7d6a4f96d6d0755b26b458540caa]
+link PAC to SES--><path d="M704.25,145.0034 C704.25,227.6534 704.25,445.7734 704.25,445.7734 C704.25,445.7734 380.52,445.7734 380.52,445.7734 " fill="none" id="PAC-&gt;SES" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="375.52,445.7734,384.52,449.7734,380.52,445.7734,384.52,441.7734,375.52,445.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[fa78ecb3da63035070bc5fe042dce7a3]
+link CUI to POB--><path d="M849.17,145.0634 C849.17,186.6034 849.17,254.7734 849.17,254.7734 C849.17,254.7734 628.71,254.7734 628.71,254.7734 " fill="none" id="CUI-&gt;POB" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="623.71,254.7734,632.71,258.7734,628.71,254.7734,632.71,250.7734,623.71,254.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[2ef85d5c5f79d7d3afdaa41fc2c2a883]
+link MED to SES--><path d="M628.5,137.8634 C628.5,212.9534 628.5,437.7734 628.5,437.7734 C628.5,437.7734 380.63,437.7734 380.63,437.7734 " fill="none" id="MED-&gt;SES" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="375.63,437.7734,384.63,441.7734,380.63,437.7734,384.63,433.7734,375.63,437.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[248cc37cec3bd545720a7e3ab7bf379e]
+link PRIV to SES--><path d="M419.74,108.7734 C408.37,108.7734 399.17,108.7734 399.17,108.7734 C399.17,108.7734 399.17,421.7734 399.17,421.7734 C399.17,421.7734 380.52,421.7734 380.52,421.7734 " fill="none" id="PRIV-&gt;SES" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="375.52,421.7734,384.52,425.7734,380.52,421.7734,384.52,417.7734,375.52,421.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[38790c9679d73a87dbf67e48b9251235]
+link PAC to BAS--><path d="M739.5,144.8634 C739.5,219.3434 739.5,401.7734 739.5,401.7734 C739.5,401.7734 871.94,401.7734 871.94,401.7734 " fill="none" id="PAC-&gt;BAS" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="876.94,401.7734,867.94,397.7734,871.94,401.7734,867.94,405.7734,876.94,401.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[0d7fba62ba44fe691650cec247bd66d9]
+link CUI to BAS--><path d="M862.83,145.0334 C862.83,219.4134 862.83,400.7734 862.83,400.7734 C862.83,400.7734 871.9,400.7734 871.9,400.7734 " fill="none" id="CUI-&gt;BAS" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="876.9,400.7734,867.9,396.7734,871.9,400.7734,867.9,404.7734,876.9,400.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[bb4519fc27032f4a3189d48eb0eced4f]
+link MED to FORM--><path d="M633.5,137.8234 C633.5,183.1634 633.5,276.7734 633.5,276.7734 C633.5,276.7734 871.27,276.7734 871.27,276.7734 " fill="none" id="MED-&gt;FORM" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="876.27,276.7734,867.27,272.7734,871.27,276.7734,867.27,280.7734,876.27,276.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[3ed243790202f43d9ffb9f2f7b1903a3]
+link AUTH to BAS--><path d="M390.67,144.9134 C390.67,219.9834 390.67,404.7734 390.67,404.7734 C390.67,404.7734 871.85,404.7734 871.85,404.7734 " fill="none" id="AUTH-&gt;BAS" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="876.85,404.7734,867.85,400.7734,871.85,404.7734,867.85,408.7734,876.85,404.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[8517473ad41774aff692490173466ed9]
+link PRIV to BAS--><path d="M419.73,119.7734 C410.71,119.7734 403.83,119.7734 403.83,119.7734 C403.83,119.7734 403.83,403.7734 403.83,403.7734 C403.83,403.7734 871.98,403.7734 871.98,403.7734 " fill="none" id="PRIV-&gt;BAS" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="876.98,403.7734,867.98,399.7734,871.98,403.7734,867.98,407.7734,876.98,403.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[2ac9d39e58615efb7d086bfa862e012a]
+link FORM to BAS--><path d="M961,293.2834 C961,293.2834 961,393.6034 961,393.6034 " fill="none" id="FORM-&gt;BAS" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="961,398.6034,965,389.6034,961,393.6034,957,389.6034,961,398.6034" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[a46d827ebab599bf42d321cd8c2cb816]
+link BAS to ICO--><path d="M961,461.0134 C961,461.0134 961,584.7534 961,584.7534 " fill="none" id="BAS-&gt;ICO" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="961,589.7534,965,580.7534,961,584.7534,957,580.7534,961,589.7534" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[b442854b8d4a46fed4a047595fe2cb7c]
+link BAS to TEMA--><path d="M1027,460.7934 C1027,506.5434 1027,586.7734 1027,586.7734 C1027,586.7734 1340.99,586.7734 1340.99,586.7734 " fill="none" id="BAS-&gt;TEMA" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="1345.99,586.7734,1336.99,582.7734,1340.99,586.7734,1336.99,590.7734,1345.99,586.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[b2ddf15a4455afcecc5dee9663859f41]
+link BAS to UTIL--><path d="M1045.32,429.7734 C1215.99,429.7734 1586.25,429.7734 1586.25,429.7734 C1586.25,429.7734 1586.25,584.4834 1586.25,584.4834 " fill="none" id="BAS-&gt;UTIL" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="1586.25,589.4834,1590.25,580.4834,1586.25,584.4834,1582.25,580.4834,1586.25,589.4834" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[a4303a8e80595c4d84c6e5fb2a225115]
+link PAC to ACC--><path d="M774.75,145.0234 C774.75,187.3734 774.75,257.7734 774.75,257.7734 C774.75,257.7734 1083.23,257.7734 1083.23,257.7734 " fill="none" id="PAC-&gt;ACC" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="1088.23,257.7734,1079.23,253.7734,1083.23,257.7734,1079.23,261.7734,1088.23,257.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[f30bd51e1456c37e9b5e230ce47e78db]
+link CUI to ACC--><path d="M945.5,144.9334 C945.5,186.7334 945.5,255.7734 945.5,255.7734 C945.5,255.7734 1083.49,255.7734 1083.49,255.7734 " fill="none" id="CUI-&gt;ACC" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="1088.49,255.7734,1079.49,251.7734,1083.49,255.7734,1079.49,259.7734,1088.49,255.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[8f76c79fad1874ad685a81511ec5e92e]
+link POB to SES--><path d="M471,300.5934 C471,343.8834 471,429.7734 471,429.7734 C471,429.7734 380.63,429.7734 380.63,429.7734 " fill="none" id="POB-&gt;SES" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="375.63,429.7734,384.63,433.7734,380.63,429.7734,384.63,425.7734,375.63,429.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[6c1bf02da82f1e80eb9ce35e258c91ae]
+link NAV to SES--><path d="M278.25,293.2834 C278.25,293.2834 278.25,400.6334 278.25,400.6334 " fill="none" id="NAV-&gt;SES" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="278.25,405.6334,282.25,396.6334,278.25,400.6334,274.25,396.6334,278.25,405.6334" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[a0f2e95e016735f62c8420713ac768d3]
+link SES to PUERTO--><path d="M371.17,453.8634 C371.17,494.3734 371.17,571.7734 371.17,571.7734 C371.17,571.7734 608.96,571.7734 608.96,571.7734 " fill="none" id="SES-&gt;PUERTO" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="613.96,571.7734,604.96,567.7734,608.96,571.7734,604.96,575.7734,613.96,571.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[19f082475f586193048e8da5c73737e6]
+link POB to PUERTO--><path d="M591.25,300.3034 C591.25,300.3034 591.25,601.6034 591.25,601.6034 " fill="none" id="POB-&gt;PUERTO" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="591.25,606.6034,595.25,597.6034,591.25,601.6034,587.25,597.6034,591.25,606.6034" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[430fbdbc3590738c24c4b9b9ce9e7894]
+link SES to MOD--><path d="M366.83,454.0134 C366.83,454.0134 366.83,570.6834 366.83,570.6834 " fill="none" id="SES-&gt;MOD" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="366.83,575.6834,370.83,566.6834,366.83,570.6834,362.83,566.6834,366.83,575.6834" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[7cc97b1bf062aef0008d11237466d745]
+link SES to POL--><path d="M278,454.0134 C278,454.0134 278,584.7234 278,584.7234 " fill="none" id="SES-&gt;POL" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="278,589.7234,282,580.7234,278,584.7234,274,580.7234,278,589.7234" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[f56dcd84a7631deace20c89cd3846323]
+link SES to ALA--><path d="M186.5,453.7834 C186.5,528.6434 186.5,752.7734 186.5,752.7734 C186.5,752.7734 161.2,752.7734 161.2,752.7734 " fill="none" id="SES-&gt;ALA" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="156.2,752.7734,165.2,756.7734,161.2,752.7734,165.2,748.7734,156.2,752.7734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[4a2bebd301f1d692754ed464f8416b43]
+link SES to ALM--><path d="M341.25,453.8934 C341.25,453.8934 341.25,750.5034 341.25,750.5034 " fill="none" id="SES-&gt;ALM" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="341.25,755.5034,345.25,746.5034,341.25,750.5034,337.25,746.5034,341.25,755.5034" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[64cbc7858c74edad4786c0e31c3362b9]
+reverse link PUERTO to CLI--><path d="M614,636.1734 C614,636.1734 614,772.7734 614,772.7734 C614,772.7734 570.46,772.7734 528.12,772.7734 " fill="none" id="PUERTO&lt;-CLI" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="none" points="607,636.1734,614,616.1734,621,636.1734,607,636.1734" style="stroke: #4E5C59; stroke-width: 1.0;"/><!--MD5=[433305628d159bd3f0fa415db2aa0dde]
+link CLI to API--><path d="M449,796.8434 C449,796.8434 449,878.6934 449,878.6934 " fill="none" id="CLI-&gt;API" style="stroke: #4E5C59; stroke-width: 1.0;"/><polygon fill="#4E5C59" points="449,883.6934,453,874.6934,449,878.6934,445,874.6934,449,883.6934" style="stroke: #4E5C59; stroke-width: 1.0;"/><text fill="#000000" font-family="Helvetica" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="78" x="450" y="857.9121">HTTPS + JWT</text><!--MD5=[c62609f67916723d9f408da9ef4f7cbe]
+link DOM to GMN56--><path d="M693.4661,552.7734 C696.007,552.7734 698.553,552.7734 701.104,552.7734 C741.921,552.7734 784.0305,552.7734 826.9688,552.7734 C1170.475,552.7734 1567.025,552.7734 1779.2,552.7734 " fill="none" id="DOM-GMN56" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[281ec79fb110fbcc37db717507936fcd]
+link CTX to GMN59--><path d="M649.225,326.7734 C651.1572,326.7734 653.0913,326.7734 655.0273,326.7734 C658.8994,326.7734 662.779,326.7734 666.6655,326.7734 C674.4385,326.7734 682.2393,326.7734 690.063,326.7734 C721.3578,326.7734 753.0197,326.7734 784.7441,326.7734 C848.193,326.7734 911.8916,326.7734 973.4019,326.7734 C1096.4225,326.7734 1210.69,326.7734 1296.7,326.7734 " fill="none" id="CTX-GMN59" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[ed199ac30d8c61c039a16b3f6372f4c2]
+link DIS to GMN62--><path d="M1321,655.0476 C1321,655.4068 1321,655.767 1321,656.1283 C1321,656.8508 1321,657.5775 1321,658.308 C1321,661.2298 1321,664.2128 1321,667.239 C1321,673.2914 1321,679.5169 1321,685.7728 C1321,698.2847 1321,710.9184 1321,722.5334 " fill="none" id="DIS-GMN62" style="stroke: #4E5C59; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[041630ee4d1cb9f695455044bcc868ce]
+@startuml 09-componentes-frontend
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam roundcorner 8
+skinparam nodesep 25
+skinparam ranksep 45
+skinparam linetype ortho
+
+skinparam component {
+  BorderColor #185A66
+  BackgroundColor #FFFFFF
+  FontColor #101817
+  BorderThickness 1.3
+}
+skinparam interface {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontColor #7A3F06
+}
+skinparam package {
+  BorderColor #A9BAB7
+  BackgroundColor #FCFDFD
+  FontColor #4E5C59
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #A0530A
+  BackgroundColor #FBF1E6
+  FontSize 11
+}
+skinparam ArrowColor #4E5C59
+skinparam cloud {
+  BorderColor #40606E
+  BackgroundColor #F4F8FA
+  FontColor #40606E
+}
+
+title <b>Chronova — Componentes de la aplicacion movil</b>\n<size:11>Expo + React Native. Las pantallas no saben que existe HTTP</size>
+
+package "PANTALLAS  ·  app/" as PANT #F7FAFB {
+  component "(auth)\ningresar · registro\nrecuperar" as AUTH
+  component "(paciente)\nhoy · medicamentos\nhistorial · perfil" as PAC
+  component "(cuidador)\npacientes\npaciente/[id]/·3 pestanas" as CUI
+  component "medicamento/\nnuevo · [id]" as MED
+  component "privacidad" as PRIV
+}
+
+package "COMPONENTES REUTILIZABLES  ·  src/ui/componentes/" as COMP #F7FAFB {
+  component "basicos\nBoton · Campo · Tarjeta\nTexto · Aviso · Insignia" as BAS
+  component "FormularioDeMedicamento" as FORM
+  component "Icono · Logo" as ICO
+  component "accionesDeMedicamento\ndialogos compartidos" as ACC
+}
+
+package "ESTADO COMPARTIDO  ·  src/ui/contexto/" as CTX #FBF9F5 {
+  component "SesionContexto\nsesion · perfil · preferencias" as SES
+  component "PacienteObservadoContexto\ncarga una vez para 3 pestanas" as POB
+  component "NavegacionPorNotificaciones" as NAV
+}
+
+package "SISTEMA DE DISENO  ·  src/ui/" as DIS #F2F8F7 {
+  component "tema\ncolores · espacios · escalas" as TEMA
+  component "tipografia · texto · hora" as UTIL
+}
+
+package "DOMINIO DEL CLIENTE  ·  src/dominio/" as DOM #F2F8F7 {
+  component "modelos\nPaciente · Medicamento\nToma · Vinculo" as MOD
+  interface "ApiDeChronova\n(puerto)" as PUERTO
+  component "politicaDeDatos" as POL
+}
+
+package "INFRAESTRUCTURA  ·  src/infraestructura/" as INF #F7FAFB {
+  component "ClienteChronova\nfetch · token · errores" as CLI
+  component "SesionEnAsyncStorage" as ALM
+  component "AlarmasExpo\nalarmas locales" as ALA
+}
+
+cloud "API de Chronova\n(backend)" as API
+
+AUTH - -> SES
+PAC - -> SES
+CUI - -> POB
+MED - -> SES
+PRIV - -> SES
+
+PAC - -> BAS
+CUI - -> BAS
+MED - -> FORM
+AUTH - -> BAS
+PRIV - -> BAS
+
+FORM - -> BAS
+BAS - -> ICO
+BAS - -> TEMA
+BAS - -> UTIL
+PAC - -> ACC
+CUI - -> ACC
+
+POB - -> SES
+NAV - -> SES
+
+SES - -> PUERTO
+POB - -> PUERTO
+SES - -> MOD
+SES - -> POL
+SES - -> ALA
+SES - -> ALM
+
+PUERTO <|.. CLI
+CLI - -> API : HTTPS + JWT
+
+note right of DOM
+  <b>La misma idea del backend, a menor escala.</b>
+  Las pantallas dependen del PUERTO
+  <b>ApiDeChronova</b>, no del cliente HTTP.
+  Ninguna pantalla sabe que existe fetch,
+  ni una URL, ni un codigo de estado.
+
+  Los nombres son los mismos del backend
+  y de los documentos —Paciente, Toma,
+  Vinculo—, para no traducir nada
+  mentalmente al pasar de una capa a otra.
+end note
+
+note right of CTX
+  <b>El estado vive en contextos, no en pantallas.</b>
+
+  <b>SesionContexto</b> guarda quien inicio sesion y
+  sus preferencias; envuelve toda la app.
+
+  <b>PacienteObservadoContexto</b> existe porque las
+  tres pestanas de la ficha necesitan los mismos
+  datos: se cargan UNA vez y las pestanas solo
+  pintan. Sin el serian tres veces las mismas
+  peticiones y tres sitios donde repetir la
+  comprobacion de permisos.
+end note
+
+note bottom of DIS
+  Un solo archivo decide colores, espacios y
+  tamanos. El texto base son 18 pt —no 14— y
+  escala hasta un 45% mas desde las preferencias
+  del paciente; las zonas tocables miden 64 px.
+  No es estetica: la revision de literatura
+  senala la experiencia de uso como causa
+  principal de abandono en este publico.
+end note
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.10+7-Ubuntu-124.04
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
