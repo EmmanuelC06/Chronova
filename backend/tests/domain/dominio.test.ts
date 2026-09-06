@@ -187,7 +187,7 @@ describe('Toma', () => {
 
   it('marca como a tiempo lo que entra en la ventana de tolerancia', () => {
     const toma = nueva();
-    toma.confirmar({ ahora: new Date('2026-08-31T08:30:00'), origen: 'PACIENTE' });
+    toma.confirmar({ ahora: new Date('2026-08-31T08:30:00'), origen: 'PACIENTE', margenParaAdelantarEnMinutos: 60 });
     expect(toma.estado).toBe('TOMADA');
     expect(toma.puntualidad(60)).toBe('A_TIEMPO');
     expect(toma.minutosDeDesfase()).toBe(30);
@@ -195,13 +195,13 @@ describe('Toma', () => {
 
   it('marca como retrasado lo que se sale de la ventana', () => {
     const toma = nueva();
-    toma.confirmar({ ahora: new Date('2026-08-31T10:30:00'), origen: 'PACIENTE' });
+    toma.confirmar({ ahora: new Date('2026-08-31T10:30:00'), origen: 'PACIENTE', margenParaAdelantarEnMinutos: 60 });
     expect(toma.puntualidad(60)).toBe('CON_RETRASO');
   });
 
   it('no deja registrar dos veces la misma toma', () => {
     const toma = nueva();
-    toma.confirmar({ ahora: programadaPara, origen: 'PACIENTE' });
+    toma.confirmar({ ahora: programadaPara, origen: 'PACIENTE', margenParaAdelantarEnMinutos: 60 });
     expect(() => toma.omitir({ ahora: programadaPara, origen: 'PACIENTE' })).toThrow(
       ErrorDeReglaDeNegocio,
     );
@@ -218,7 +218,7 @@ describe('Toma', () => {
   it('aplazar no maquilla la puntualidad: se mide contra la hora original', () => {
     const toma = nueva();
     toma.posponer(120, programadaPara);
-    toma.confirmar({ ahora: new Date('2026-08-31T10:00:00'), origen: 'PACIENTE' });
+    toma.confirmar({ ahora: new Date('2026-08-31T10:00:00'), origen: 'PACIENTE', margenParaAdelantarEnMinutos: 60 });
     // Aunque la tomo justo a la hora corrida, llegan 2 horas tarde.
     expect(toma.puntualidad(60)).toBe('CON_RETRASO');
     expect(toma.minutosDeDesfase()).toBe(120);
@@ -248,7 +248,7 @@ describe('ResumenDeAdherencia', () => {
         pacienteId: ID_C,
         programadaPara: new Date('2026-08-31T08:00:00'),
       });
-      if (estado === 'TOMADA') toma.confirmar({ ahora: new Date('2026-08-31T08:10:00'), origen: 'PACIENTE' });
+      if (estado === 'TOMADA') toma.confirmar({ ahora: new Date('2026-08-31T08:10:00'), origen: 'PACIENTE', margenParaAdelantarEnMinutos: 60 });
       if (estado === 'OMITIDA') toma.omitir({ ahora: new Date('2026-08-31T12:00:00'), origen: 'PACIENTE' });
       return toma;
     });

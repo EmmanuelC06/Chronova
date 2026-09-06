@@ -217,7 +217,14 @@ export function construirContenedor(
       reloj,
       tolerancia,
     ),
-    registrarToma: new RegistrarToma(tomas, medicamentos, politica, reloj, notificador),
+    registrarToma: new RegistrarToma(
+      tomas,
+      medicamentos,
+      politica,
+      reloj,
+      notificador,
+      tolerancia,
+    ),
     consultarHistorial: new ConsultarHistorial(
       tomas,
       medicamentos,

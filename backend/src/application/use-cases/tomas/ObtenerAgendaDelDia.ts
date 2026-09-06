@@ -30,7 +30,23 @@ export interface ElementoDeAgenda {
   programadaPara: string;
   estado: EstadoDeToma;
   vecesPospuesta: number;
+  /**
+   * Si la toma se puede confirmar AHORA MISMO.
+   *
+   * Antes era simplemente "no esta resuelta", asi que a las nueve de la
+   * manana la agenda ofrecia el boton tambien para la dosis de las ocho
+   * de la noche.
+   */
   puedeConfirmarse: boolean;
+  /**
+   * Hora a partir de la cual se podra confirmar, en la zona del
+   * paciente. Null cuando ya se puede o cuando ya esta resuelta.
+   *
+   * La app la necesita para decir "Disponible a partir de las 19:00" en
+   * lugar de un boton apagado sin explicacion: un control desactivado y
+   * mudo se lee como que la aplicacion se rompio.
+   */
+  disponibleDesde: string | null;
   necesitaReabastecimiento: boolean;
 }
 
@@ -158,6 +174,10 @@ export class ObtenerAgendaDelDia {
 
     const porMedicamento = new Map(medicamentosActivos.map((m) => [m.id.valor, m]));
 
+    // El instante real, no el dia consultado: lo que decide si un boton
+    // esta disponible es que hora es ahora.
+    const ahoraMismo = this.reloj.ahora();
+
     const elementos: ElementoDeAgenda[] = todas
       .map((toma) => {
         const medicamento = porMedicamento.get(toma.medicamentoId.valor);
@@ -172,7 +192,12 @@ export class ObtenerAgendaDelDia {
           programadaPara: toma.programadaPara.toISOString(),
           estado: toma.estado,
           vecesPospuesta: toma.vecesPospuesta,
-          puedeConfirmarse: !toma.estaResuelta,
+          puedeConfirmarse: toma.puedeConfirmarseEn(ahoraMismo, this.ventanaDeToleranciaEnMinutos),
+          disponibleDesde:
+            toma.estaResuelta ||
+            toma.puedeConfirmarseEn(ahoraMismo, this.ventanaDeToleranciaEnMinutos)
+              ? null
+              : zona.horaDePareDe(toma.confirmableDesde(this.ventanaDeToleranciaEnMinutos)),
           necesitaReabastecimiento: medicamento?.stock.necesitaReabastecimiento ?? false,
         };
       })

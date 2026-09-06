@@ -162,6 +162,46 @@ export class Toma {
   }
 
   /**
+   * Instante a partir del cual esta toma se puede confirmar.
+   *
+   * Se mide contra `programadaPara` y no contra la hora original: si el
+   * paciente pospuso la toma de las 20:00 a las 21:00, la ventana se
+   * corre con ella. Usar la original permitiria confirmar de inmediato
+   * lo que se acaba de aplazar, que es exactamente lo contrario de
+   * aplazar.
+   */
+  confirmableDesde(margenEnMinutos: number): Date {
+    return new Date(this._programadaPara.getTime() - margenEnMinutos * 60_000);
+  }
+
+  /**
+   * ¿Se puede confirmar esta toma ahora mismo?
+   *
+   * La regla es ASIMETRICA, y esa asimetria es el fondo del asunto:
+   *
+   *  - Confirmar TARDE se puede siempre. Se te olvido tocar el boton y
+   *    lo haces por la noche; la dosis ocurrio de verdad y el sistema
+   *    debe poder registrarla. Que llegue tarde lo dice la puntualidad,
+   *    no un bloqueo.
+   *  - Confirmar PRONTO tiene limite, porque una toma que todavia no ha
+   *    llegado no ha ocurrido, y marcarla como tomada es afirmar algo
+   *    que no paso.
+   *
+   * Sin esta regla, a las nueve de la manana la agenda ofrecia el boton
+   * "Ya la tome" tambien para la dosis de las ocho de la noche. Y el
+   * dano no era sobre todo estadistico: la causa mas probable de una
+   * confirmacion once horas antes no es que alguien se adelantara once
+   * horas, es un toque en la tarjeta equivocada — con temblor, con baja
+   * vision y con dos botones grandes uno debajo del otro. Esa noche no
+   * sonaba el recordatorio, porque para la aplicacion la dosis ya estaba
+   * resuelta. Una dosis perdida en silencio.
+   */
+  puedeConfirmarseEn(ahora: Date, margenEnMinutos: number): boolean {
+    if (this.estaResuelta) return false;
+    return ahora.getTime() >= this.confirmableDesde(margenEnMinutos).getTime();
+  }
+
+  /**
    * Que tan puntual fue la toma respecto a su hora original.
    *
    * Se compara contra la hora ORIGINAL de la agenda, no contra la hora
@@ -194,8 +234,14 @@ export class Toma {
     origen: OrigenDeRegistro;
     registradaPorId?: Identificador | null;
     observaciones?: string | null;
+    /**
+     * Cuanto antes de su hora se admite confirmar. Ver
+     * `puedeConfirmarseEn`: la ventana es asimetrica a proposito.
+     */
+    margenParaAdelantarEnMinutos: number;
   }): void {
     this.asegurarQueNoEstaResuelta('confirmar');
+    this.asegurarQueSuHoraYaLlego(datos.ahora, datos.margenParaAdelantarEnMinutos);
     this._estado = 'TOMADA';
     this._resueltaEn = datos.ahora;
     this._origenDelRegistro = datos.origen;
@@ -266,6 +312,27 @@ export class Toma {
   // --------------------------------------------------------------
   // Internos
   // --------------------------------------------------------------
+
+  /**
+   * No se confirma lo que todavia no ha pasado.
+   *
+   * La comprobacion vive en la entidad y no en la pantalla porque una
+   * pantalla es una sugerencia: el boton se puede desactivar, pero la
+   * peticion se puede mandar igual. Aqui no se puede rodear.
+   */
+  private asegurarQueSuHoraYaLlego(ahora: Date, margenEnMinutos: number): void {
+    if (this.puedeConfirmarseEn(ahora, margenEnMinutos)) return;
+
+    const faltan = Math.ceil(
+      (this.confirmableDesde(margenEnMinutos).getTime() - ahora.getTime()) / 60_000,
+    );
+    throw new ErrorDeReglaDeNegocio(
+      'Todavia no es hora de esta toma. Podras confirmarla ' +
+        (faltan >= 60
+          ? `dentro de ${Math.round(faltan / 60)} hora(s).`
+          : `en ${faltan} minuto(s).`),
+    );
+  }
 
   private asegurarQueNoEstaResuelta(accion: string): void {
     if (this.estaResuelta) {

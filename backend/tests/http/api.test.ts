@@ -377,6 +377,74 @@ describe('API HTTP', () => {
     });
   });
 
+  describe('no se confirma una toma que todavia no ha llegado', () => {
+    /**
+     * El defecto: `confirmar()` no tenia ninguna guarda de hora, asi que
+     * a las 09:00 la agenda ofrecia el boton "Ya la tome" tambien para
+     * la dosis de las 20:00. Once horas antes no es adelantarse: es un
+     * toque en la tarjeta equivocada. Y esa noche ya no sonaba el
+     * recordatorio, porque la dosis constaba como resuelta.
+     */
+    async function pacienteConDosTomas() {
+      // Las 12:00Z son las 07:00 en Bogota.
+      await api.cerrar();
+      api = await levantarApi({ fechaInicial: new Date('2026-09-05T12:00:00Z') });
+
+      const paciente = await pacienteDePrueba(api);
+      await api.peticion('POST', '/api/medicamentos', {
+        token: paciente.token,
+        cuerpo: {
+          nombre: 'Losartan',
+          dosis: { cantidad: 1, unidad: 'TABLETA' },
+          frecuencia: { tipo: 'DIARIA' },
+          horarios: ['08:00', '20:00'],
+          fechaInicio: '2026-09-01',
+        },
+      });
+      const agenda = await api.peticion('GET', '/api/tomas/agenda', { token: paciente.token });
+      return { paciente, elementos: agenda.cuerpo.elementos as any[] };
+    }
+
+    it('la agenda marca como no confirmable la toma de la noche', async () => {
+      const { elementos } = await pacienteConDosTomas();
+
+      const manana = elementos.find((e) => e.horaProgramada === '08:00');
+      const noche = elementos.find((e) => e.horaProgramada === '20:00');
+
+      expect(manana.puedeConfirmarse).toBe(true);
+      expect(manana.disponibleDesde).toBeNull();
+
+      expect(noche.puedeConfirmarse).toBe(false);
+      expect(noche.disponibleDesde).toBe('19:00');
+    });
+
+    it('y la API la rechaza aunque el boton se saltee', async () => {
+      const { paciente, elementos } = await pacienteConDosTomas();
+      const noche = elementos.find((e) => e.horaProgramada === '20:00');
+
+      const { estado, cuerpo } = await api.peticion(
+        'POST',
+        `/api/tomas/${noche.tomaId}/registro`,
+        { token: paciente.token, cuerpo: { accion: 'CONFIRMAR' } },
+      );
+
+      expect(estado).toBe(422);
+      expect(JSON.stringify(cuerpo)).toMatch(/todavia no es hora/i);
+    });
+
+    it('la de la manana si se confirma, porque llegar tarde se puede siempre', async () => {
+      const { paciente, elementos } = await pacienteConDosTomas();
+      const manana = elementos.find((e) => e.horaProgramada === '08:00');
+
+      const { estado } = await api.peticion('POST', `/api/tomas/${manana.tomaId}/registro`, {
+        token: paciente.token,
+        cuerpo: { accion: 'CONFIRMAR' },
+      });
+
+      expect(estado).toBe(200);
+    });
+  });
+
   describe('las puertas de entrada estan cerradas', () => {
     it('sin token, los datos de un paciente devuelven 401', async () => {
       const { estado } = await api.peticion('GET', '/api/tomas/agenda');

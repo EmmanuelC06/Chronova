@@ -887,7 +887,10 @@ describe('Panel del cuidador', () => {
         pacienteId: paciente.id,
         fecha: HOY,
       });
-      for (const elemento of agenda.elementos) {
+      // Son las 07:00, asi que solo la toma de las 08:00 esta dentro de
+      // su ventana. La de las 20:00 no se puede registrar todavia, y eso
+      // es justamente lo que se quiere.
+      for (const elemento of agenda.elementos.filter((e) => e.puedeConfirmarse)) {
         await app.contenedor.casosDeUso.registrarToma.ejecutar({
           solicitante: paciente.solicitante,
           tomaId: elemento.tomaId,
@@ -1115,7 +1118,7 @@ describe('Cambios en el tratamiento y adherencia', () => {
     expect(despues.elementos.map((e) => e.tomaId)).toEqual(antes.elementos.map((e) => e.tomaId));
   });
 
-  it('confirmar una toma antes de su hora no cuenta como puntual', async () => {
+  it('no deja confirmar una toma cuya hora todavia no ha llegado', async () => {
     const paciente = await crearPacienteDePrueba(app);
     await registrarLosartan(paciente.solicitante, paciente.id);
 
@@ -1124,24 +1127,48 @@ describe('Cambios en el tratamiento y adherencia', () => {
       pacienteId: paciente.id,
     });
 
-    // Son las 07:00 y confirma por error la toma de las 20:00.
+    // Son las 07:00 y toca por error la tarjeta de las 20:00.
+    //
+    // Antes esto se aceptaba y la toma quedaba TOMADA: contaba como
+    // cumplida al 100% aunque no fuera puntual, y —lo que mas importa—
+    // esa noche ya no sonaba el recordatorio, porque para la aplicacion
+    // la dosis estaba resuelta. Una dosis perdida en silencio.
     const noche = agenda.elementos.find((e) => e.horaProgramada === '20:00')!;
-    await app.contenedor.casosDeUso.registrarToma.ejecutar({
-      solicitante: paciente.solicitante,
-      tomaId: noche.tomaId,
-      accion: 'CONFIRMAR',
-    });
 
+    expect(noche.puedeConfirmarse).toBe(false);
+    expect(noche.disponibleDesde).toBe('19:00');
+
+    await expect(
+      app.contenedor.casosDeUso.registrarToma.ejecutar({
+        solicitante: paciente.solicitante,
+        tomaId: noche.tomaId,
+        accion: 'CONFIRMAR',
+      }),
+    ).rejects.toThrow(/todavia no es hora/i);
+
+    // Y sigue pendiente: el recordatorio de la noche se mantiene en pie.
     const historial = await app.contenedor.casosDeUso.consultarHistorial.ejecutar({
       solicitante: paciente.solicitante,
       pacienteId: paciente.id,
       desde: HOY,
       hasta: HOY,
     });
+    expect(historial.resumen.tomadas).toBe(0);
+  });
 
-    // Trece horas antes de su hora no es puntualidad, es un error de dedo.
-    expect(historial.resumen.tomadasATiempo).toBe(0);
-    expect(historial.resumen.porcentajeDePuntualidad).toBe(0);
+  it('si deja confirmar la de la manana, que ya paso', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    await registrarLosartan(paciente.solicitante, paciente.id);
+
+    const agenda = await app.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    // La regla es asimetrica: llegar tarde se puede siempre.
+    const manana = agenda.elementos.find((e) => e.horaProgramada === '08:00')!;
+    expect(manana.puedeConfirmarse).toBe(true);
+    expect(manana.disponibleDesde).toBeNull();
   });
 });
 

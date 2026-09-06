@@ -43,6 +43,15 @@ export class RegistrarToma {
     private readonly politica: PoliticaDeAcceso,
     private readonly reloj: Reloj,
     private readonly notificador: Notificador,
+    /**
+     * Cuanto antes de su hora se admite confirmar una toma.
+     *
+     * Es la MISMA ventana con la que se decide que cuenta como "a
+     * tiempo", y compartirla no es ahorro: hace que el sistema no se
+     * contradiga. Toda toma que se pueda confirmar es, por definicion,
+     * una toma que todavia puede resultar puntual.
+     */
+    private readonly ventanaDeToleranciaEnMinutos: number,
   ) {}
 
   async ejecutar(comando: ComandoRegistrarToma): Promise<ResultadoDeRegistrarToma> {
@@ -65,6 +74,7 @@ export class RegistrarToma {
           origen,
           registradaPorId: comando.solicitante.id,
           observaciones: comando.observaciones ?? null,
+          margenParaAdelantarEnMinutos: this.ventanaDeToleranciaEnMinutos,
         });
         break;
       case 'OMITIR':
