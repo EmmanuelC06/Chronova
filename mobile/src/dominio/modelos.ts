@@ -101,7 +101,13 @@ export interface ElementoDeAgenda {
   programadaPara: string;
   estado: EstadoDeToma;
   vecesPospuesta: number;
+  /** Si se puede registrar AHORA MISMO. */
   puedeConfirmarse: boolean;
+  /**
+   * Hora a partir de la cual se podra registrar, en la zona del
+   * paciente. Null cuando ya se puede o cuando ya esta resuelta.
+   */
+  disponibleDesde: string | null;
   necesitaReabastecimiento: boolean;
 }
 

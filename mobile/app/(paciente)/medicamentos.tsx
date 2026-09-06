@@ -19,6 +19,7 @@ import {
 } from '../../src/ui/componentes/accionesDeMedicamento';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { colores, espacio } from '../../src/ui/tema';
+import { formatearHora } from '../../src/ui/hora';
 
 /** Lista de medicamentos del paciente, con su inventario. */
 export default function Medicamentos() {
@@ -151,7 +152,7 @@ export default function Medicamentos() {
             {medicamento.horarios.map((hora) => (
               <Insignia
                 key={hora}
-                texto={hora}
+                texto={formatearHora(hora)}
                 color={colores.primarioOscuro}
                 fondo={colores.primarioSuave}
               />

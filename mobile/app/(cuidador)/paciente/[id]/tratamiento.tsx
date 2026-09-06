@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Aviso, Boton, EstadoVacio, Tarjeta, Texto } from '../../../../src/ui/componentes/basicos';
 import { usePacienteObservado } from '../../../../src/ui/contexto/PacienteObservadoContexto';
 import { colores, espacio } from '../../../../src/ui/tema';
+import { formatearHora } from '../../../../src/ui/hora';
 
 /**
  * PESTANA "Tratamiento": que esta tomando el paciente, y como cambiarlo.
@@ -100,7 +101,7 @@ export default function Tratamiento() {
             {medicamento.descripcionDeDosis ??
               `${medicamento.dosis.cantidad} ${medicamento.dosis.unidad}`}
             {' · '}
-            {medicamento.horarios.join(', ')}
+            {medicamento.horarios.map(formatearHora).join(', ')}
           </Texto>
 
           {medicamento.descripcionDeFrecuencia ? (

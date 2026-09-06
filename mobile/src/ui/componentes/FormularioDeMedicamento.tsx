@@ -4,6 +4,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'rea
 import type { Medicamento } from '../../dominio/modelos';
 import { Aviso, Boton, Campo, Rotulo, Texto } from './basicos';
 import { ALTO_TACTIL_MINIMO, colores, espacio, radio } from '../tema';
+import { aHoraDe24, formatearHora, horaEnPalabras } from '../hora';
 
 /**
  * Formulario de medicamento, compartido por el alta y la edicion.
@@ -24,6 +25,11 @@ import { ALTO_TACTIL_MINIMO, colores, espacio, radio } from '../tema';
 const UNIDADES = ['tableta', 'capsula', 'ml', 'mg', 'gota', 'sobre', 'inyeccion', 'unidad'];
 const DIAS = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
 const NOMBRES_DE_DIAS = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+/**
+ * Las horas que la gente usa de verdad, ancladas a las comidas y al
+ * levantarse y acostarse. Se guardan en 24 horas y se ENSENAN en a. m. /
+ * p. m., que es como se leen aqui.
+ */
 const HORAS_SUGERIDAS = ['07:00', '08:00', '12:00', '13:00', '18:00', '20:00', '22:00'];
 
 /** Lo que el formulario entrega, listo para enviar a la API. */
@@ -56,6 +62,16 @@ export function FormularioDeMedicamento({
   const [unidad, setUnidad] = useState(inicial?.dosis.unidad ?? 'tableta');
   const [horarios, setHorarios] = useState<string[]>(inicial?.horarios ?? []);
   const [horaNueva, setHoraNueva] = useState('');
+  /**
+   * a. m. o p. m. para la hora que se escribe a mano.
+   *
+   * Existe porque sin el la entrada seria ambigua: "8:30" pueden ser las
+   * ocho y media de la manana o las de la noche, y en una aplicacion de
+   * medicacion esa diferencia son doce horas de tratamiento. Dos botones
+   * grandes resuelven la ambiguedad sin pedirle a nadie que traduzca a
+   * horario de 24 horas.
+   */
+  const [meridiano, setMeridiano] = useState<'AM' | 'PM'>('AM');
   const [todosLosDias, setTodosLosDias] = useState(
     inicial ? inicial.frecuencia.tipo === 'DIARIA' : true,
   );
@@ -68,24 +84,34 @@ export function FormularioDeMedicamento({
   const [error, setError] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
 
-  const agregarHora = (hora: string) => {
-    const limpia = hora.trim();
-    if (!/^\d{1,2}:\d{2}$/.test(limpia)) {
-      setError('La hora debe escribirse como 08:30.');
-      return;
-    }
-    const [h, m] = limpia.split(':').map(Number);
-    if (h === undefined || m === undefined || h > 23 || m > 59) {
-      setError('Esa hora no existe. Las horas van de 00 a 23 y los minutos de 00 a 59.');
-      return;
-    }
-    const normalizada = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    if (horarios.includes(normalizada)) {
+  /** Agrega una hora que ya viene en formato de 24 horas (los atajos). */
+  const agregarHora = (hora24: string) => {
+    if (horarios.includes(hora24)) {
       setError('Esa hora ya esta en la lista.');
       return;
     }
     setError(null);
-    setHorarios([...horarios, normalizada].sort());
+    setHorarios([...horarios, hora24].sort());
+  };
+
+  /**
+   * Agrega la hora que se escribio a mano, en formato de 12 horas.
+   *
+   * Se guarda en 24 horas, que es lo que entiende el servidor, pero la
+   * persona nunca ve ese formato: escribe "8:30", toca "p. m." y listo.
+   */
+  const agregarHoraEscrita = () => {
+    const hora24 = aHoraDe24(horaNueva, meridiano);
+    if (!hora24) {
+      setError('Escribe la hora como 8:30, y elige si es de la manana o de la tarde.');
+      return;
+    }
+    if (horarios.includes(hora24)) {
+      setError('Esa hora ya esta en la lista.');
+      return;
+    }
+    setError(null);
+    setHorarios([...horarios, hora24].sort());
     setHoraNueva('');
   };
 
@@ -240,7 +266,7 @@ export function FormularioDeMedicamento({
                   key={hora}
                   onPress={() => setHorarios(horarios.filter((h) => h !== hora))}
                   accessibilityRole="button"
-                  accessibilityLabel={`Quitar la hora ${hora}`}
+                  accessibilityLabel={`Quitar la toma de las ${horaEnPalabras(hora)}`}
                   style={{
                     minHeight: ALTO_TACTIL_MINIMO,
                     paddingHorizontal: espacio.md,
@@ -250,7 +276,7 @@ export function FormularioDeMedicamento({
                   }}
                 >
                   <Texto peso="semi" color={colores.primarioOscuro}>
-                    {hora}
+                    {formatearHora(hora)}
                   </Texto>
                 </Pressable>
               ))}
@@ -263,7 +289,12 @@ export function FormularioDeMedicamento({
 
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: espacio.xs }}>
             {HORAS_SUGERIDAS.map((hora) => (
-              <Ficha key={hora} texto={hora} activa={false} onPress={() => agregarHora(hora)} />
+              <Ficha
+                key={hora}
+                texto={formatearHora(hora)}
+                activa={false}
+                onPress={() => agregarHora(hora)}
+              />
             ))}
           </View>
 
@@ -279,16 +310,23 @@ export function FormularioDeMedicamento({
                 etiqueta="Otra hora"
                 valor={horaNueva}
                 onCambio={setHoraNueva}
-                marcador="09:30"
+                marcador="9:30"
                 tipoDeTeclado="numbers-and-punctuation"
               />
             </View>
+            <View style={{ paddingBottom: 2, flexDirection: 'row', gap: espacio.xs }}>
+              <Ficha texto="a. m." activa={meridiano === 'AM'} onPress={() => setMeridiano('AM')} />
+              <Ficha texto="p. m." activa={meridiano === 'PM'} onPress={() => setMeridiano('PM')} />
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row' }}>
             <View style={{ paddingBottom: 2 }}>
               <Boton
-                titulo="Agregar"
+                titulo="Agregar esta hora"
                 variante="secundario"
                 ancho="ajustado"
-                onPress={() => agregarHora(horaNueva)}
+                onPress={agregarHoraEscrita}
               />
             </View>
           </View>

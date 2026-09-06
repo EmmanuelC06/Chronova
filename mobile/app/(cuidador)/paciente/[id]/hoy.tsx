@@ -9,11 +9,19 @@ import {
   Tarjeta,
   Texto,
 } from '../../../../src/ui/componentes/basicos';
+import { Icono } from '../../../../src/ui/componentes/Icono';
+import { formatearHora, horaEnPalabras } from '../../../../src/ui/hora';
 import {
   DIAS_DE_RESUMEN,
   usePacienteObservado,
 } from '../../../../src/ui/contexto/PacienteObservadoContexto';
-import { colores, espacio, ESTILO_POR_ESTADO, ESTILO_POR_NIVEL } from '../../../../src/ui/tema';
+import {
+  colores,
+  espacio,
+  ESTILO_POR_ESTADO,
+  ESTILO_POR_NIVEL,
+  radio,
+} from '../../../../src/ui/tema';
 
 /**
  * PESTANA "Hoy": como va el paciente en este momento.
@@ -54,8 +62,16 @@ export default function Hoy() {
   const nivel = ESTILO_POR_NIVEL[paciente.adherencia.nivel];
   const puedeRegistrar = paciente.permisos.puedeRegistrarTomas;
 
-  const pendientes = agenda?.elementos.filter((e) => e.puedeConfirmarse) ?? [];
-  const resueltas = agenda?.elementos.filter((e) => !e.puedeConfirmarse) ?? [];
+  // El reparto se hace por ESTADO, no por si el boton esta disponible.
+  //
+  // Es una distincion que costo un error: `puedeConfirmarse` dejo de
+  // significar "sigue pendiente" y paso a significar "se puede tocar
+  // ahora". Repartir por el campo viejo mandaba la toma de las 20:00 a
+  // la seccion "Ya registradas" a las nueve de la manana, que es
+  // exactamente lo contrario de lo que pasa.
+  const estaResuelta = (e: ElementoDeAgenda) => e.estado === 'TOMADA' || e.estado === 'OMITIDA';
+  const pendientes = agenda?.elementos.filter((e) => !estaResuelta(e)) ?? [];
+  const resueltas = agenda?.elementos.filter(estaResuelta) ?? [];
   const porAgotarse = medicamentos.filter((m) => m.necesitaReabastecimiento);
 
   return (
@@ -178,7 +194,7 @@ function TarjetaDeToma({
         <IconoDeEstado nombre={estilo.icono} color={estilo.color} fondo={estilo.fondo} />
         <View style={{ flex: 1, gap: 1 }}>
           <Texto variante="subtitulo" peso="semi">
-            {elemento.horaProgramada}
+            {formatearHora(elemento.horaProgramada)}
           </Texto>
           <Texto variante="rotulo" peso="semi" color={estilo.color}>
             {estilo.etiqueta}
@@ -197,6 +213,30 @@ function TarjetaDeToma({
         </Texto>
       ) : null}
 
+      {!elemento.puedeConfirmarse && elemento.disponibleDesde ? (
+        <View
+          style={{
+            marginTop: espacio.sm,
+            padding: espacio.md,
+            borderRadius: radio.md,
+            backgroundColor: colores.superficieSuave,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: espacio.sm,
+          }}
+          accessible
+          accessibilityLabel={`Todavia no es hora. Podras registrarla a partir de las ${horaEnPalabras(elemento.disponibleDesde)}.`}
+        >
+          <Icono nombre="reloj" tamano={22} color={colores.textoSuave} />
+          <View style={{ flex: 1 }}>
+            <Texto variante="pequeno" color={colores.textoSuave}>
+              Todavia no es hora. Podras registrarla a partir de las{' '}
+              {formatearHora(elemento.disponibleDesde)}.
+            </Texto>
+          </View>
+        </View>
+      ) : null}
+
       {puedeRegistrar && elemento.puedeConfirmarse && onAccion ? (
         <View
           style={{
@@ -211,7 +251,7 @@ function TarjetaDeToma({
               variante="exito"
               ocupado={procesando}
               onPress={() => onAccion('CONFIRMAR')}
-              descripcionAccesible={`Registrar que ya tomo ${elemento.nombreDelMedicamento} de las ${elemento.horaProgramada}`}
+              descripcionAccesible={`Registrar que ya tomo ${elemento.nombreDelMedicamento} de las ${horaEnPalabras(elemento.horaProgramada)}`}
             />
           </View>
           <View style={{ flex: 1 }}>
@@ -220,7 +260,7 @@ function TarjetaDeToma({
               variante="peligro"
               deshabilitado={procesando}
               onPress={() => onAccion('OMITIR')}
-              descripcionAccesible={`Registrar que no tomo ${elemento.nombreDelMedicamento} de las ${elemento.horaProgramada}`}
+              descripcionAccesible={`Registrar que no tomo ${elemento.nombreDelMedicamento} de las ${horaEnPalabras(elemento.horaProgramada)}`}
             />
           </View>
         </View>

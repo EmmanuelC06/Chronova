@@ -280,8 +280,12 @@ function fechaYHora(iso: string): string {
   return fecha.toLocaleString('es-CO', {
     day: 'numeric',
     month: 'short',
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
+    // hour12 explicito: sin el, el formato depende de los datos de idioma
+    // que traiga el motor, y en Android eso varia. Un historial que salga
+    // en 24 horas contradiria al resto de la aplicacion.
+    hour12: true,
   });
 }
 
