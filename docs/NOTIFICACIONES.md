@@ -96,6 +96,53 @@ una captura de pantalla.
 
 ---
 
+## Precisión: por qué una alarma puede llegar tarde
+
+Android **no garantiza** que una notificación programada suene en el segundo exacto.
+Lo que hace la aplicación es pedirle al sistema «avísame a las 8:00»; a partir de ahí
+decide el sistema, y son varias capas las que pueden retrasarlo:
+
+1. **El permiso de alarmas exactas.** Desde Android 14 viene denegado de fábrica. Sin él,
+   el sistema degrada la alarma a *inexacta* y puede darla con quince minutos o más de
+   retraso. Se concede en *Ajustes → Aplicaciones → Acceso especial → Alarmas y
+   recordatorios*.
+2. **El ahorro de batería (Doze).** Con la pantalla apagada y el teléfono quieto, Android
+   agrupa el trabajo pendiente y lo despacha en tandas. Marcas como Xiaomi, Huawei y
+   Samsung añaden capas propias, más agresivas que las de Android.
+3. **La propia librería.** `expo-notifications` programa a través del sistema y hereda
+   todo lo anterior.
+
+Incluso con todo bien configurado, conviene contar con **un margen de algunos minutos**.
+Perseguir el segundo exacto exigiría abandonar `expo-notifications` por una solución
+nativa (`notifee`, o un plugin propio sobre `AlarmManager`), con compilación nueva y
+bastante trabajo.
+
+### Por qué eso no rompe el proyecto
+
+Chronova está diseñada para tolerarlo, y no por casualidad:
+
+- La **puntualidad** se mide con una ventana de ±60 minutos. Una toma a las 8:03 en vez
+  de a las 8:00 es puntual, y clínicamente es la misma toma.
+- Los **minutos de gracia** —que el paciente configura entre 1 y 4 horas— son lo que
+  espera el sistema antes de dar una dosis por perdida.
+
+Un retraso de dos minutos no cambia nada. Lo que sí importa es el caso en que **la
+alarma no basta**: la persona la oyó y se distrajo, o el teléfono estaba en silencio.
+
+Y para eso la respuesta no es más precisión, es **redundancia**: el aviso al cuidador
+cuando la toma no se confirma. Esa es la red de seguridad real del producto, y es
+justamente la que hoy no funciona por lo de Firebase. Ahí es donde rinde el esfuerzo,
+no en afinar segundos.
+
+### Qué decir si lo preguntan en la sustentación
+
+Que es una limitación conocida y documentada de la plataforma, no un defecto de la
+implementación; que el diseño la absorbe con la ventana de tolerancia y los minutos de
+gracia; y que la garantía de que una dosis olvidada no pase inadvertida no descansa en
+la alarma, sino en el aviso al cuidador. Reconocer el límite es más sólido que ignorarlo.
+
+---
+
 ## ¿Hay que hacerlo ya?
 
 No es urgente para que la aplicación funcione, pero **sí antes de la sustentación** si
@@ -112,3 +159,5 @@ que avisa sin que el cuidador tenga que entrar a mirar.
 
 - [Configurar credenciales de FCM — Expo](https://docs.expo.dev/push-notifications/fcm-credentials/)
 - [expo-notifications — Expo](https://docs.expo.dev/versions/latest/sdk/notifications/)
+- [Las alarmas exactas vienen denegadas por defecto — Android 14](https://developer.android.com/about/versions/14/changes/schedule-exact-alarms)
+- [Programar alarmas — Android Developers](https://developer.android.com/develop/background-work/services/alarms)

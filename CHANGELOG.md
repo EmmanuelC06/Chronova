@@ -29,6 +29,38 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.3.0] — 2026-09-08
+
+### Añadido
+
+- **Tarjeta «Mis alarmas», en Mi cuenta.** Dice cuántas alarmas tiene puestas el TELÉFONO
+  —preguntándoselo al sistema operativo, no repitiendo lo que la aplicación cree haber
+  programado— y a qué hora suena la próxima.
+
+  Existe porque cuando una alarma de medicación no suena, la persona no tiene forma de saber
+  si el fallo está en la aplicación o en su teléfono, y son cosas que se arreglan en sitios
+  opuestos: si la alarma no existe hay algo que corregir en el código; si existe y no sonó, el
+  teléfono la está reteniendo y eso se cambia en los ajustes del sistema. Sin esa distinción
+  lo único que quedaba era esperar a la siguiente toma a ver si sonaba, y con un medicamento
+  de verdad esa espera es la dosis. Lleva además un acceso directo a los ajustes del teléfono.
+- La consola dice cuántas alarmas quedaron programadas y cuándo suena la próxima.
+- **`docs/NOTIFICACIONES.md`** gana una sección sobre por qué una alarma puede llegar con
+  minutos de retraso: el permiso de alarmas exactas que Android 14 deniega de fábrica, el
+  ahorro de batería, y por qué el diseño lo absorbe —la ventana de ±60 minutos y los minutos
+  de gracia—. Incluye qué responder si el tema sale en la sustentación.
+
+### Corregido
+
+- **Un fallo puntual al programar alarmas podía dejar la aplicación sin programar ninguna
+  más.** La cola encadena promesas, y una promesa rechazada contamina todo lo que se encadene
+  después: si una sincronización fallaba, la cola quedaba envenenada y todas las siguientes se
+  saltaban en silencio durante el resto de la ejecución. Medido: tras un fallo puntual se
+  completaba 1 de 3 sincronizaciones; ahora se completan las 3.
+- **Los fallos al programar alarmas se tragaban en silencio.** Un recordatorio que no suena y
+  tampoco avisa de que no va a sonar es peor que no tener recordatorios.
+
+---
+
 ## [1.2.1] — 2026-09-08
 
 ### Corregido
