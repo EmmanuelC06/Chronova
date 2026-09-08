@@ -30,8 +30,38 @@ import type pg from 'pg';
  * hay una terminal a mano donde correr comandos sueltos entre despliegue
  * y despliegue.
  */
+/**
+ * Cuantas veces se reintenta antes de darse por vencido.
+ *
+ * El plan gratuito de Neon suspende la base de datos cuando lleva unos
+ * minutos sin uso, y la primera conexion tiene que despertarla. Eso tarda
+ * unos segundos y, si se cae justo en el limite de conexion del pool,
+ * falla una vez y funciona a la siguiente.
+ *
+ * Sin reintentos, ese tropiezo momentaneo impide arrancar el servidor
+ * entero: cambiar "no arranca si no puede escribir" por "no arranca
+ * porque la base de datos estaba dormida" no seria ninguna mejora.
+ * Distinguir las dos cosas es justamente el punto.
+ */
+const INTENTOS = 3;
+const ESPERA_ENTRE_INTENTOS_MS = 2_000;
+
 export async function aplicarEsquema(pool: pg.Pool): Promise<void> {
   const ruta = fileURLToPath(new URL('./esquema.sql', import.meta.url));
   const sql = await readFile(ruta, 'utf8');
-  await pool.query(sql);
+
+  for (let intento = 1; intento <= INTENTOS; intento += 1) {
+    try {
+      await pool.query(sql);
+      return;
+    } catch (error) {
+      if (intento === INTENTOS) throw error;
+
+      console.warn(
+        `  Esquema         la base de datos no respondio (intento ${intento} de ${INTENTOS}). ` +
+          'Si esta en un plan gratuito, puede estar despertando. Reintentando...',
+      );
+      await new Promise((seguir) => setTimeout(seguir, ESPERA_ENTRE_INTENTOS_MS));
+    }
+  }
 }
