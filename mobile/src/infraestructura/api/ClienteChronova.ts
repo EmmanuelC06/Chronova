@@ -57,8 +57,57 @@ function zonaHorariaDelDispositivo(): string | null {
   }
 }
 
-function resolverUrlBase(): string {
+/**
+ * Direccion del computador que esta sirviendo la aplicacion.
+ *
+ * En desarrollo, Expo le dice al telefono desde que maquina se descargo
+ * el codigo: es el mismo computador donde corre el servidor. Preguntarselo
+ * evita tener que escribir la IP a mano en app.json.
+ *
+ * Esa IP la reparte el router y cambia sola —al cambiar de red, al
+ * reiniciar el router, o simplemente porque caduco la asignacion
+ * anterior—. Cada vez que cambiaba, la aplicacion quedaba llamando a una
+ * direccion donde ya no habia nadie, y el sintoma no ayudaba nada:
+ * la peticion no fallaba, se quedaba esperando quince segundos hasta
+ * agotar el tiempo. Parece un servidor lento y es un numero viejo.
+ *
+ * Devuelve null cuando no aplica: en una compilacion de produccion no hay
+ * servidor de desarrollo, y ahi manda `apiUrl`.
+ */
+function anfitrionDeDesarrollo(): string | null {
+  const constantes = Constants as unknown as {
+    expoConfig?: { hostUri?: string };
+    expoGoConfig?: { debuggerHost?: string };
+  };
+
+  const anfitrion = constantes.expoConfig?.hostUri ?? constantes.expoGoConfig?.debuggerHost;
+  if (!anfitrion) return null;
+
+  // Llega como "192.168.1.9:8081"; interesa solo la parte de la maquina.
+  const soloMaquina = anfitrion.split(':')[0]?.trim();
+  if (!soloMaquina) return null;
+
+  // "localhost" desde un telefono apunta al propio telefono, no al
+  // computador: no sirve de nada y taparia la direccion configurada.
+  if (soloMaquina === 'localhost' || soloMaquina === '127.0.0.1') return null;
+
+  return soloMaquina;
+}
+
+/** El puerto que declare apiUrl; si no dice nada, el del backend. */
+function puertoConfigurado(apiUrl: string | undefined): string {
+  const encontrado = apiUrl?.match(/:(\d+)\s*$/);
+  return encontrado?.[1] ?? '4000';
+}
+
+export function resolverUrlBase(): string {
   const configurada = (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl;
+
+  // En desarrollo gana la maquina que sirve la app, no lo que diga
+  // app.json: es la unica de las dos que no puede quedar desactualizada.
+  const maquina = anfitrionDeDesarrollo();
+  if (maquina) return `http://${maquina}:${puertoConfigurado(configurada)}`;
+
   return (configurada ?? URL_POR_DEFECTO).replace(/\/$/, '');
 }
 
@@ -284,11 +333,15 @@ export class ClienteChronova implements ApiDeChronova {
     } catch (error) {
       // Sin internet, servidor apagado o IP equivocada: un mensaje que
       // la persona pueda entender y accionar.
+      // El mensaje dice A DONDE se intento llamar. Sin ese dato, una IP
+      // vieja en la configuracion y una caida real del servidor producen
+      // exactamente el mismo texto, y se pierde un buen rato mirando el
+      // sitio equivocado. Es una direccion de red local, no un secreto.
       const esTiempoAgotado = error instanceof Error && error.name === 'AbortError';
       throw new ErrorDeApi(
         esTiempoAgotado
-          ? 'El servidor esta tardando demasiado en responder. Intentalo de nuevo.'
-          : 'No pudimos conectarnos con el servidor. Revisa tu conexion a internet.',
+          ? `El servidor no respondio a tiempo (${this.urlBase}). Comprueba que este encendido y que esa sea su direccion.`
+          : `No pudimos conectarnos con el servidor (${this.urlBase}). Revisa tu conexion.`,
         'SIN_CONEXION',
       );
     } finally {

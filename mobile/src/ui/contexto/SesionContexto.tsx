@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { ErrorDeApi } from '../../dominio/modelos';
@@ -216,6 +216,25 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
     return () => api.alRenovarLaSesion(null);
   }, [api, almacen]);
 
+  /**
+   * Las dos tareas de arranque, siempre en su version mas reciente.
+   *
+   * El efecto de abajo tiene que correr UNA vez, al abrir la aplicacion.
+   * Si las nombrara en su lista de dependencias volveria a correr cada
+   * vez que cambiaran, y `sincronizarAlarmas` cambia con las
+   * preferencias: tocar "Muy grande" relanzaba el arranque entero
+   * —volver a leer la sesion, volver a pedir el perfil, volver a
+   * programar todas las alarmas— y esa era una de las fuentes de las
+   * sincronizaciones simultaneas que duplicaban los avisos.
+   *
+   * Guardarlas en una referencia deja que el efecto llame siempre a la
+   * ultima version sin depender de ella.
+   */
+  const tareasDeArranque = useRef({ registrarEsteDispositivo, sincronizarAlarmas });
+  useEffect(() => {
+    tareasDeArranque.current = { registrarEsteDispositivo, sincronizarAlarmas };
+  });
+
   // Al abrir la app: recuperar la sesion guardada, si la hay.
   useEffect(() => {
     let vigente = true;
@@ -230,8 +249,10 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
           if (!vigente) return;
           setPerfil(perfilCargado);
           if (perfilCargado.preferencias) setPreferencias(perfilCargado.preferencias);
-          void registrarEsteDispositivo();
-          if (guardada.usuario.tipo === 'PACIENTE') void sincronizarAlarmas();
+          void tareasDeArranque.current.registrarEsteDispositivo();
+          if (guardada.usuario.tipo === 'PACIENTE') {
+            void tareasDeArranque.current.sincronizarAlarmas();
+          }
         } catch (problema) {
           // SOLO se descarta la sesion si el servidor dice que el token ya
           // no vale. Antes se borraba ante cualquier fallo, asi que abrir
@@ -255,7 +276,9 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
     return () => {
       vigente = false;
     };
-  }, [api, almacen, registrarEsteDispositivo, sincronizarAlarmas]);
+    // Solo `api` y `almacen`, que se crean una vez y no cambian nunca:
+    // este efecto es el arranque de la aplicacion y corre una sola vez.
+  }, [api, almacen]);
 
   const iniciarSesion = useCallback(
     async (email: string, contrasena: string, tipo?: TipoDeUsuario) => {

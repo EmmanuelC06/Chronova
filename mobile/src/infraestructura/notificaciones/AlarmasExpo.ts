@@ -49,6 +49,40 @@ Notifications.setNotificationHandler({
 export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
   private canalPreparado = false;
 
+  /**
+   * Que ya se explico por que no hay avisos remotos.
+   *
+   * El motivo no cambia durante la ejecucion —o hay credenciales de
+   * Firebase o no las hay—, asi que repetir el aviso en cada inicio de
+   * sesion solo llena la consola y entierra los mensajes que si son
+   * nuevos. Se dice una vez y con todas las letras.
+   */
+  private yaSeExplicoLaFaltaDeToken = false;
+
+  /**
+   * Cola de sincronizacion, con una sola tarea pendiente.
+   *
+   * `sincronizar` borra todas las alarmas y vuelve a programarlas una por
+   * una, y cada una de esas operaciones es una llamada al sistema
+   * operativo: entre el borrado y la ultima alarma pasa un rato. Si
+   * durante ese rato entra una segunda sincronizacion, las dos se
+   * entrelazan: la segunda borra lo que la primera llevaba puesto, la
+   * primera sigue su bucle y programa lo que le quedaba, y la segunda
+   * programa su tanda completa. La misma toma acaba con dos alarmas. Con
+   * tres o cuatro llamadas seguidas —abrir la app, cambiar una
+   * preferencia y confirmar una toma bastan— son cinco o seis avisos
+   * para la misma pastilla.
+   *
+   * `cola` encadena las llamadas para que nunca corran dos a la vez.
+   * `siguiente` guarda solo la ULTIMA peticion: si mientras una
+   * sincronizacion esta en marcha llegan tres mas, al terminar se hace
+   * una sola con los datos mas frescos, y las otras dos se descartan.
+   * Rehacer las alarmas cuatro veces seguidas con la misma agenda no
+   * aporta nada y tarda.
+   */
+  private cola: Promise<void> = Promise.resolve();
+  private siguiente: { agendas: readonly AgendaDelDia[]; preferencias: Preferencias } | null = null;
+
   // ---------------------------------------------------------------
   // Permisos y canal
   // ---------------------------------------------------------------
@@ -117,22 +151,37 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
           ?.projectId ?? Constants.easConfig?.projectId;
 
       if (!idDeProyecto) {
-        console.warn(
-          '[push] Falta extra.eas.projectId en app.json: no se puede obtener el token. ' +
-            'Las alarmas locales siguen funcionando.',
-        );
+        this.explicarUnaVez('falta extra.eas.projectId en app.json');
         return null;
       }
 
       const { data } = await Notifications.getExpoPushTokenAsync({ projectId: idDeProyecto });
       return data ?? null;
     } catch (error) {
-      console.warn(
-        '[push] No se pudo obtener el token del dispositivo:',
-        error instanceof Error ? error.message : error,
-      );
+      this.explicarUnaVez(error instanceof Error ? error.message : String(error));
       return null;
     }
+  }
+
+  /**
+   * Deja claro en la consola QUE deja de funcionar, no solo que fallo.
+   *
+   * Este aviso se confunde con facilidad con un fallo general de la
+   * aplicacion, y no lo es: sin token de push las alarmas de medicacion
+   * del paciente —que son locales y las programa el propio telefono—
+   * siguen sonando igual. Lo que no llega son los avisos que manda el
+   * servidor al cuidador, que es una funcion distinta.
+   */
+  private explicarUnaVez(motivo: string): void {
+    if (this.yaSeExplicoLaFaltaDeToken) return;
+    this.yaSeExplicoLaFaltaDeToken = true;
+
+    console.warn(
+      `[push] Este dispositivo no recibira avisos REMOTOS. Motivo: ${motivo}\n` +
+        '       Las alarmas de las tomas son locales y siguen funcionando con normalidad.\n' +
+        '       Lo que no llegara son los avisos del servidor al cuidador ("se salto una toma").\n' +
+        '       En Android eso exige credenciales de Firebase (FCM); ver docs/NOTIFICACIONES.md.',
+    );
   }
 
   /**
@@ -168,13 +217,42 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
   // Puerto ProgramadorDeAlarmas
   // ---------------------------------------------------------------
 
-  async sincronizar(
+  async sincronizar(agendas: readonly AgendaDelDia[], preferencias: Preferencias): Promise<void> {
+    this.siguiente = { agendas, preferencias };
+    this.cola = this.cola.then(() => this.reprogramarLoPendiente());
+    return this.cola;
+  }
+
+  /**
+   * Hace la sincronizacion que haya quedado apuntada, si queda alguna.
+   *
+   * Puede no quedar ninguna: si tres llamadas se encolaron mientras
+   * corria la primera, la primera de las tres ya hizo el trabajo con los
+   * datos mas recientes y las otras dos encuentran el hueco vacio.
+   */
+  private async reprogramarLoPendiente(): Promise<void> {
+    const trabajo = this.siguiente;
+    if (!trabajo) return;
+    this.siguiente = null;
+    await this.reprogramar(trabajo.agendas, trabajo.preferencias);
+  }
+
+  private async reprogramar(
     agendas: readonly AgendaDelDia[],
     preferencias: Preferencias,
   ): Promise<void> {
     try {
+      // El permiso se pide AQUI, y no solo al registrar el telefono para
+      // avisos remotos. Hasta ahora las alarmas de medicacion dependian,
+      // sin decirlo, de que el registro de push hubiera pedido el permiso
+      // antes: funcionaba de casualidad. Si ese camino se corta —y hoy ya
+      // falla, por las credenciales de Firebase que faltan— la funcion
+      // principal de la aplicacion se quedaria sin permiso y sin alarmas,
+      // en silencio. Lo que necesita el permiso es esto, asi que esto lo
+      // pide. Si ya esta concedido no se le pregunta nada a nadie.
+      await this.pedirPermiso();
       await this.prepararCanal();
-      await this.cancelarTodas();
+      await this.borrarTodas();
 
       const ahora = Date.now();
 
@@ -213,7 +291,23 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
     }
   }
 
+  /**
+   * Borra todas las alarmas de este telefono.
+   *
+   * Pasa por la misma cola que la sincronizacion, y de paso descarta la
+   * peticion que hubiera apuntada. Sin eso, cerrar sesion mientras una
+   * sincronizacion va en camino dejaria que esa sincronizacion volviera
+   * a programar, despues del borrado, las alarmas de la persona que
+   * acaba de salir: avisos sobre la medicacion de otro en un telefono
+   * que ya cambio de manos.
+   */
   async cancelarTodas(): Promise<void> {
+    this.siguiente = null;
+    this.cola = this.cola.then(() => this.borrarTodas());
+    return this.cola;
+  }
+
+  private async borrarTodas(): Promise<void> {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
     } catch {
