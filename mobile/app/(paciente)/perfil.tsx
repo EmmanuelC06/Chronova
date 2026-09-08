@@ -9,6 +9,7 @@ import type {
   TamanoDeLetra,
 } from '../../src/dominio/modelos';
 import { Aviso, Boton, Campo, Insignia, Tarjeta, Texto } from '../../src/ui/componentes/basicos';
+import { EstadoDeLasAlarmas } from '../../src/ui/componentes/EstadoDeLasAlarmas';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { ALTO_TACTIL_MINIMO, colores, espacio } from '../../src/ui/tema';
 import { primerNombre } from '../../src/ui/texto';
@@ -232,7 +233,7 @@ export default function Perfil() {
         <Texto color={colores.textoSuave}>{perfil?.email}</Texto>
         {perfil?.edad ? (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            {perfil.edad} años
+            {perfil.edad} anos
           </Texto>
         ) : null}
       </Tarjeta>
@@ -284,6 +285,9 @@ export default function Perfil() {
           ))}
         </View>
       </Tarjeta>
+
+      {/* ---- Alarmas ---- */}
+      <EstadoDeLasAlarmas />
 
       {/* ---- Privacidad ---- */}
       <Tarjeta>

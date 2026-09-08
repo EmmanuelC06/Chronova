@@ -204,4 +204,23 @@ export interface ProgramadorDeAlarmas {
   sincronizar(agendas: readonly AgendaDelDia[], preferencias: Preferencias): Promise<void>;
 
   cancelarTodas(): Promise<void>;
+
+  /**
+   * Que alarmas tiene puestas el TELEFONO ahora mismo.
+   *
+   * No lo que la aplicacion cree haber programado: lo que el sistema
+   * operativo confirma que tiene agendado. La diferencia importa, porque
+   * "no me sono la alarma" tiene dos causas que se ven iguales desde
+   * fuera y se arreglan en sitios opuestos: que nunca se creara, o que
+   * exista y el telefono la este reteniendo.
+   */
+  alarmasProgramadas(): Promise<AlarmasEnElTelefono>;
+}
+
+export interface AlarmasEnElTelefono {
+  total: number;
+  /** Instante de la proxima, en ISO. Null si no hay ninguna. */
+  proxima: string | null;
+  /** Nombre del medicamento de la proxima, si se puede saber. */
+  medicamento: string | null;
 }

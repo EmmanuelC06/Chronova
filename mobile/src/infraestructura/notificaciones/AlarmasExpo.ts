@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 
 import type { AgendaDelDia, Preferencias } from '../../dominio/modelos';
 import type {
+  AlarmasEnElTelefono,
   DatosDeNotificacion,
   ProgramadorDeAlarmas,
   RegistroDePush,
@@ -164,6 +165,34 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
   }
 
   /**
+   * Dice cuantas alarmas quedaron puestas y cuando suena la primera.
+   *
+   * Existe porque "no me llego la notificacion" tiene dos causas que se
+   * ven identicas desde fuera y se arreglan en sitios opuestos: que la
+   * alarma nunca se creara —un permiso, un fallo de red al pedir la
+   * agenda— o que se creara y el telefono la retrasara por ahorro de
+   * bateria. Esta linea las separa sin tener que adivinar.
+   */
+  private informar(cuantas: number, proximo: number | null): void {
+    if (cuantas === 0) {
+      console.log('[alarmas] 0 alarmas programadas: no hay tomas pendientes por delante.');
+      return;
+    }
+
+    const cuando = proximo
+      ? new Date(proximo).toLocaleString('es-CO', {
+          day: 'numeric',
+          month: 'short',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      : 'desconocida';
+
+    console.log(`[alarmas] ${cuantas} alarma(s) programada(s). La proxima: ${cuando}.`);
+  }
+
+  /**
    * Deja claro en la consola QUE deja de funcionar, no solo que fallo.
    *
    * Este aviso se confunde con facilidad con un fallo general de la
@@ -219,7 +248,16 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
 
   async sincronizar(agendas: readonly AgendaDelDia[], preferencias: Preferencias): Promise<void> {
     this.siguiente = { agendas, preferencias };
-    this.cola = this.cola.then(() => this.reprogramarLoPendiente());
+
+    // El `.catch` no es decorativo. Una promesa rechazada contamina todo
+    // lo que se encadene despues: si UNA sincronizacion fallara, la cola
+    // quedaria rechazada y TODAS las siguientes se saltarian, en
+    // silencio y para el resto de la ejecucion. En una aplicacion de
+    // medicacion eso es dejar de programar alarmas sin que nadie se
+    // entere. Hoy `reprogramar` atrapa lo suyo y no deberia llegar aqui
+    // nada, pero eso es una suposicion sobre codigo que puede cambiar, y
+    // el precio de equivocarse es demasiado alto.
+    this.cola = this.cola.then(() => this.reprogramarLoPendiente()).catch(() => {});
     return this.cola;
   }
 
@@ -285,9 +323,18 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
           },
         });
       }
-    } catch {
-      // Sin permisos o sin soporte (por ejemplo, en la version web).
-      // La app sigue funcionando: solo no suenan las alarmas.
+
+      this.informar(pendientes.length, pendientes[0]?.instante ?? null);
+    } catch (error) {
+      // No es mortal —la aplicacion sigue sirviendo— pero tampoco puede
+      // ser mudo. Antes, cualquier fallo aqui dejaba al paciente sin
+      // alarmas sin que nada lo dijera en ningun sitio: ni en la
+      // pantalla, ni en la consola. Un recordatorio que no suena y no
+      // avisa de que no va a sonar es peor que no tener recordatorios.
+      console.warn(
+        '[alarmas] No se pudieron programar las alarmas:',
+        error instanceof Error ? error.message : error,
+      );
     }
   }
 
@@ -303,8 +350,41 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
    */
   async cancelarTodas(): Promise<void> {
     this.siguiente = null;
-    this.cola = this.cola.then(() => this.borrarTodas());
+    this.cola = this.cola.then(() => this.borrarTodas()).catch(() => {});
     return this.cola;
+  }
+
+  /**
+   * Le pregunta al sistema operativo que tiene agendado.
+   *
+   * Es la unica fuente fiable. La aplicacion puede haber pedido veinte
+   * alarmas y el telefono haber aceptado cero —sin permiso, sin soporte,
+   * por un limite del sistema— sin que nada lo diga.
+   */
+  async alarmasProgramadas(): Promise<AlarmasEnElTelefono> {
+    try {
+      const puestas = await Notifications.getAllScheduledNotificationsAsync();
+
+      const instantes = puestas
+        .map((aviso) => {
+          const disparador = aviso.trigger as { value?: number; date?: number } | null;
+          const cuando = disparador?.value ?? disparador?.date ?? null;
+          return cuando === null
+            ? null
+            : { cuando, nombre: extraerMedicamento(aviso.content?.title) };
+        })
+        .filter((x): x is { cuando: number; nombre: string | null } => x !== null)
+        .sort((a, b) => a.cuando - b.cuando);
+
+      const primera = instantes[0];
+      return {
+        total: puestas.length,
+        proxima: primera ? new Date(primera.cuando).toISOString() : null,
+        medicamento: primera?.nombre ?? null,
+      };
+    } catch {
+      return { total: 0, proxima: null, medicamento: null };
+    }
   }
 
   private async borrarTodas(): Promise<void> {
@@ -314,6 +394,13 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
       // Nada que hacer.
     }
   }
+}
+
+/** «Hora de tu Losartan» -> «Losartan». Si no encaja, se deja pasar. */
+function extraerMedicamento(titulo: unknown): string | null {
+  if (typeof titulo !== 'string') return null;
+  const encontrado = titulo.match(/^Hora de tu\s+(.+)$/i);
+  return encontrado?.[1] ?? titulo;
 }
 
 /** Se queda solo con los campos conocidos, y solo si son cadenas. */
