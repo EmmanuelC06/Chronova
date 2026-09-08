@@ -8,3 +8,12 @@ coverage/
 
 # Entregas generadas, se reconstruyen desde el repositorio
 Claude outputs/
+
+# Credenciales de Firebase para las notificaciones remotas.
+# google-services.json identifica el proyecto de Firebase; la clave de la
+# cuenta de servicio permite ENVIAR notificaciones haciendose pasar por
+# Chronova. Ver docs/NOTIFICACIONES.md
+google-services.json
+**/google-services.json
+GoogleService-Info.plist
+**/*-firebase-adminsdk-*.json

@@ -29,6 +29,52 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.2.1] — 2026-09-08
+
+### Corregido
+
+- **Llegaban cinco o seis avisos por la misma toma.** Reprogramar las alarmas consiste en
+  borrarlas todas y volver a crearlas una por una, y cada paso es una llamada al sistema
+  operativo: entre el borrado y la última alarma pasa un rato. Si en ese rato entraba una
+  segunda sincronización, las dos se entrelazaban —la segunda borraba lo que la primera
+  llevaba puesto, la primera seguía su bucle, la segunda ponía su tanda completa— y la misma
+  pastilla quedaba con varias alarmas. Bastaban tres disparadores normales: abrir la
+  aplicación, cambiar una preferencia y confirmar una toma. Ahora las sincronizaciones se
+  encolan, nunca corren dos a la vez, y si llegan varias mientras una está en marcha se hace
+  **una sola** con los datos más frescos.
+- **Cambiar una preferencia relanzaba el arranque de la aplicación entera**: volver a leer la
+  sesión, volver a pedir el perfil y volver a programar todas las alarmas. Era una de las
+  fuentes de esas sincronizaciones simultáneas.
+- **Cerrar sesión mientras se estaban programando alarmas podía dejarlas puestas.** El borrado
+  ocurría, y la sincronización que venía en camino las volvía a crear justo después: avisos
+  sobre la medicación de otra persona en un teléfono que ya cambió de manos. El borrado pasa
+  ahora por la misma cola y descarta lo que hubiera pendiente.
+- **La aplicación ya no depende de una IP escrita a mano.** En desarrollo pregunta a Expo desde
+  qué máquina se descargó el código, que es la misma donde corre el servidor. Esa dirección la
+  reparte el router y cambia sola —al cambiar de red, al reiniciar el router, o porque caducó la
+  asignación—, y cada vez que cambiaba la app quedaba llamando a un sitio vacío. El síntoma no
+  ayudaba: la petición no fallaba, se quedaba esperando quince segundos. Parecía un servidor
+  lento y era un número viejo. Pasó tres veces.
+- **Los errores de conexión ahora dicen a qué dirección se intentó llamar.** Sin ese dato, una IP
+  desactualizada y una caída real del servidor daban exactamente el mismo mensaje.
+- **Las alarmas piden su propio permiso de notificaciones.** Antes lo pedía, de paso, el registro
+  para avisos remotos: la función principal de la aplicación dependía sin decirlo de otra que
+  hoy ya falla. Funcionaba de casualidad.
+- **El aviso de que no hay avisos remotos se decía en cada intento.** Ahora se dice una vez, y
+  explica qué deja de funcionar —los avisos al cuidador— y qué no —las alarmas de las tomas—.
+- **El arranque tolera que la base de datos esté despertando.** El plan gratuito de Neon la
+  suspende tras unos minutos de inactividad; sin reintentos, ese tropiezo momentáneo impedía
+  arrancar el servidor entero. Cambiar «no arranca si no puede escribir» por «no arranca porque
+  estaba dormida» no habría sido ninguna mejora.
+
+### Añadido
+
+- **`docs/NOTIFICACIONES.md`**: la diferencia entre alarmas locales y avisos remotos, qué
+  significa el aviso de Firebase en la consola, y los pasos para habilitar las notificaciones
+  al cuidador en Android. Las credenciales de Firebase quedaron en `.gitignore`.
+
+---
+
 ## [1.2.0] — 2026-09-06
 
 ### Añadido
