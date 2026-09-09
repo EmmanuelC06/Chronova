@@ -48,8 +48,42 @@ export function cargarEntorno(): Entorno {
         'Copia el archivo .env.example a .env y completa el valor.',
     );
   }
-  if (entornoDeEjecucion === 'production' && jwtSecreto.includes('cambia-esta-clave')) {
-    throw new Error('Estas usando el JWT_SECRET de ejemplo en produccion. Cambialo.');
+
+  /**
+   * La clave de ejemplo se rechaza SIEMPRE, no solo en produccion.
+   *
+   * Antes esta comprobacion pedia que NODE_ENV fuera exactamente
+   * "production", y ese es justo el detalle que se olvida al desplegar:
+   * en una plataforma en la nube, si nadie declara esa variable, el
+   * servidor arranca creyendose de desarrollo y acepta la clave que esta
+   * escrita en .env.example —es decir, en el repositorio, a la vista de
+   * cualquiera—.
+   *
+   * Con esa clave, quien la tenga puede FABRICAR un token de sesion
+   * valido para cualquier cuenta. No hay que adivinar contrasenas ni
+   * romper nada: se firma un token a nombre de quien sea y el servidor lo
+   * da por bueno, con acceso a los datos de salud de esa persona. Es el
+   * fallo mas grave que puede tener este proyecto, y la unica proteccion
+   * dependia de acordarse de una variable de entorno.
+   */
+  if (jwtSecreto.includes('cambia-esta-clave')) {
+    throw new Error(
+      'Estas usando el JWT_SECRET de ejemplo, el que viene en .env.example y esta publicado ' +
+        'en el repositorio. Con esa clave cualquiera puede fabricar una sesion valida a nombre ' +
+        'de cualquier paciente. Genera una propia, por ejemplo con: ' +
+        'node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64url\'))"',
+    );
+  }
+
+  // Con base de datos real hay personas reales detras. Una clave corta se
+  // puede probar por fuerza bruta fuera de linea: quien tenga UN token
+  // firmado puede ensayar claves hasta dar con la que lo valida, sin
+  // tocar el servidor y sin que nadie lo note.
+  if (persistencia === 'postgres' && jwtSecreto.length < 32) {
+    throw new Error(
+      'Con PERSISTENCE=postgres el JWT_SECRET debe tener al menos 32 caracteres. ' +
+        'Genera uno con: node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64url\'))"',
+    );
   }
 
   const urlDeBaseDeDatos = process.env.DATABASE_URL ?? '';
