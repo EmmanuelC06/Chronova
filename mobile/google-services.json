@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "314538782271",
+    "project_id": "chronova-ecc50",
+    "storage_bucket": "chronova-ecc50.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:314538782271:android:cd5e6369387fc30973928a",
+        "android_client_info": {
+          "package_name": "com.chronova.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVx2a9bjTa5egeflW8puaPDzw2XukpfBg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

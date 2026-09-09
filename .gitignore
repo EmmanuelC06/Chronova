@@ -9,11 +9,19 @@ coverage/
 # Entregas generadas, se reconstruyen desde el repositorio
 Claude outputs/
 
-# Credenciales de Firebase para las notificaciones remotas.
-# google-services.json identifica el proyecto de Firebase; la clave de la
-# cuenta de servicio permite ENVIAR notificaciones haciendose pasar por
-# Chronova. Ver docs/NOTIFICACIONES.md
-google-services.json
-**/google-services.json
-GoogleService-Info.plist
+# Credenciales de Firebase.
+#
+# La clave de la CUENTA DE SERVICIO es la que hay que proteger: permite
+# ENVIAR notificaciones haciendose pasar por Chronova a cualquiera que
+# tenga la app instalada. Se sube a EAS y no vive en el repositorio.
+#
+# google-services.json NO esta en esta lista, y es deliberado. No
+# contiene ninguna clave privada: solo el identificador del proyecto, el
+# nombre del paquete y una clave de API que viaja dentro del APK de todas
+# formas, asi que cualquiera que instale la aplicacion puede extraerla.
+# Ignorarlo no protegia nada y si rompia la compilacion: EAS Build solo
+# sube al servidor los archivos que git tiene registrados, de modo que la
+# app se construia sin configuracion de Firebase y las notificaciones
+# remotas no llegaban nunca. Ver docs/NOTIFICACIONES.md
 **/*-firebase-adminsdk-*.json
+**/serviceAccountKey.json
