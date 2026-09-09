@@ -2,7 +2,7 @@
   "expo": {
     "name": "Chronova",
     "slug": "chronova",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "orientation": "portrait",
     "scheme": "chronova",
     "userInterfaceStyle": "light",
