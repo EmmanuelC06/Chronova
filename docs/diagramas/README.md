@@ -1,6 +1,6 @@
 # Diagramas UML de Chronova
 
-Ocho diagramas generados **a partir del código real**, no de un boceto previo. Cada nombre de clase, método, columna y estado que aparece en ellos existe en el proyecto.
+Nueve diagramas generados **a partir del código real**, no de un boceto previo. Cada nombre de clase, método, columna y estado que aparece en ellos existe en el proyecto.
 
 Eso importa para la sustentación: si el profesor pregunta «¿dónde está esto en el código?», la respuesta existe.
 
@@ -29,9 +29,35 @@ Cada diagrama viene en tres formatos:
 
 | Formato | Para qué |
 |---|---|
-| `.png` | Pegar directamente en el documento de Word |
-| `.svg` | Imprimir o proyectar sin que se pixele |
-| `fuentes/*.puml` | Editar el diagrama cuando el proyecto cambie |
+| `.png` | Pegar directamente en el documento de Word. Se rasterizan a 2× para que no se vean dentados al imprimir |
+| `.svg` | Imprimir, proyectar o editar en Figma, Illustrator o Inkscape sin que se pixele. Llevan la tipografía incrustada, así que se ven igual en cualquier computador |
+| `generador/*.py` | Cambiar el contenido o la colocación de un diagrama y volver a generarlo |
+| `fuentes/*.puml` | La versión anterior, hecha con PlantUML. Se conserva como referencia del contenido |
+
+### Cómo se hacen ahora
+
+Los diagramas se dibujan con un generador propio (`generador/`) en vez de con PlantUML.
+
+El motivo: PlantUML decide por su cuenta el aspecto y la colocación. Con él salían diagramas correctos pero con la estética por defecto de la herramienta —cajas grises, tipografía del sistema, flechas que se cruzan donde el algoritmo quiera—. Con el generador, la colocación es explícita: cada caja tiene sus coordenadas, y ninguna línea pasa por encima de una caja.
+
+El acabado sale del propio sistema de diseño de la aplicación (`mobile/src/ui/tema.ts`): los mismos colores y la misma tipografía, Atkinson Hyperlegible. Los diagramas y la app se ven de la misma familia.
+
+```bash
+cd docs/diagramas/generador
+python3 construir.py          # los nueve
+python3 construir.py 03 08    # solo los que se nombren
+```
+
+Escribe los `.svg` y los `.png` en `docs/diagramas/`. Necesita `pillow`, `fonttools`, `brotli` y `playwright` (con Chromium instalado).
+
+Cómo está repartido el código:
+
+| Archivo | Qué hace |
+|---|---|
+| `lienzo.py` | Colores, medición de texto con la tipografía real, tipografía incrustada y puntas de flecha UML |
+| `piezas.py` | Tarjeta de clase, óvalo de caso de uso, actor, nota, grupo y conectores con esquinas redondeadas |
+| `casos_de_uso.py` · `clases.py` · `estados.py` · `secuencias.py` · `componentes.py` · `entidad_relacion.py` | Un archivo por familia de diagrama |
+| `rasterizar.py` | Convierte los SVG en PNG con Chromium |
 
 ---
 

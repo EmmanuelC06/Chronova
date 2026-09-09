@@ -67,18 +67,33 @@ const aire = (after = 200) => new Paragraph({ spacing: { after } });
  * el ancho útil son 6,08 pulgadas; en horizontal, 9,5. Un 55% más de ancho
  * es la diferencia entre poder leer los nombres de las clases y no poder.
  */
-function diagrama(archivo, anchoPx, altoPx, pie, opciones = {}) {
-  const { apaisado = false, antes = [], despues = [] } = opciones;
+function diagrama(archivo, pie, opciones = {}) {
+  const { antes = [], despues = [] } = opciones;
+  // El tamaño se lee del propio PNG. Antes venía escrito a mano en cada
+  // llamada, y al rehacer los diagramas todas esas cifras quedaron
+  // desfasadas: el .docx los deformaba sin avisar.
+  const datos = fs.readFileSync(`${DIAGRAMAS}/${archivo}`);
+  const { ancho: anchoPx, alto: altoPx } = medirPng(datos);
+
   // Espacio útil en píxeles a 96 ppp, dejando aire para el pie de figura.
-  const ANCHO_MAXIMO = apaisado ? 900 : 580;
-  const ALTO_MAXIMO = apaisado ? 560 : 800;
-  const escala = Math.min(1, ANCHO_MAXIMO / anchoPx, ALTO_MAXIMO / altoPx);
+  // La orientación ya no se elige a mano: se calcula cuál de las dos deja
+  // el diagrama más grande. Un diagrama de secuencia es más alto que ancho
+  // y se ve mejor en vertical; uno de componentes, al revés. Ponerlo a mano
+  // significaba que al rehacer un diagrama la elección quedaba obsoleta.
+  // Los altos dejan sitio al encabezado del apartado y al pie de figura.
+  // Con 620 en apaisado el conjunto medía justo más que la página y se
+  // desbordaba a una segunda hoja horizontal en blanco.
+  const VERTICAL = { ancho: 580, alto: 760 };
+  const APAISADO = { ancho: 900, alto: 560 };
+  const cabe = (h) => Math.min(1, h.ancho / anchoPx, h.alto / altoPx);
+  const apaisado = cabe(APAISADO) > cabe(VERTICAL) * 1.02;
+  const escala = cabe(apaisado ? APAISADO : VERTICAL);
   const contenido = [
     new Paragraph({
       alignment: AlignmentType.CENTER, spacing: { before: 120, after: 80 },
       children: [new ImageRun({
         type: 'png',
-        data: fs.readFileSync(`${DIAGRAMAS}/${archivo}`),
+        data: datos,
         transformation: { width: Math.round(anchoPx * escala), height: Math.round(altoPx * escala) },
       })],
     }),
@@ -89,8 +104,11 @@ function diagrama(archivo, anchoPx, altoPx, pie, opciones = {}) {
   ];
   // El encabezado del apartado viaja con la figura: si se queda en la página
   // vertical anterior, aparece solo al pie de una página en blanco.
+  // El texto que sigue a la figura vuelve a la página vertical: dejarlo
+  // dentro de la sección apaisada producía una hoja horizontal con dos
+  // líneas sueltas y el resto en blanco.
   return apaisado
-    ? [{ __apaisado: [...antes, ...contenido, ...despues] }]
+    ? [{ __apaisado: [...antes, ...contenido] }, ...despues]
     : [...antes, ...contenido, ...despues];
 }
 
@@ -615,9 +633,9 @@ const doc = new Document({
          t(' No es una inconsistencia. Guardar y recuperar un paciente es una necesidad de la propia entidad, que no sabría existir sin poder persistirse; enviar un correo o firmar un token son necesidades del caso de uso. La carpeta donde vive cada interfaz indica a quién le hace falta.')]),
       p('Existe además un único archivo en todo el servidor que decide qué implementación concreta se conecta a cada puerto: contenedor.ts, la raíz de composición. Solo ahí se sabe que la persistencia es PostgreSQL, que el cifrado es bcrypt y que los tokens son JWT.'),
 
-      ...diagrama('07-componentes-hexagonal.png', 2569, 1166,
+      ...diagrama('07-componentes-hexagonal.png',
         'Figura 1. Arquitectura hexagonal del servidor. Las flechas de dependencia apuntan siempre hacia el dominio.',
-        { apaisado: true,
+        {
           antes: [h2('1.2  Diagrama de arquitectura')],
           despues: [pFigura('El diagrama permite comprobar dos propiedades. La primera es que hay dos adaptadores distintos cumpliendo el mismo puerto de repositorios, PostgreSQL y en memoria, y que la aplicación funciona con cualquiera de los dos sin que el dominio cambie. La segunda es que ningún componente del dominio tiene una flecha que salga hacia una capa externa.')] }),
 
@@ -626,9 +644,9 @@ const doc = new Document({
       tabla([1500, 2600, 4660], ['Capa', 'Tecnología', 'Justificación'], STACK),
 
       // ================= 2. BASE DE DATOS =================
-      ...diagrama('08-entidad-relacion.png', 2612, 1309,
+      ...diagrama('08-entidad-relacion.png',
         'Figura 2. Modelo entidad-relación en notación pata de gallo, con las siete tablas, sus restricciones y las decisiones de diseño anotadas.',
-        { apaisado: true,
+        {
           antes: [h1('2.  Diseño de base de datos'), h2('2.1  Modelo Entidad-Relación')],
           despues: [pFigura([t('Las líneas punteadas de dispositivos y recuperaciones no son claves foráneas. ', { bold: true }),
             t('Ambas tablas tienen una columna que apunta a pacientes o a cuidadores según el valor de otra columna, y PostgreSQL no admite una clave foránea con dos destinos posibles. Es un compromiso consciente: se pierde la integridad referencial de esas dos columnas, que pasa a cuidar la aplicación, y a cambio no hacen falta cuatro tablas casi idénticas.')])] }),
@@ -722,17 +740,17 @@ const doc = new Document({
          t('una toma solo se puede confirmar a partir de sesenta minutos antes de su hora programada.', { bold: true }),
          t(' Llegar tarde se admite siempre, porque la dosis ocurrió de verdad y el sistema debe poder registrarla; adelantarse tiene límite, porque una toma que aún no ha llegado no ha ocurrido. Un cliente que ignore el botón desactivado y envíe la petición igual recibe 422.')]),
 
-      ...diagrama('05-secuencia-confirmar-toma.png', 1932, 1486,
+      ...diagrama('05-secuencia-confirmar-toma.png',
         'Figura 3. Confirmar una toma. Se aprecian las capas separadas, los dos caminos de error y el descuento de inventario.',
-        { apaisado: true,
+        {
           antes: [
             h2('3.4  Diagrama de secuencia de operaciones principales'),
             pFigura('Se documentan los dos flujos críticos del sistema.'),
           ],
           despues: [pFigura('El primero recorre lo que ocurre desde que el paciente toca «Ya la tomé» hasta que la pantalla se actualiza. Sirve para observar la arquitectura en movimiento: el adaptador HTTP solo valida la forma, el caso de uso orquesta, y las decisiones reales las toma la entidad Toma.')] }),
-      ...diagrama('06-secuencia-agenda-del-dia.png', 1654, 1085,
+      ...diagrama('06-secuencia-agenda-del-dia.png',
         'Figura 4. Generación de la agenda del día, incluida la resolución del problema de concurrencia.',
-        { apaisado: true,
+        {
           despues: [pFigura('El segundo muestra cómo un patrón como «una pastilla a las 8:00 todos los días» se convierte en tomas concretas que el paciente puede confirmar, y cómo se resuelve el caso en que dos peticiones piden la agenda del mismo día simultáneamente.')] }),
 
       // Sin salto(): el cambio de sección que cierra la página apaisada de la
@@ -870,12 +888,12 @@ const doc = new Document({
       h2('5.4  Diagrama de clases (Backend)'),
       p('Dos tipos de relación aparecen en el diagrama y conviene distinguirlas. La composición, con rombo relleno, indica que Medicamento contiene su Dosis, su Stock y su Frecuencia: si el medicamento desaparece, esos objetos desaparecen con él porque no tienen sentido solos. La agregación, con rombo vacío, indica que Paciente agrega Medicamento, que tiene identidad propia y su propio ciclo de vida.'),
       p('Los objetos de valor merecen atención porque son la pieza que evita la mayor parte de las validaciones repartidas. Un Email no es una cadena de texto: es una clase que no se puede construir con un valor inválido. En consecuencia, cualquier función que reciba un Email no necesita validarlo, porque ya es válido por construcción.'),
-      ...diagrama('03-clases-dominio.png', 1576, 2716,
+      ...diagrama('03-clases-dominio.png',
         'Figura 5. Clases del dominio: siete entidades, sus objetos de valor, el servicio ResumenDeAdherencia y las enumeraciones.'),
 
-      ...diagrama('09-componentes-frontend.png', 2041, 933,
+      ...diagrama('09-componentes-frontend.png',
         'Figura 6. Componentes de la aplicación móvil y su jerarquía de dependencias.',
-        { apaisado: true,
+        {
           antes: [h2('5.5  Diagrama de componentes (Frontend)')],
           despues: [pFigura('El estado compartido vive en contextos y no en las pantallas. SesionContexto guarda quién inició sesión y sus preferencias, y envuelve toda la aplicación. PacienteObservadoContexto existe por una razón concreta: las tres pestañas de la ficha del paciente necesitan los mismos datos, de modo que se cargan una sola vez y las pestañas únicamente presentan. Sin él serían tres veces las mismas peticiones y tres lugares donde repetir la comprobación de permisos.')] }),
 
