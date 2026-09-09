@@ -84,15 +84,58 @@ Son cinco pasos y hay que rehacer la compilación al final.
 Después, una compilación nueva. La configuración de credenciales no se aplica a un
 `.apk` ya construido.
 
-### Dos archivos que NO se suben al repositorio
+### Cómo comprobar que quedó bien, sin esperar a que se pierda una toma
 
-- **`google-services.json`** — identifica el proyecto de Firebase.
-- **La clave privada de la cuenta de servicio** (el `.json` del paso 2) — esta es la
-  más delicada: quien la tenga puede enviar notificaciones haciéndose pasar por
-  Chronova, a cualquier persona que tenga la app instalada.
+El aviso al cuidador solo se dispara cuando una toma vence, y eso tarda horas. Depurar
+con un ciclo de espera de tres horas no es depurar, es adivinar. Para eso está:
 
-Las dos están ya en `.gitignore`. No las pegues en un chat, ni en el entregable, ni en
-una captura de pantalla.
+```bash
+cd backend
+npm run push:probar
+```
+
+Recorre exactamente el mismo camino que el servidor de verdad —los mismos teléfonos
+guardados, el mismo cliente hacia Expo— y responde tres preguntas en orden, cada una
+descartando una causa:
+
+1. **¿Hay algún teléfono registrado?** Si no, la aplicación móvil nunca consiguió su
+   token: el problema está en el teléfono, no en el servidor. El motivo aparece en la
+   terminal de Expo.
+2. **¿Expo acepta el mensaje?** Si lo rechaza, imprime el motivo. El más común es que
+   falten las credenciales de FCM.
+3. **¿Llegó al teléfono?** Eso ya se mira en el aparato.
+
+Conviene saber que «aceptado» significa que Expo recibió el mensaje, no que llegó. La
+entrega real se confirma consultando los recibos, que este proyecto no implementa.
+
+### Los dos archivos, y cuál de ellos es secreto
+
+Solo uno de los dos lo es, y confundirlos cuesta caro en las dos direcciones.
+
+**La clave privada de la cuenta de servicio** (el `.json` del paso 2) **es secreta**.
+Quien la tenga puede enviar notificaciones haciéndose pasar por Chronova a cualquier
+persona que tenga la app instalada. Se sube a EAS y ahí se queda: está en `.gitignore`,
+no se pega en un chat, no va en el entregable y no sale en una captura de pantalla.
+
+**`google-services.json` NO es secreto, y sí va al repositorio.** No contiene ninguna
+clave privada: solo el identificador del proyecto, el nombre del paquete y una clave de
+API que **viaja dentro del APK de todas formas**, así que cualquiera que instale la
+aplicación puede extraerla. Ignorarlo no protege nada.
+
+Y tiene un costo concreto ignorarlo: **EAS Build solo sube al servidor los archivos que
+git tiene registrados.** Si está en `.gitignore`, la compilación falla con
+
+```
+"google-services.json" is missing, make sure that the file exists.
+Remember that EAS Build only uploads the files tracked by git.
+```
+
+o —peor— sale adelante sin configuración de Firebase y las notificaciones remotas no
+llegan nunca, sin ningún error que lo explique.
+
+La alternativa es guardarlo como *variable de archivo* en EAS, pero eso obliga a
+convertir `app.json` en `app.config.js` para poder leer la variable. Para este proyecto
+no compensa: más piezas que pueden fallar, a cambio de ninguna seguridad real.
 
 ---
 

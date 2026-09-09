@@ -29,6 +29,49 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.3.2] — 2026-09-09
+
+### Añadido
+
+- **Los avisos remotos al cuidador ya funcionan.** Android exige que todo mensaje de un
+  servidor a un teléfono pase por Firebase Cloud Messaging, y el proyecto no tenía
+  credenciales: el teléfono nunca conseguía su token y el servidor no tenía a quién avisar.
+  Configurado y verificado de punta a punta.
+- **`npm run push:probar`**, en el backend. El aviso al cuidador solo se dispara cuando una
+  toma vence, y eso tarda horas; depurar con un ciclo de espera de tres horas no es depurar,
+  es adivinar. El script recorre el mismo camino que el servidor real y responde tres
+  preguntas en orden —¿hay teléfonos registrados?, ¿Expo acepta el mensaje?, ¿llegó?—, cada
+  una descartando una causa. Los tokens se imprimen enmascarados.
+- **`docs/PLAN-DE-TRABAJO.md`**: lo que queda, ordenado por qué bloquea a qué.
+
+### Cambiado
+
+- **`google-services.json` entra al repositorio.** EAS Build solo sube al servidor los
+  archivos que git tiene registrados, así que tenerlo en `.gitignore` hacía fallar la
+  compilación —y en el peor caso la habría dejado pasar sin configuración de Firebase, sin
+  ningún error que lo explicara—. No es un secreto: no lleva clave privada, y la clave de API
+  que contiene viaja dentro del APK de todas formas. La clave de la cuenta de servicio, esa
+  sí secreta, sigue fuera.
+- Se quitan `versionCode` y `buildNumber` de `app.json`: `eas.json` usa `appVersionSource`
+  remoto, así que EAS lleva la cuenta y lo que diga `app.json` se ignora.
+
+---
+
+## [1.3.1] — 2026-09-09
+
+### Corregido
+
+- **La clave con la que se firman las sesiones podía ser la de ejemplo.** La comprobación
+  que lo impedía solo se activaba si `NODE_ENV` valía exactamente `production`, que es justo
+  la variable que se olvida al desplegar en una plataforma en la nube. Con la clave de
+  ejemplo —publicada en `.env.example`, dentro del repositorio— cualquiera puede **fabricar
+  un token de sesión válido a nombre de cualquier paciente** y leer sus datos de salud: no
+  hay que adivinar ninguna contraseña, se firma y el servidor lo da por bueno. Ahora se
+  rechaza siempre, y con base de datos real se exigen 32 caracteres como mínimo, porque una
+  clave corta se puede probar por fuerza bruta fuera de línea a partir de un solo token.
+
+---
+
 ## [1.3.0] — 2026-09-08
 
 ### Añadido
