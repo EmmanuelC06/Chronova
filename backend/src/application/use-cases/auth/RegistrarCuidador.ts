@@ -43,7 +43,7 @@ export class RegistrarCuidador {
     const versionDePolitica = versionAutorizadaOFallar(comando);
 
     if (await this.cuidadores.existeConEmail(email)) {
-      throw new ErrorDeConflicto('Ya existe una cuenta de cuidador con ese correo electronico.');
+      throw new ErrorDeConflicto('Ya existe una cuenta de cuidador con ese correo electrónico.');
     }
 
     const cuidador = Cuidador.registrar({

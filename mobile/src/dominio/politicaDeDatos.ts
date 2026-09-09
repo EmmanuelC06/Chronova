@@ -39,8 +39,8 @@ export const URL_DE_LOS_TERMINOS = 'https://chronova.app/terminos';
  */
 export const TEXTO_DE_LA_AUTORIZACION =
   'Autorizo el tratamiento de mis datos personales, incluidos mis datos de salud, ' +
-  'y que se guarden en servidores fuera de Colombia, segun la Politica de ' +
-  'Tratamiento de Datos y los Terminos y Condiciones.';
+  'y que se guarden en servidores fuera de Colombia, según la Política de ' +
+  'Tratamiento de Datos y los Términos y Condiciones.';
 
 /**
  * La advertencia que la ley obliga a dar y que casi ninguna app da.
@@ -50,41 +50,41 @@ export const TEXTO_DE_LA_AUTORIZACION =
  * parte de que la autorización sea informada.
  */
 export const TEXTO_DE_LA_ADVERTENCIA =
-  'No estas obligado a autorizarlo. Sin esta autorizacion no podemos crear tu cuenta, ' +
-  'porque Chronova no puede recordarte nada sin la informacion de tu tratamiento.';
+  'No estás obligado a autorizarlo. Sin esta autorización no podemos crear tu cuenta, ' +
+  'porque Chronova no puede recordarte nada sin la información de tu tratamiento.';
 
 /** El aviso de privacidad corto, tal como se muestra en pantalla. */
 export const AVISO_DE_PRIVACIDAD: { titulo: string; parrafos: string[] }[] = [
   {
-    titulo: 'Que guardamos',
+    titulo: 'Qué guardamos',
     parrafos: [
-      'Tu nombre, tu correo y la informacion de tu tratamiento: que medicamentos tomas, a que horas y si confirmaste cada toma.',
-      'La informacion sobre tu salud es un dato sensible. La ley dice que nadie esta obligado a entregarla, asi que necesitamos que nos autorices expresamente.',
+      'Tu nombre, tu correo y la información de tu tratamiento: qué medicamentos tomas, a qué horas y si confirmaste cada toma.',
+      'La información sobre tu salud es un dato sensible. La ley dice que nadie está obligado a entregarla, así que necesitamos que nos autorices expresamente.',
     ],
   },
   {
-    titulo: 'Para que la usamos',
+    titulo: 'Para qué la usamos',
     parrafos: [
-      'Para recordarte tus tomas, llevar tu historial y avisar a la persona que tu autorices si una toma queda sin confirmar. Nada mas.',
+      'Para recordarte tus tomas, llevar tu historial y avisar a la persona que tú autorices si una toma queda sin confirmar. Nada más.',
       'No la vendemos ni la compartimos con aseguradoras, empleadores ni anunciantes. No hacemos publicidad con ella.',
     ],
   },
   {
-    titulo: 'Quien la ve',
+    titulo: 'Quién la ve',
     parrafos: [
-      'Solo tu, y los cuidadores que tu autorices. Decides que puede ver cada uno y puedes quitarle el acceso cuando quieras, sin dar explicaciones.',
+      'Solo tú, y los cuidadores que tú autorices. Decides qué puede ver cada uno y puedes quitarle el acceso cuando quieras, sin dar explicaciones.',
     ],
   },
   {
-    titulo: 'Donde se guarda',
+    titulo: 'Dónde se guarda',
     parrafos: [
-      'En servidores de nuestros proveedores tecnologicos, que estan fuera de Colombia. Al autorizar, tambien autorizas que tus datos salgan del pais para poder guardarlos alli.',
+      'En servidores de nuestros proveedores tecnológicos, que están fuera de Colombia. Al autorizar, también autorizas que tus datos salgan del país para poder guardarlos allí.',
     ],
   },
   {
     titulo: 'Tus derechos',
     parrafos: [
-      'Puedes conocer tus datos, corregirlos, pedirnos prueba de esta autorizacion, retirarla y pedir que borremos todo.',
+      'Puedes conocer tus datos, corregirlos, pedirnos prueba de esta autorización, retirarla y pedir que borremos todo.',
       'Muchos de esos derechos los ejerces desde la propia app: corriges tu perfil, cambias los permisos de cada cuidador y revocas un acceso cuando quieras.',
     ],
   },

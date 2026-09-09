@@ -167,7 +167,7 @@ export function ProveedorDePacienteObservado({
       setError(
         problema instanceof ErrorDeApi
           ? problema.message
-          : 'No pudimos cargar la informacion de este paciente.',
+          : 'No pudimos cargar la información de este paciente.',
       );
 
       // Si nunca llegamos a tener la ficha, no hay nada que pintar y hay

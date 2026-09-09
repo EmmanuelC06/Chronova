@@ -74,7 +74,7 @@ export class RegistrarPaciente {
     const versionDePolitica = versionAutorizadaOFallar(comando);
 
     if (await this.pacientes.existeConEmail(email)) {
-      throw new ErrorDeConflicto('Ya existe una cuenta registrada con ese correo electronico.');
+      throw new ErrorDeConflicto('Ya existe una cuenta registrada con ese correo electrónico.');
     }
 
     // La zona horaria se toma del telefono al registrarse. Si no llega

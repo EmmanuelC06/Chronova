@@ -30,22 +30,22 @@ const PERMISOS: {
   {
     clave: 'puedeVerHistorial',
     etiqueta: 'Ver mi tratamiento',
-    ayuda: 'Sus medicamentos, sus horarios y que tomas ha cumplido.',
+    ayuda: 'Sus medicamentos, sus horarios y qué tomas ha cumplido.',
   },
   {
     clave: 'recibeAlertas',
     etiqueta: 'Avisarle si me salto una toma',
-    ayuda: 'Recibira una notificacion en su telefono.',
+    ayuda: 'Recibirá una notificación en su teléfono.',
   },
   {
     clave: 'puedeRegistrarTomas',
-    etiqueta: 'Confirmar tomas por mi',
-    ayuda: 'Util si le avisas por telefono que ya te la tomaste.',
+    etiqueta: 'Confirmar tomas por mí',
+    ayuda: 'Útil si le avisas por teléfono que ya te la tomaste.',
   },
   {
     clave: 'puedeGestionarMedicamentos',
     etiqueta: 'Cambiar mi tratamiento',
-    ayuda: 'Podra agregar, modificar y suspender medicamentos. Es el permiso mas amplio.',
+    ayuda: 'Podrá agregar, modificar y suspender medicamentos. Es el permiso más amplio.',
   },
 ];
 
@@ -114,11 +114,11 @@ export default function Perfil() {
         emailDeLaOtraParte: emailDelCuidador.trim(),
       });
       setEmailDelCuidador('');
-      setExito('Listo. Esa persona ya puede acompanarte en tu tratamiento.');
+      setExito('Listo. Esa persona ya puede acompañarte en tu tratamiento.');
       await cargar();
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi ? problema.message : 'No pudimos enviar la invitacion.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos enviar la invitación.',
       );
     } finally {
       setOcupado(false);
@@ -172,7 +172,7 @@ export default function Perfil() {
       setError(
         problema instanceof ErrorDeApi
           ? problema.message
-          : 'No pudimos cambiar ese permiso. Revisa tu conexion.',
+          : 'No pudimos cambiar ese permiso. Revisa tu conexión.',
       );
     }
   };
@@ -180,7 +180,7 @@ export default function Perfil() {
   const confirmarRevocar = (vinculo: CuidadorDelPaciente) => {
     Alert.alert(
       'Quitar acceso',
-      `${vinculo.nombre} dejara de ver tu tratamiento. Puedes volver a invitarlo cuando quieras.`,
+      `${vinculo.nombre} dejará de ver tu tratamiento. Puedes volver a invitarlo cuando quieras.`,
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -241,11 +241,11 @@ export default function Perfil() {
       {/* ---- Accesibilidad ---- */}
       <Tarjeta>
         <Texto variante="subtitulo" peso="semi">
-          Como se ve la aplicacion
+          Cómo se ve la aplicación
         </Texto>
 
         <Texto variante="etiqueta" peso="semi" color={colores.textoSuave}>
-          Tamano de la letra
+          Tamaño de la letra
         </Texto>
         <View style={{ gap: espacio.sm }}>
           {(Object.keys(ETIQUETAS_DE_TAMANO) as TamanoDeLetra[]).map((opcion) => (
@@ -264,7 +264,7 @@ export default function Perfil() {
           onCambio={(valor) => void cambiar({ alertasSonoras: valor })}
         />
         <Interruptor
-          etiqueta="Vibracion en las alarmas"
+          etiqueta="Vibración en las alarmas"
           valor={preferencias.alertasVibracion}
           onCambio={(valor) => void cambiar({ alertasVibracion: valor })}
         />
@@ -295,7 +295,7 @@ export default function Perfil() {
           Mis datos y privacidad
         </Texto>
         <Texto variante="pequeno" color={colores.textoSuave}>
-          Que guardamos, para que lo usamos, que autorizaste y cuando. Y lo que puedes pedirnos en
+          Qué guardamos, para qué lo usamos, qué autorizaste y cuándo. Y lo que puedes pedirnos en
           cualquier momento.
         </Texto>
         <Boton
@@ -309,16 +309,16 @@ export default function Perfil() {
       {/* ---- Cuidadores ---- */}
       <Tarjeta>
         <Texto variante="subtitulo" peso="semi">
-          Quien me acompana
+          Quién me acompaña
         </Texto>
         <Texto variante="pequeno" color={colores.textoSuave}>
-          Las personas que invites podran ver como va tu tratamiento. Tu decides quien entra y
+          Las personas que invites podrán ver cómo va tu tratamiento. Tú decides quién entra y
           puedes quitarles el acceso en cualquier momento.
         </Texto>
 
         {errorDeCuidadores ? (
           <Aviso
-            mensaje="No pudimos comprobar quien tiene acceso a tu informacion. Revisa tu conexion y vuelve a entrar a esta pantalla."
+            mensaje="No pudimos comprobar quién tiene acceso a tu información. Revisa tu conexión y vuelve a entrar a esta pantalla."
             tono="error"
           />
         ) : cuidadores !== null && cuidadores.length === 0 ? (
@@ -400,12 +400,12 @@ export default function Perfil() {
             tipoDeTeclado="email-address"
             ayuda="Esa persona debe tener una cuenta de cuidador en Chronova."
           />
-          <Boton titulo="Enviar invitacion" onPress={invitar} ocupado={ocupado} />
+          <Boton titulo="Enviar invitación" onPress={invitar} ocupado={ocupado} />
         </View>
       </Tarjeta>
 
       <Boton
-        titulo="Cerrar sesion"
+        titulo="Cerrar sesión"
         variante="peligro"
         onPress={() => {
           void cerrarSesion().then(() => router.replace('/(auth)/ingresar'));

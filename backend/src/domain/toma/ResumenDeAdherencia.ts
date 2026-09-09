@@ -104,13 +104,13 @@ export class ResumenDeAdherencia {
   get mensaje(): string {
     switch (this.nivel) {
       case 'SIN_DATOS':
-        return 'Todavia no hay tomas registradas en este periodo.';
+        return 'Todavía no hay tomas registradas en este período.';
       case 'BUENA':
-        return `Excelente: se cumplio el ${this.porcentaje}% del tratamiento.`;
+        return `Excelente: se cumplió el ${this.porcentaje}% del tratamiento.`;
       case 'REGULAR':
-        return `Atencion: se cumplio el ${this.porcentaje}% del tratamiento. Hay margen de mejora.`;
+        return `Atención: se cumplió el ${this.porcentaje}% del tratamiento. Hay margen de mejora.`;
       case 'BAJA':
-        return `Riesgo: solo se cumplio el ${this.porcentaje}% del tratamiento. Conviene revisar con el cuidador o el medico.`;
+        return `Riesgo: solo se cumplió el ${this.porcentaje}% del tratamiento. Conviene revisar con el cuidador o el médico.`;
     }
   }
 

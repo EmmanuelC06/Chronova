@@ -35,7 +35,7 @@ export function crearPool(entorno: Entorno): pg.Pool {
    */
   pool.on('error', (error) => {
     console.error(
-      '[pg] Error en una conexion ociosa (el pool la repondra):',
+      '[pg] Error en una conexión ociosa (el pool la repondrá):',
       error instanceof Error ? error.message : error,
     );
   });

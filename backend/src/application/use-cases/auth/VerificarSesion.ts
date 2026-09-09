@@ -79,7 +79,7 @@ export class VerificarSesion {
 
     // Cuenta desactivada: la firma sigue siendo buena y aun asi no entra.
     if (!cuenta.activo) {
-      throw new ErrorDeAutenticacion('Esta cuenta ya no esta activa.');
+      throw new ErrorDeAutenticacion('Esta cuenta ya no está activa.');
     }
 
     // El corazon del asunto: el token es anterior al ultimo cambio de
@@ -87,7 +87,7 @@ export class VerificarSesion {
     // porque la marca del token es una copia exacta de la guardada.
     if (sesion.validaDesde !== cuenta.sesionesValidasDesde.getTime()) {
       throw new ErrorDeAutenticacion(
-        'Tu contrasena cambio, asi que esta sesion se cerro. Inicia sesion de nuevo.',
+        'Tu contraseña cambió, así que esta sesión se cerró. Inicia sesión de nuevo.',
       );
     }
 
@@ -113,6 +113,6 @@ export class VerificarSesion {
   }
 
   private sesionInvalida(): ErrorDeAutenticacion {
-    return new ErrorDeAutenticacion('Tu sesion expiro o no es valida. Inicia sesion de nuevo.');
+    return new ErrorDeAutenticacion('Tu sesión expiró o no es válida. Inicia sesión de nuevo.');
   }
 }

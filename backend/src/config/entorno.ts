@@ -44,7 +44,7 @@ export function cargarEntorno(): Entorno {
   const jwtSecreto = process.env.JWT_SECRET ?? '';
   if (jwtSecreto.length < 16) {
     throw new Error(
-      'Falta JWT_SECRET o es demasiado corto (minimo 16 caracteres). ' +
+      'Falta JWT_SECRET o es demasiado corto (mínimo 16 caracteres). ' +
         'Copia el archivo .env.example a .env y completa el valor.',
     );
   }
@@ -69,7 +69,7 @@ export function cargarEntorno(): Entorno {
   if (jwtSecreto.includes('cambia-esta-clave')) {
     throw new Error(
       'Estas usando el JWT_SECRET de ejemplo, el que viene en .env.example y esta publicado ' +
-        'en el repositorio. Con esa clave cualquiera puede fabricar una sesion valida a nombre ' +
+        'en el repositorio. Con esa clave cualquiera puede fabricar una sesión válida a nombre ' +
         'de cualquier paciente. Genera una propia, por ejemplo con: ' +
         'node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64url\'))"',
     );

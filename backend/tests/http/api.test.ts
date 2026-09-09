@@ -429,7 +429,7 @@ describe('API HTTP', () => {
       );
 
       expect(estado).toBe(422);
-      expect(JSON.stringify(cuerpo)).toMatch(/todavia no es hora/i);
+      expect(JSON.stringify(cuerpo)).toMatch(/todavía no es hora/i);
     });
 
     it('la de la manana si se confirma, porque llegar tarde se puede siempre', async () => {

@@ -17,11 +17,11 @@ export class Identificador {
   static desde(valor: string): Identificador {
     const limpio = valor?.trim() ?? '';
     if (limpio.length === 0) {
-      throw new ErrorDeValidacion('El identificador no puede estar vacio.', 'id');
+      throw new ErrorDeValidacion('El identificador no puede estar vacío.', 'id');
     }
     if (!PATRON_UUID.test(limpio)) {
       throw new ErrorDeValidacion(
-        `El identificador "${limpio}" no tiene un formato valido.`,
+        `El identificador "${limpio}" no tiene un formato válido.`,
         'id',
       );
     }

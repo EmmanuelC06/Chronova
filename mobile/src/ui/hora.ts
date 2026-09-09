@@ -64,7 +64,7 @@ export function horaEnPalabras(hora24: string | null | undefined): string {
   const enDoce = horas % 12 === 0 ? 12 : horas % 12;
 
   // Los tramos son los que usa la gente al hablar, no los que salen de
-  // dividir el dia en dos. "12 de la manana" para la medianoche es lo
+  // dividir el dia en dos. "12 de la mañana" para la medianoche es lo
   // que devolveria un a. m./p. m. traducido sin pensar, y no lo dice
   // nadie.
   const momento =
@@ -73,9 +73,9 @@ export function horaEnPalabras(hora24: string | null | undefined): string {
       : horas < 6
         ? 'de la madrugada'
         : horas < 12
-          ? 'de la manana'
+          ? 'de la mañana'
           : horas === 12
-            ? 'del mediodia'
+            ? 'del mediodía'
             : horas < 19
               ? 'de la tarde'
               : 'de la noche';

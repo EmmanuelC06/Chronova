@@ -50,7 +50,7 @@ export default function Recuperar() {
       setError(
         problema instanceof ErrorDeApi
           ? problema.message
-          : 'No pudimos enviar el codigo. Revisa tu conexion.',
+          : 'No pudimos enviar el código. Revisa tu conexión.',
       );
     } finally {
       setOcupado(false);
@@ -61,11 +61,11 @@ export default function Recuperar() {
     setError(null);
 
     if (codigo.trim() === '') {
-      setError('Escribe el codigo que te llego al correo.');
+      setError('Escribe el código que te llegó al correo.');
       return;
     }
     if (nuevaContrasena.length < 8) {
-      setError('La contrasena nueva debe tener al menos 8 caracteres.');
+      setError('La contraseña nueva debe tener al menos 8 caracteres.');
       return;
     }
 
@@ -83,7 +83,7 @@ export default function Recuperar() {
       router.replace('/');
     } catch (problema) {
       setError(
-        problema instanceof ErrorDeApi ? problema.message : 'No pudimos cambiar tu contrasena.',
+        problema instanceof ErrorDeApi ? problema.message : 'No pudimos cambiar tu contraseña.',
       );
     } finally {
       setOcupado(false);
@@ -106,7 +106,7 @@ export default function Recuperar() {
         <Logo variante="emblema" alto={48} />
 
         <Texto variante="subtitulo" peso="semi" centrado>
-          Recuperar tu contrasena
+          Recuperar tu contraseña
         </Texto>
 
         {error ? <Aviso mensaje={error} tono="error" /> : null}
@@ -123,32 +123,32 @@ export default function Recuperar() {
         />
 
         {paso === 'PEDIR' ? (
-          <Boton titulo="Enviarme un codigo" onPress={pedirCodigo} ocupado={ocupado} />
+          <Boton titulo="Enviarme un código" onPress={pedirCodigo} ocupado={ocupado} />
         ) : (
           <View style={{ gap: espacio.md }}>
             <Campo
-              etiqueta="Codigo del correo"
+              etiqueta="Código del correo"
               valor={codigo}
               onCambio={setCodigo}
-              marcador="6 numeros"
+              marcador="6 números"
               tipoDeTeclado="number-pad"
               ayuda="Revisa tu correo. Si no llega, mira en la carpeta de correo no deseado."
             />
 
             <Campo
-              etiqueta="Tu contrasena nueva"
+              etiqueta="Tu contraseña nueva"
               valor={nuevaContrasena}
               onCambio={setNuevaContrasena}
               marcador="Al menos 8 caracteres"
               secreto
               autoCompletar="password"
-              ayuda="Elige algo que puedas recordar y que nadie mas adivine."
+              ayuda="Elige algo que puedas recordar y que nadie más adivine."
             />
 
-            <Boton titulo="Cambiar mi contrasena" onPress={confirmar} ocupado={ocupado} />
+            <Boton titulo="Cambiar mi contraseña" onPress={confirmar} ocupado={ocupado} />
 
             <Boton
-              titulo="Enviarme otro codigo"
+              titulo="Enviarme otro código"
               variante="secundario"
               deshabilitado={ocupado}
               onPress={() => {

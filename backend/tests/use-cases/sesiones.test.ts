@@ -95,7 +95,7 @@ describe('Una sesion normal', () => {
 
   it('un token inventado no abre nada', async () => {
     await crearPacienteDePrueba(app);
-    await expect(verificar('esto.no.es-un-token')).rejects.toThrow(/expiro o no es valida/i);
+    await expect(verificar('esto.no.es-un-token')).rejects.toThrow(/expiró o no es válida/i);
   });
 
   it('un token firmado con otro secreto no vale', async () => {
@@ -111,7 +111,7 @@ describe('Una sesion normal', () => {
       validaDesde: AHORA.getTime(),
     });
 
-    await expect(verificar(falsificado)).rejects.toThrow(/expiro o no es valida/i);
+    await expect(verificar(falsificado)).rejects.toThrow(/expiró o no es válida/i);
   });
 
   it('un token de un usuario que ya no existe no vale', async () => {
@@ -124,7 +124,7 @@ describe('Una sesion normal', () => {
       validaDesde: AHORA.getTime(),
     });
 
-    await expect(verificar(token)).rejects.toThrow(/expiro o no es valida/i);
+    await expect(verificar(token)).rejects.toThrow(/expiró o no es válida/i);
   });
 });
 
@@ -140,7 +140,7 @@ describe('M-8 · Cambiar la contrasena cierra las sesiones abiertas', () => {
 
     await cambiarLaContrasena();
 
-    await expect(verificar(tokenViejo)).rejects.toThrow(/contrasena cambio/i);
+    await expect(verificar(tokenViejo)).rejects.toThrow(/contraseña cambió/i);
   });
 
   it('el token emitido justo despues del cambio si sirve', async () => {
@@ -174,7 +174,7 @@ describe('M-8 · Cambiar la contrasena cierra las sesiones abiertas', () => {
     enBase!.desactivar(AHORA);
     await app.pacientes.guardar(enBase!);
 
-    await expect(verificar(token)).rejects.toThrow(/ya no esta activa/i);
+    await expect(verificar(token)).rejects.toThrow(/ya no está activa/i);
   });
 
   it('desactivar tambien mueve la marca, para que reactivar no resucite sesiones', async () => {
@@ -258,7 +258,7 @@ describe('M-4 · La sesion se renueva sola antes de caducar', () => {
 
     await cambiarLaContrasena(corto);
 
-    await expect(verificar(tokenRenovado!, corto)).rejects.toThrow(/contrasena cambio/i);
+    await expect(verificar(tokenRenovado!, corto)).rejects.toThrow(/contraseña cambió/i);
   });
 
   it('el margen de renovacion cabe dentro de la vida del token', async () => {

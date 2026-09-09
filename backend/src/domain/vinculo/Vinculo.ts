@@ -146,7 +146,7 @@ export class Vinculo {
     if (this._estado === 'ACEPTADO') return;
     if (this._estado !== 'PENDIENTE') {
       throw new ErrorDeReglaDeNegocio(
-        'Solo se puede aceptar un vinculo que este pendiente. Pide al cuidador que envie una nueva solicitud.',
+        'Solo se puede aceptar un vínculo que esté pendiente. Pide al cuidador que envíe una nueva solicitud.',
       );
     }
     this._estado = 'ACEPTADO';
@@ -155,7 +155,7 @@ export class Vinculo {
 
   rechazar(ahora: Date): void {
     if (this._estado !== 'PENDIENTE') {
-      throw new ErrorDeReglaDeNegocio('Solo se puede rechazar un vinculo que este pendiente.');
+      throw new ErrorDeReglaDeNegocio('Solo se puede rechazar un vínculo que esté pendiente.');
     }
     this._estado = 'RECHAZADO';
     this._resueltoEn = ahora;
@@ -189,7 +189,7 @@ export class Vinculo {
     ahora: Date;
   }): void {
     if (this._estado === 'PENDIENTE' || this._estado === 'ACEPTADO') {
-      throw new ErrorDeReglaDeNegocio('Este vinculo sigue vigente: no hay nada que volver a pedir.');
+      throw new ErrorDeReglaDeNegocio('Este vínculo sigue vigente: no hay nada que volver a pedir.');
     }
 
     this._permisos = { ...Vinculo.permisosPorDefecto(), ...(datos.permisos ?? {}) };
@@ -208,7 +208,7 @@ export class Vinculo {
   cambiarPermisos(nuevos: Partial<PermisosDelCuidador>): void {
     if (!this.estaActivo) {
       throw new ErrorDeReglaDeNegocio(
-        'No se pueden cambiar los permisos de un vinculo que no esta activo.',
+        'No se pueden cambiar los permisos de un vínculo que no está activo.',
       );
     }
     this._permisos = { ...this._permisos, ...nuevos };

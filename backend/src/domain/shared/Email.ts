@@ -15,14 +15,14 @@ export class Email {
   static desde(valor: string): Email {
     const limpio = (valor ?? '').trim().toLowerCase();
     if (limpio.length === 0) {
-      throw new ErrorDeValidacion('El correo electronico es obligatorio.', 'email');
+      throw new ErrorDeValidacion('El correo electrónico es obligatorio.', 'email');
     }
     if (limpio.length > 254) {
-      throw new ErrorDeValidacion('El correo electronico es demasiado largo.', 'email');
+      throw new ErrorDeValidacion('El correo electrónico es demasiado largo.', 'email');
     }
     if (!PATRON_EMAIL.test(limpio)) {
       throw new ErrorDeValidacion(
-        `"${valor}" no parece un correo electronico valido.`,
+        `"${valor}" no parece un correo electrónico válido.`,
         'email',
       );
     }

@@ -59,7 +59,7 @@ describe('Registro e inicio de sesion', () => {
         email: 'r@test.com',
         contrasena: '12345678',
       }),
-    ).rejects.toThrow(/facil de adivinar/);
+    ).rejects.toThrow(/fácil de adivinar/);
   });
 
   it('da el mismo mensaje si falla el correo o la contrasena', async () => {
@@ -123,7 +123,7 @@ describe('Gestion de medicamentos', () => {
     expect(lista).toHaveLength(1);
     expect(lista[0]?.nombre).toBe('Losartan');
     expect(lista[0]?.descripcionDeDosis).toBe('1 tableta');
-    expect(lista[0]?.descripcionDeFrecuencia).toBe('Todos los dias');
+    expect(lista[0]?.descripcionDeFrecuencia).toBe('Todos los días');
   });
 
   it('un paciente no puede ver los medicamentos de otro', async () => {
@@ -857,7 +857,7 @@ describe('Vinculo cuidador-paciente y control de acceso', () => {
         solicitante: cuidador.solicitante,
         emailDeLaOtraParte: 'nadie@test.com',
       }),
-    ).rejects.toThrow(/No se encontro/);
+    ).rejects.toThrow(/No se encontró/);
   });
 });
 
@@ -1146,7 +1146,7 @@ describe('Cambios en el tratamiento y adherencia', () => {
         tomaId: noche.tomaId,
         accion: 'CONFIRMAR',
       }),
-    ).rejects.toThrow(/todavia no es hora/i);
+    ).rejects.toThrow(/todavía no es hora/i);
 
     // Y sigue pendiente: el recordatorio de la noche se mantiene en pie.
     const historial = await app.contenedor.casosDeUso.consultarHistorial.ejecutar({

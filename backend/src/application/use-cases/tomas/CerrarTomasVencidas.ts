@@ -93,8 +93,8 @@ export class CerrarTomasVencidas {
         titulo: 'Toma sin confirmar',
         cuerpo:
           cantidad === 1
-            ? `${nombreDelPaciente} no confirmo una toma de su tratamiento.`
-            : `${nombreDelPaciente} no confirmo ${cantidad} tomas de su tratamiento.`,
+            ? `${nombreDelPaciente} no confirmó una toma de su tratamiento.`
+            : `${nombreDelPaciente} no confirmó ${cantidad} tomas de su tratamiento.`,
         datos: { pacienteId: pacienteId.valor, cantidad },
       });
       enviados += 1;

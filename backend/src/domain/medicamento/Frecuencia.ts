@@ -29,7 +29,7 @@ export class Frecuencia {
     readonly intervaloEnDias: number,
   ) {}
 
-  /** Todos los dias. Es el caso mas comun en tratamientos cronicos. */
+  /** Todos los días. Es el caso mas comun en tratamientos cronicos. */
   static diaria(): Frecuencia {
     return new Frecuencia('DIARIA', [], 1);
   }
@@ -38,12 +38,12 @@ export class Frecuencia {
   static diasDeLaSemana(dias: readonly number[]): Frecuencia {
     const unicos = [...new Set(dias)].sort((a, b) => a - b);
     if (unicos.length === 0) {
-      throw new ErrorDeValidacion('Debes seleccionar al menos un dia de la semana.', 'frecuencia');
+      throw new ErrorDeValidacion('Debes seleccionar al menos un día de la semana.', 'frecuencia');
     }
     for (const dia of unicos) {
       if (!Number.isInteger(dia) || dia < 0 || dia > 6) {
         throw new ErrorDeValidacion(
-          'Los dias de la semana deben ser numeros entre 0 (domingo) y 6 (sabado).',
+          'Los días de la semana deben ser números entre 0 (domingo) y 6 (sábado).',
           'frecuencia',
         );
       }
@@ -55,7 +55,7 @@ export class Frecuencia {
   static cadaNDias(intervalo: number): Frecuencia {
     if (!Number.isInteger(intervalo) || intervalo < 1 || intervalo > 90) {
       throw new ErrorDeValidacion(
-        'El intervalo debe ser un numero entero entre 1 y 90 dias.',
+        'El intervalo debe ser un número entero entre 1 y 90 días.',
         'frecuencia',
       );
     }
@@ -90,11 +90,11 @@ export class Frecuencia {
   get descripcion(): string {
     switch (this.tipo) {
       case 'DIARIA':
-        return 'Todos los dias';
+        return 'Todos los días';
       case 'DIAS_DE_LA_SEMANA':
         return `Los ${this.diasDeLaSemana.map((d) => NOMBRES_DE_DIAS[d]).join(', ')}`;
       case 'CADA_N_DIAS':
-        return `Cada ${this.intervaloEnDias} dias`;
+        return `Cada ${this.intervaloEnDias} días`;
     }
   }
 

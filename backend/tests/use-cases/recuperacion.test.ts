@@ -72,7 +72,7 @@ describe('Recuperar la contrasena', () => {
         email: 'rosa@test.com',
         contrasena: 'contrasena-segura',
       }),
-    ).rejects.toThrow(/correo o la contrasena/);
+    ).rejects.toThrow(/correo o la contraseña/);
   });
 
   it('el codigo llega por correo, no en la respuesta de la API', async () => {
@@ -130,7 +130,7 @@ describe('Lo que impide que la recuperacion sea una puerta trasera', () => {
       new Date(AHORA.getTime() + (SolicitudDeRecuperacion.MINUTOS_DE_VIGENCIA + 1) * 60_000),
     );
 
-    await expect(restablecer({})).rejects.toThrow(/no es correcto o ya caduco/);
+    await expect(restablecer({})).rejects.toThrow(/no es correcto o ya caducó/);
   });
 
   it('justo antes de caducar todavia sirve', async () => {
@@ -152,7 +152,7 @@ describe('Lo que impide que la recuperacion sea una puerta trasera', () => {
     // Quien haya visto el codigo no puede volver a entrar con el despues
     // de que el dueno crea haber recuperado su cuenta.
     await expect(restablecer({ nuevaContrasena: 'otra-clave-distinta' })).rejects.toThrow(
-      /no es correcto o ya caduco/,
+      /no es correcto o ya caducó/,
     );
   });
 
@@ -204,7 +204,7 @@ describe('Lo que impide que la recuperacion sea una puerta trasera', () => {
 
     // La otra cuenta no pidio nada: no hay solicitud viva para ella.
     await expect(restablecer({ email: 'otra@test.com' })).rejects.toThrow(
-      /no es correcto o ya caduco/,
+      /no es correcto o ya caducó/,
     );
   });
 

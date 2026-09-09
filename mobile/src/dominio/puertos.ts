@@ -144,7 +144,7 @@ export interface AlmacenDeSesion {
  * Es distinto de las alarmas locales: aquellas las programa el propio
  * telefono y suenan sin internet; estas las envia el servidor cuando
  * ocurre algo que el telefono no puede saber por su cuenta, como que el
- * paciente al que acompanas se salto una toma.
+ * paciente al que acompanas se saltó una toma.
  */
 export interface RegistroDePush {
   /** Devuelve null si no hay permiso o el dispositivo no lo soporta. */

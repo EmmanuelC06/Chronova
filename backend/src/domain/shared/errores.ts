@@ -34,8 +34,8 @@ export class ErrorNoEncontrado extends ErrorDeDominio {
   constructor(recurso: string, identificador?: string) {
     super(
       identificador
-        ? `No se encontro ${recurso} con identificador ${identificador}.`
-        : `No se encontro ${recurso}.`,
+        ? `No se encontró ${recurso} con identificador ${identificador}.`
+        : `No se encontró ${recurso}.`,
     );
   }
 }
@@ -48,7 +48,7 @@ export class ErrorDeConflicto extends ErrorDeDominio {
 /** Credenciales invalidas o sesion ausente. */
 export class ErrorDeAutenticacion extends ErrorDeDominio {
   readonly codigo = 'NO_AUTENTICADO';
-  constructor(mensaje = 'Las credenciales no son validas.') {
+  constructor(mensaje = 'Las credenciales no son válidas.') {
     super(mensaje);
   }
 }
@@ -56,7 +56,7 @@ export class ErrorDeAutenticacion extends ErrorDeDominio {
 /** Esta autenticado, pero no tiene permiso sobre ese recurso. */
 export class ErrorDeAutorizacion extends ErrorDeDominio {
   readonly codigo = 'NO_AUTORIZADO';
-  constructor(mensaje = 'No tienes permiso para realizar esta accion.') {
+  constructor(mensaje = 'No tienes permiso para realizar esta acción.') {
     super(mensaje);
   }
 }

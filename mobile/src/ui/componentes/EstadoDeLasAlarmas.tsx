@@ -45,7 +45,7 @@ export function EstadoDeLasAlarmas() {
 
       {estado.total === 0 ? (
         <Aviso
-          mensaje="Tu telefono no tiene ninguna alarma puesta. Si tienes medicamentos activos, baja para recargar tu dia; si sigue en cero, revisa que Chronova tenga permiso para enviarte notificaciones."
+          mensaje="Tu teléfono no tiene ninguna alarma puesta. Si tienes medicamentos activos, baja para recargar tu día; si sigue en cero, revisa que Chronova tenga permiso para enviarte notificaciones."
           tono="advertencia"
         />
       ) : (
@@ -63,7 +63,7 @@ export function EstadoDeLasAlarmas() {
       )}
 
       <Texto variante="pequeno" color={colores.textoSuave}>
-        Las alarmas las guarda tu telefono, asi que suenan aunque no tengas internet.
+        Las alarmas las guarda tu teléfono, así que suenan aunque no tengas internet.
       </Texto>
 
       {/*
@@ -77,9 +77,9 @@ export function EstadoDeLasAlarmas() {
       {Platform.OS === 'android' ? (
         <View style={{ gap: espacio.xs, marginTop: espacio.sm }}>
           <Texto variante="pequeno" color={colores.textoSuave}>
-            Si una alarma llega tarde, no es la aplicacion: es tu telefono retrasandola para
-            ahorrar bateria. En los ajustes de Chronova, activa «Alarmas y recordatorios» y pon la
-            bateria «Sin restricciones».
+            Si una alarma llega tarde, no es la aplicación: es tu teléfono retrasándola para
+            ahorrar batería. En los ajustes de Chronova, activa «Alarmas y recordatorios» y pon la
+            batería «Sin restricciones».
           </Texto>
           <Boton
             titulo="Abrir los ajustes de Chronova"

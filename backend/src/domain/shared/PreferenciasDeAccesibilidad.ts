@@ -39,7 +39,7 @@ export class PreferenciasDeAccesibilidad {
     const tamano = (datos.tamanoDeLetra ?? base.tamanoDeLetra).toUpperCase();
     if (!TAMANOS_DE_LETRA.includes(tamano as TamanoDeLetra)) {
       throw new ErrorDeValidacion(
-        `El tamano de letra debe ser uno de: ${TAMANOS_DE_LETRA.join(', ')}.`,
+        `El tamaño de letra debe ser uno de: ${TAMANOS_DE_LETRA.join(', ')}.`,
         'tamanoDeLetra',
       );
     }

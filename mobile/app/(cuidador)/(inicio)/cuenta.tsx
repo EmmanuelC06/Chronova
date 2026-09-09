@@ -80,11 +80,11 @@ export default function CuentaDelCuidador() {
       {/* ---- Accesibilidad ---- */}
       <Tarjeta>
         <Texto variante="subtitulo" peso="semi">
-          Tamano de la letra
+          Tamaño de la letra
         </Texto>
         <Texto variante="pequeno" color={colores.textoSuave}>
-          Cambia el tamano de todos los textos de la aplicacion. Se guarda en tu cuenta, asi que te
-          acompana si entras desde otro telefono.
+          Cambia el tamaño de todos los textos de la aplicación. Se guarda en tu cuenta, así que te
+          acompaña si entras desde otro teléfono.
         </Texto>
 
         <View style={{ gap: espacio.sm, marginTop: espacio.sm }}>
@@ -105,7 +105,7 @@ export default function CuentaDelCuidador() {
           Mis datos y privacidad
         </Texto>
         <Texto variante="pequeno" color={colores.textoSuave}>
-          Que guardamos sobre ti, para que lo usamos y que puedes pedirnos en cualquier momento.
+          Qué guardamos sobre ti, para qué lo usamos y qué puedes pedirnos en cualquier momento.
         </Texto>
 
         {autorizacion?.consta ? (
@@ -128,7 +128,7 @@ export default function CuentaDelCuidador() {
           </View>
         ) : (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            Tu cuenta se creo antes de que existiera este registro, asi que no consta la version que
+            Tu cuenta se creó antes de que existiera este registro, así que no consta la versión que
             aceptaste.
           </Texto>
         )}
@@ -142,7 +142,7 @@ export default function CuentaDelCuidador() {
       </Tarjeta>
 
       <Boton
-        titulo="Cerrar sesion"
+        titulo="Cerrar sesión"
         variante="peligro"
         onPress={() => {
           void cerrarSesion().then(() => router.replace('/(auth)/ingresar'));

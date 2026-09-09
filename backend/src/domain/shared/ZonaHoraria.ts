@@ -33,7 +33,7 @@ export class ZonaHoraria {
     }
     if (!ZonaHoraria.esValida(limpio)) {
       throw new ErrorDeValidacion(
-        `"${valor}" no es una zona horaria valida. Usa un nombre como "America/Bogota".`,
+        `"${valor}" no es una zona horaria válida. Usa un nombre como "America/Bogota".`,
         'zonaHoraria',
       );
     }

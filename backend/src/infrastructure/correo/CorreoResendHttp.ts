@@ -46,7 +46,7 @@ export class CorreoResendHttp implements EnviadorDeCorreo {
       if (!respuesta.ok) {
         const detalle = await respuesta.text().catch(() => '');
         console.error(
-          `[correo] El proveedor respondio ${respuesta.status}: ${detalle.slice(0, 300)}`,
+          `[correo] El proveedor respondió ${respuesta.status}: ${detalle.slice(0, 300)}`,
         );
       }
     } catch (error) {

@@ -126,8 +126,8 @@ export default function Medicamentos() {
 
       {medicamentos !== null && medicamentos.length === 0 ? (
         <EstadoVacio
-          titulo="Aun no tienes medicamentos"
-          descripcion="Agrega el primero y Chronova te avisara a la hora exacta de cada toma."
+          titulo="Aún no tienes medicamentos"
+          descripcion="Agrega el primero y Chronova te avisará a la hora exacta de cada toma."
         />
       ) : null}
 
@@ -160,7 +160,7 @@ export default function Medicamentos() {
           </View>
 
           <Texto variante="pequeno" color={colores.textoSuave}>
-            {medicamento.descripcionDeFrecuencia ?? 'Todos los dias'}
+            {medicamento.descripcionDeFrecuencia ?? 'Todos los días'}
           </Texto>
 
           {medicamento.instrucciones ? (
@@ -178,7 +178,7 @@ export default function Medicamentos() {
               }
             >
               Quedan {medicamento.stock.unidadesDisponibles} unidades
-              {medicamento.necesitaReabastecimiento ? ' — conviene comprar mas' : ''}
+              {medicamento.necesitaReabastecimiento ? ', conviene comprar más' : ''}
             </Texto>
           ) : null}
 

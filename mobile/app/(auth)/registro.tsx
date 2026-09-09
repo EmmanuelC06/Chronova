@@ -53,18 +53,18 @@ export default function Registro() {
       return;
     }
     if (contrasena.length < 8) {
-      setError('La contrasena debe tener al menos 8 caracteres.');
+      setError('La contraseña debe tener al menos 8 caracteres.');
       return;
     }
     if (!autoriza) {
       setError(
         'Para crear la cuenta necesitamos que autorices el tratamiento de tus datos. ' +
-          'Marca la casilla del final si estas de acuerdo.',
+          'Marca la casilla del final si estás de acuerdo.',
       );
       return;
     }
     if (fechaDeNacimiento && !/^\d{4}-\d{2}-\d{2}$/.test(fechaDeNacimiento)) {
-      setError('La fecha de nacimiento debe escribirse como 1952-04-18 (ano-mes-dia).');
+      setError('La fecha de nacimiento debe escribirse como 1952-04-18 (año-mes-día).');
       return;
     }
 
@@ -91,7 +91,7 @@ export default function Registro() {
       setError(
         problema instanceof ErrorDeApi
           ? problema.message
-          : 'No pudimos crear tu cuenta. Intentalo de nuevo.',
+          : 'No pudimos crear tu cuenta. Inténtalo de nuevo.',
       );
     } finally {
       setOcupado(false);
@@ -116,7 +116,7 @@ export default function Registro() {
         {error ? <Aviso mensaje={error} tono="error" /> : null}
 
         <View style={{ gap: espacio.sm }}>
-          <Texto negrita>¿Como vas a usar Chronova?</Texto>
+          <Texto negrita>¿Cómo vas a usar Chronova?</Texto>
 
           <OpcionDeRol
             seleccionada={rol === 'PACIENTE'}
@@ -126,7 +126,7 @@ export default function Registro() {
           />
           <OpcionDeRol
             seleccionada={rol === 'CUIDADOR'}
-            titulo="Acompano a alguien"
+            titulo="Acompaño a alguien"
             descripcion="Soy familiar, cuidador o profesional de la salud y hago seguimiento."
             onPress={() => setRol('CUIDADOR')}
           />
@@ -141,7 +141,7 @@ export default function Registro() {
         />
 
         <Campo
-          etiqueta="Correo electronico"
+          etiqueta="Correo electrónico"
           valor={email}
           onCambio={setEmail}
           marcador="ejemplo@correo.com"
@@ -150,7 +150,7 @@ export default function Registro() {
         />
 
         <Campo
-          etiqueta="Contrasena"
+          etiqueta="Contraseña"
           valor={contrasena}
           onCambio={setContrasena}
           secreto
@@ -159,7 +159,7 @@ export default function Registro() {
         />
 
         <Campo
-          etiqueta="Telefono (opcional)"
+          etiqueta="Teléfono (opcional)"
           valor={telefono}
           onCambio={setTelefono}
           marcador="300 123 4567"
@@ -173,7 +173,7 @@ export default function Registro() {
             valor={fechaDeNacimiento}
             onCambio={setFechaDeNacimiento}
             marcador="1952-04-18"
-            ayuda="Escribela como ano-mes-dia."
+            ayuda="Escríbela como año-mes-día."
           />
         ) : null}
 
@@ -250,7 +250,7 @@ function CasillaDeAutorizacion({
       </Texto>
 
       <Boton
-        titulo="Leer que datos guardamos y por que"
+        titulo="Leer qué datos guardamos y por qué"
         variante="texto"
         onPress={() => router.push('/privacidad')}
       />

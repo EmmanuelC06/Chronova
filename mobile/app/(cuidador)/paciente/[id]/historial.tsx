@@ -144,7 +144,7 @@ function TarjetaDeOmision({
         </Texto>
       ) : registro.registradaPor === 'CUIDADOR' ? (
         <Texto variante="pequeno" color={colores.textoSuave}>
-          La registro un cuidador.
+          La registró un cuidador.
         </Texto>
       ) : null}
       {registro.observaciones ? (

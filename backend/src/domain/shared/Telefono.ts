@@ -13,11 +13,11 @@ export class Telefono {
   static desde(valor: string): Telefono {
     const limpio = (valor ?? '').replace(/[\s\-().]/g, '');
     if (limpio.length === 0) {
-      throw new ErrorDeValidacion('El numero de telefono es obligatorio.', 'telefono');
+      throw new ErrorDeValidacion('El número de teléfono es obligatorio.', 'telefono');
     }
     if (!/^\+?\d{7,15}$/.test(limpio)) {
       throw new ErrorDeValidacion(
-        `"${valor}" no parece un numero de telefono valido.`,
+        `"${valor}" no parece un número de teléfono válido.`,
         'telefono',
       );
     }

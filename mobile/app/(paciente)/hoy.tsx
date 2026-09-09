@@ -25,8 +25,8 @@ import { formatearHora, horaEnPalabras } from '../../src/ui/hora';
  * Es donde la persona pasara el 90% de su tiempo en la app, asi que
  * responde a una sola pregunta: ¿que me toca ahora?
  *
- * Cada tarjeta tiene tres botones grandes y explicitos (Ya la tome / En
- * un rato / No la tome) en vez de gestos, menus o deslizamientos. Los
+ * Cada tarjeta tiene tres botones grandes y explicitos (Ya la tomé / En
+ * un rato / No la tomé) en vez de gestos, menus o deslizamientos. Los
  * gestos ocultos son elegantes en una app para jovenes y son una barrera
  * infranqueable para alguien que aprendio a usar el telefono hace dos
  * anos.
@@ -92,14 +92,14 @@ export default function Hoy() {
     }
   };
 
-  if (cargando) return <Cargando mensaje="Preparando tu dia..." />;
+  if (cargando) return <Cargando mensaje="Preparando tu día..." />;
 
   // El reparto se hace por ESTADO, no por si el boton esta disponible.
   //
   // Es una distincion que costo un error: `puedeConfirmarse` dejo de
   // significar "sigue pendiente" y paso a significar "se puede tocar
   // ahora". Repartir por el campo viejo mandaba la toma de las 20:00 a
-  // la seccion "Ya registradas" a las nueve de la manana, que es
+  // la seccion "Ya registradas" a las nueve de la mañana, que es
   // exactamente lo contrario de lo que pasa.
   const estaResuelta = (e: ElementoDeAgenda) => e.estado === 'TOMADA' || e.estado === 'OMITIDA';
   const pendientes = agenda?.elementos.filter((e) => !estaResuelta(e)) ?? [];
@@ -125,7 +125,7 @@ export default function Hoy() {
     >
       <View style={{ gap: 2 }}>
         <Texto variante="titulo" peso="negrita">
-          Hola, {perfil?.nombre?.split(' ')[0] ?? 'que bueno verte'}
+          Hola, {perfil?.nombre?.split(' ')[0] ?? 'qué bueno verte'}
         </Texto>
         <Texto variante="etiqueta" color={colores.textoSuave}>
           {fechaEnPalabras(agenda?.fecha)}
@@ -140,7 +140,7 @@ export default function Hoy() {
       {agenda?.elementos.length === 0 ? (
         <EstadoVacio
           titulo="Hoy no tienes tomas programadas"
-          descripcion="Cuando agregues un medicamento, apareceran aqui sus horarios."
+          descripcion="Cuando agregues un medicamento, aparecerán aquí sus horarios."
           accion={{
             titulo: 'Agregar un medicamento',
             onPress: () => router.push('/medicamento/nuevo'),
@@ -223,7 +223,7 @@ function ResumenDelDia({ agenda }: { agenda: AgendaDelDia }) {
         </Texto>
       ) : (
         <Texto variante="pequeno" color={colores.exito}>
-          Ya registraste todas las tomas del dia. Muy bien.
+          Ya registraste todas las tomas del día. Muy bien.
         </Texto>
       )}
     </Tarjeta>
@@ -276,7 +276,7 @@ function TarjetaDeToma({
       ) : null}
 
       {elemento.necesitaReabastecimiento ? (
-        <Aviso mensaje="Te esta quedando poco de este medicamento." tono="advertencia" />
+        <Aviso mensaje="Te está quedando poco de este medicamento." tono="advertencia" />
       ) : null}
 
       {elemento.vecesPospuesta > 0 && elemento.puedeConfirmarse ? (
@@ -297,12 +297,12 @@ function TarjetaDeToma({
             gap: espacio.sm,
           }}
           accessible
-          accessibilityLabel={`Todavia no es hora. Podras registrarla a partir de las ${horaEnPalabras(elemento.disponibleDesde)}.`}
+          accessibilityLabel={`Todavía no es hora. Podrás registrarla a partir de las ${horaEnPalabras(elemento.disponibleDesde)}.`}
         >
           <Icono nombre="reloj" tamano={22} color={colores.textoSuave} />
           <View style={{ flex: 1 }}>
             <Texto variante="pequeno" color={colores.textoSuave}>
-              Todavia no es hora. Podras registrarla a partir de las{' '}
+              Todavía no es hora. Podrás registrarla a partir de las{' '}
               {formatearHora(elemento.disponibleDesde)}.
             </Texto>
           </View>
@@ -312,7 +312,7 @@ function TarjetaDeToma({
       {elemento.puedeConfirmarse ? (
         <View style={{ gap: espacio.sm, marginTop: espacio.sm }}>
           <Boton
-            titulo="Ya la tome"
+            titulo="Ya la tomé"
             variante="exito"
             icono="check"
             ocupado={procesando}
@@ -331,7 +331,7 @@ function TarjetaDeToma({
             </View>
             <View style={{ flex: 1 }}>
               <Boton
-                titulo="No la tome"
+                titulo="No la tomé"
                 variante="peligro"
                 deshabilitado={procesando}
                 onPress={() => onAccion('OMITIR')}

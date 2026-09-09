@@ -30,22 +30,22 @@ export function validarFortalezaDeContrasena(contrasena: string): void {
 
   if (valor.length < LONGITUD_MINIMA) {
     throw new ErrorDeValidacion(
-      `La contrasena debe tener al menos ${LONGITUD_MINIMA} caracteres.`,
+      `La contraseña debe tener al menos ${LONGITUD_MINIMA} caracteres.`,
       'contrasena',
     );
   }
   if (valor.length > LONGITUD_MAXIMA) {
-    throw new ErrorDeValidacion('La contrasena es demasiado larga.', 'contrasena');
+    throw new ErrorDeValidacion('La contraseña es demasiado larga.', 'contrasena');
   }
   if (CONTRASENAS_PROHIBIDAS.has(valor.toLowerCase())) {
     throw new ErrorDeValidacion(
-      'Esa contrasena es demasiado facil de adivinar. Elige otra.',
+      'Esa contraseña es demasiado fácil de adivinar. Elige otra.',
       'contrasena',
     );
   }
   if (/^(.)\1+$/.test(valor)) {
     throw new ErrorDeValidacion(
-      'La contrasena no puede ser el mismo caracter repetido.',
+      'La contraseña no puede ser el mismo carácter repetido.',
       'contrasena',
     );
   }

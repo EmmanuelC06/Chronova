@@ -25,11 +25,11 @@ export class CodigoDeRecuperacion {
     const limpio = (texto ?? '').replace(/\s/g, '');
 
     if (limpio.length === 0) {
-      throw new ErrorDeValidacion('Escribe el codigo que te llego al correo.', 'codigo');
+      throw new ErrorDeValidacion('Escribe el código que te llegó al correo.', 'codigo');
     }
     if (!new RegExp(`^\\d{${CodigoDeRecuperacion.LONGITUD}}$`).test(limpio)) {
       throw new ErrorDeValidacion(
-        `El codigo son ${CodigoDeRecuperacion.LONGITUD} numeros, sin letras ni espacios.`,
+        `El código son ${CodigoDeRecuperacion.LONGITUD} números, sin letras ni espacios.`,
         'codigo',
       );
     }

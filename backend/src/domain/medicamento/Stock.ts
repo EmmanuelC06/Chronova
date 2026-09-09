@@ -16,13 +16,13 @@ export class Stock {
   static desde(unidadesDisponibles: number, umbralDeAlerta: number): Stock {
     if (!Number.isInteger(unidadesDisponibles) || unidadesDisponibles < 0) {
       throw new ErrorDeValidacion(
-        'Las unidades disponibles deben ser un numero entero mayor o igual a cero.',
+        'Las unidades disponibles deben ser un número entero mayor o igual a cero.',
         'stock',
       );
     }
     if (!Number.isInteger(umbralDeAlerta) || umbralDeAlerta < 0) {
       throw new ErrorDeValidacion(
-        'El umbral de alerta debe ser un numero entero mayor o igual a cero.',
+        'El umbral de alerta debe ser un número entero mayor o igual a cero.',
         'stock',
       );
     }
@@ -56,13 +56,13 @@ export class Stock {
   reabastecer(unidades: number): Stock {
     if (!Number.isInteger(unidades) || unidades <= 0) {
       throw new ErrorDeValidacion(
-        'Las unidades a reabastecer deben ser un numero entero mayor que cero.',
+        'Las unidades a reabastecer deben ser un número entero mayor que cero.',
         'stock',
       );
     }
     const total = this.unidadesDisponibles + unidades;
     if (total > 100_000) {
-      throw new ErrorDeReglaDeNegocio('El inventario supera el maximo permitido.');
+      throw new ErrorDeReglaDeNegocio('El inventario supera el máximo permitido.');
     }
     return new Stock(total, this.umbralDeAlerta);
   }

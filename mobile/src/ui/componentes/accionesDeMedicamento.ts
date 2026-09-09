@@ -56,14 +56,10 @@ export function pedirReabastecimiento(
     return;
   }
 
-  Alert.alert(
-    'Reabastecer',
-    `Se agregaran 30 unidades a ${medicamento.nombre}. ¿Continuar?`,
-    [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Agregar 30', onPress: () => aplicar(30) },
-    ],
-  );
+  Alert.alert('Reabastecer', `Se agregaran 30 unidades a ${medicamento.nombre}. ¿Continuar?`, [
+    { text: 'Cancelar', style: 'cancel' },
+    { text: 'Agregar 30', onPress: () => aplicar(30) },
+  ]);
 }
 
 /**

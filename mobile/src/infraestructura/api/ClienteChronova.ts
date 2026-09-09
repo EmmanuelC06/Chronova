@@ -142,7 +142,7 @@ export class ClienteChronova implements ApiDeChronova {
     return this.pedir<Sesion>('POST', '/api/auth/registro/paciente', {
       ...datos,
       // Si la pantalla no la indica, se toma la del telefono. Es lo que
-      // hace que "las 8 de la manana" signifique las 8 donde vive.
+      // hace que "las 8 de la mañana" signifique las 8 donde vive.
       zonaHoraria: datos.zonaHoraria ?? zonaHorariaDelDispositivo(),
     });
   }
@@ -340,8 +340,8 @@ export class ClienteChronova implements ApiDeChronova {
       const esTiempoAgotado = error instanceof Error && error.name === 'AbortError';
       throw new ErrorDeApi(
         esTiempoAgotado
-          ? `El servidor no respondio a tiempo (${this.urlBase}). Comprueba que este encendido y que esa sea su direccion.`
-          : `No pudimos conectarnos con el servidor (${this.urlBase}). Revisa tu conexion.`,
+          ? `El servidor no respondió a tiempo (${this.urlBase}). Comprueba que esté encendido y que esa sea su dirección.`
+          : `No pudimos conectarnos con el servidor (${this.urlBase}). Revisa tu conexión.`,
         'SIN_CONEXION',
       );
     } finally {
@@ -356,7 +356,7 @@ export class ClienteChronova implements ApiDeChronova {
     if (!respuesta.ok) {
       const error = datos.error ?? {};
       throw new ErrorDeApi(
-        error.mensaje ?? 'Ocurrio un error inesperado.',
+        error.mensaje ?? 'Ocurrió un error inesperado.',
         error.codigo ?? 'ERROR_INTERNO',
         error.campo,
         respuesta.status,

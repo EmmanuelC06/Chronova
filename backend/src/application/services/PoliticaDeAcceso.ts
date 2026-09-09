@@ -33,11 +33,11 @@ export class PoliticaDeAcceso {
     if (!vinculo || !vinculo.estaActivo) {
       // Mismo mensaje exista o no el vinculo: no revelamos si esa
       // persona es paciente del sistema.
-      throw new ErrorDeAutorizacion('No tienes acceso a la informacion de este paciente.');
+      throw new ErrorDeAutorizacion('No tienes acceso a la información de este paciente.');
     }
     if (!vinculo.autorizar(permiso)) {
       throw new ErrorDeAutorizacion(
-        'El paciente no te ha concedido permiso para realizar esta accion.',
+        'El paciente no te ha concedido permiso para realizar esta acción.',
       );
     }
     return vinculo;
@@ -71,7 +71,7 @@ export class PoliticaDeAcceso {
     pacienteId: Identificador,
   ): void {
     if (!solicitanteId.esIgualA(pacienteId)) {
-      throw new ErrorDeAutorizacion('Solo el propio paciente puede realizar esta accion.');
+      throw new ErrorDeAutorizacion('Solo el propio paciente puede realizar esta acción.');
     }
   }
 }

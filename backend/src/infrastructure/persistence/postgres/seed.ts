@@ -32,7 +32,7 @@ async function sembrar(): Promise<void> {
     });
 
     const cuidadora = await casosDeUso.registrarCuidador.ejecutar({
-      nombre: 'Ana Maria Correa',
+      nombre: 'Ana María Correa',
       email: CREDENCIALES.cuidadora.email,
       contrasena: CREDENCIALES.cuidadora.contrasena,
       telefono: '+573014445566',
@@ -56,7 +56,7 @@ async function sembrar(): Promise<void> {
       frecuencia: { tipo: 'DIARIA' },
       horarios: ['08:00', '20:00'],
       fechaInicio: hoy,
-      instrucciones: 'Tomar con un vaso lleno de agua, despues de comer.',
+      instrucciones: 'Tomar con un vaso lleno de agua, después de comer.',
       stock: { unidadesDisponibles: 24, umbralDeAlerta: 6 },
     });
 
@@ -105,7 +105,7 @@ async function sembrar(): Promise<void> {
     console.log(`\n  Cuidadora vinculada: ${cuidadora.usuario.nombre}\n`);
 
     if (entorno.persistencia === 'memory') {
-      console.log('  Aviso: PERSISTENCE=memory, asi que estos datos NO quedaron guardados.');
+      console.log('  Aviso: PERSISTENCE=memory, así que estos datos NO quedaron guardados.');
       console.log('  Pon PERSISTENCE=postgres en .env para sembrar la base de datos real.\n');
     }
   } finally {

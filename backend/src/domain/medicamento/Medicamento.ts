@@ -78,7 +78,7 @@ export class Medicamento {
 
     if (fechaFin && fechaFin.esAnteriorA(fechaInicio)) {
       throw new ErrorDeValidacion(
-        'La fecha de finalizacion no puede ser anterior a la de inicio.',
+        'La fecha de finalización no puede ser anterior a la de inicio.',
         'fechaFin',
       );
     }
@@ -249,7 +249,7 @@ export class Medicamento {
       const fin = cambios.fechaFin ?? null;
       if (fin && fin.esAnteriorA(this._fechaInicio)) {
         throw new ErrorDeValidacion(
-          'La fecha de finalizacion no puede ser anterior a la de inicio.',
+          'La fecha de finalización no puede ser anterior a la de inicio.',
           'fechaFin',
         );
       }
@@ -314,7 +314,7 @@ export class Medicamento {
     }
     if (horarios.length > MAXIMO_DE_HORARIOS_POR_DIA) {
       throw new ErrorDeValidacion(
-        `No se pueden registrar mas de ${MAXIMO_DE_HORARIOS_POR_DIA} horarios al dia.`,
+        `No se pueden registrar más de ${MAXIMO_DE_HORARIOS_POR_DIA} horarios al día.`,
         'horarios',
       );
     }
@@ -322,7 +322,7 @@ export class Medicamento {
     for (const hora of horarios) {
       const texto = hora.toString();
       if (vistos.has(texto)) {
-        throw new ErrorDeValidacion(`El horario ${texto} esta repetido.`, 'horarios');
+        throw new ErrorDeValidacion(`El horario ${texto} está repetido.`, 'horarios');
       }
       vistos.add(texto);
     }

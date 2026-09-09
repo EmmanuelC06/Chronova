@@ -118,7 +118,7 @@ export class Dispositivo {
     const limpia = (plataforma ?? '').trim().toLowerCase();
     if (!PLATAFORMAS.includes(limpia as Plataforma)) {
       throw new ErrorDeValidacion(
-        `La plataforma "${plataforma}" no es valida. Usa una de: ${PLATAFORMAS.join(', ')}.`,
+        `La plataforma "${plataforma}" no es válida. Usa una de: ${PLATAFORMAS.join(', ')}.`,
         'plataforma',
       );
     }

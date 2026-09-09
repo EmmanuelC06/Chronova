@@ -26,7 +26,7 @@ async function arrancar(): Promise<void> {
     } catch (error) {
       await contenedor.cerrar();
       throw new Error(
-        'No se pudo poner al dia el esquema de la base de datos. ' +
+        'No se pudo poner al día el esquema de la base de datos. ' +
           'Comprueba DATABASE_URL y que el usuario tenga permiso para crear y alterar tablas.\n' +
           `Detalle: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -39,12 +39,12 @@ async function arrancar(): Promise<void> {
     console.log('');
     console.log('  Chronova API');
     console.log(`  Escuchando en   http://localhost:${entorno.puerto}`);
-    console.log(`  Persistencia    ${entorno.persistencia}${contenedor.pool ? ' (esquema al dia)' : ''}`);
+    console.log(`  Persistencia    ${entorno.persistencia}${contenedor.pool ? ' (esquema al día)' : ''}`);
     console.log(`  Entorno         ${entorno.entornoDeEjecucion}`);
     console.log(`  Comprobacion    http://localhost:${entorno.puerto}/api/salud`);
     if (entorno.persistencia === 'memory') {
       console.log('');
-      console.log('  Aviso: los datos estan solo en memoria y se pierden al reiniciar.');
+      console.log('  Aviso: los datos están solo en memoria y se pierden al reiniciar.');
       console.log('  Para usar una base de datos real, pon PERSISTENCE=postgres en .env');
     }
     console.log('');
@@ -87,7 +87,7 @@ async function arrancar(): Promise<void> {
   // Apagado ordenado: se deja de aceptar peticiones y se cierran las
   // conexiones a la base de datos antes de terminar el proceso.
   const apagar = async (senal: string) => {
-    console.log(`\nRecibida senal ${senal}. Cerrando Chronova...`);
+    console.log(`\nRecibida señal ${senal}. Cerrando Chronova...`);
     clearInterval(temporizador);
     servidor.close();
     await contenedor.cerrar();

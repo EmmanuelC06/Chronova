@@ -35,7 +35,7 @@ export class ResponderSolicitudDeVinculo {
       !vinculo.pacienteId.esIgualA(comando.solicitante.id)
     ) {
       throw new ErrorDeAutorizacion(
-        'Solo el paciente puede decidir quien accede a su informacion de salud.',
+        'Solo el paciente puede decidir quién accede a su información de salud.',
       );
     }
 
@@ -61,7 +61,7 @@ export class ResponderSolicitudDeVinculo {
         destinatarioId: vinculo.cuidadorId,
         tipoDeDestinatario: 'CUIDADOR',
         titulo: 'Solicitud aceptada',
-        cuerpo: 'El paciente acepto tu solicitud. Ya puedes ver su seguimiento.',
+        cuerpo: 'El paciente aceptó tu solicitud. Ya puedes ver su seguimiento.',
         datos: { vinculoId: vinculo.id.valor },
       });
     }

@@ -66,7 +66,7 @@ export function FormularioDeMedicamento({
    * a. m. o p. m. para la hora que se escribe a mano.
    *
    * Existe porque sin el la entrada seria ambigua: "8:30" pueden ser las
-   * ocho y media de la manana o las de la noche, y en una aplicacion de
+   * ocho y media de la mañana o las de la noche, y en una aplicacion de
    * medicacion esa diferencia son doce horas de tratamiento. Dos botones
    * grandes resuelven la ambiguedad sin pedirle a nadie que traduzca a
    * horario de 24 horas.
@@ -87,7 +87,7 @@ export function FormularioDeMedicamento({
   /** Agrega una hora que ya viene en formato de 24 horas (los atajos). */
   const agregarHora = (hora24: string) => {
     if (horarios.includes(hora24)) {
-      setError('Esa hora ya esta en la lista.');
+      setError('Esa hora ya está en la lista.');
       return;
     }
     setError(null);
@@ -103,11 +103,11 @@ export function FormularioDeMedicamento({
   const agregarHoraEscrita = () => {
     const hora24 = aHoraDe24(horaNueva, meridiano);
     if (!hora24) {
-      setError('Escribe la hora como 8:30, y elige si es de la manana o de la tarde.');
+      setError('Escribe la hora como 8:30, y elige si es de la mañana o de la tarde.');
       return;
     }
     if (horarios.includes(hora24)) {
-      setError('Esa hora ya esta en la lista.');
+      setError('Esa hora ya está en la lista.');
       return;
     }
     setError(null);
@@ -133,13 +133,13 @@ export function FormularioDeMedicamento({
       return;
     }
     if (!todosLosDias && diasElegidos.length === 0) {
-      setError('Elige al menos un dia de la semana.');
+      setError('Elige al menos un día de la semana.');
       return;
     }
 
     const numeroDeCantidad = Number(cantidad.replace(',', '.'));
     if (!Number.isFinite(numeroDeCantidad) || numeroDeCantidad <= 0) {
-      setError('La cantidad debe ser un numero mayor que cero.');
+      setError('La cantidad debe ser un número mayor que cero.');
       return;
     }
 
@@ -194,7 +194,7 @@ export function FormularioDeMedicamento({
         {editando ? (
           <Aviso
             tono="info"
-            mensaje="Si cambias las horas o los dias, las tomas de hoy que aun no habias registrado se rehacen con el horario nuevo. Las que ya registraste no se tocan."
+            mensaje="Si cambias las horas o los días, las tomas de hoy que aún no habías registrado se rehacen con el horario nuevo. Las que ya registraste no se tocan."
           />
         ) : null}
 
@@ -203,12 +203,12 @@ export function FormularioDeMedicamento({
           valor={nombre}
           onCambio={setNombre}
           marcador="Losartan"
-          ayuda="Escribelo como aparece en la caja."
+          ayuda="Escríbelo como aparece en la caja."
         />
 
         {/* -------- Dosis -------- */}
         <View style={{ gap: espacio.sm }}>
-          <Rotulo>¿Cuanto toma cada vez?</Rotulo>
+          <Rotulo>¿Cuánto toma cada vez?</Rotulo>
 
           <View
             style={{
@@ -251,7 +251,7 @@ export function FormularioDeMedicamento({
 
         {/* -------- Horarios -------- */}
         <View style={{ gap: espacio.sm }}>
-          <Rotulo>¿A que horas?</Rotulo>
+          <Rotulo>¿A qué horas?</Rotulo>
 
           {horarios.length > 0 ? (
             <View
@@ -334,12 +334,12 @@ export function FormularioDeMedicamento({
 
         {/* -------- Frecuencia -------- */}
         <View style={{ gap: espacio.sm }}>
-          <Rotulo>¿Que dias?</Rotulo>
+          <Rotulo>¿Qué días?</Rotulo>
 
           <View style={{ flexDirection: 'row', gap: espacio.sm }}>
             <View style={{ flex: 1 }}>
               <Boton
-                titulo="Todos los dias"
+                titulo="Todos los días"
                 variante={todosLosDias ? 'primario' : 'secundario'}
                 onPress={() => setTodosLosDias(true)}
               />
@@ -406,14 +406,14 @@ export function FormularioDeMedicamento({
           etiqueta="Indicaciones (opcional)"
           valor={instrucciones}
           onCambio={setInstrucciones}
-          marcador="Tomar despues de comer"
+          marcador="Tomar después de comer"
         />
 
         {!editando ? (
           <View style={{ gap: espacio.sm }}>
             <Rotulo>Inventario (opcional)</Rotulo>
             <Texto variante="pequeno" color={colores.textoSuave}>
-              Si nos dices cuantas unidades tienes, Chronova las va descontando y te avisa antes de
+              Si nos dices cuántas unidades tienes, Chronova las va descontando y te avisa antes de
               que se acaben.
             </Texto>
 
@@ -440,7 +440,7 @@ export function FormularioDeMedicamento({
           </View>
         ) : (
           <Texto variante="pequeno" color={colores.textoSuave}>
-            El inventario se ajusta desde la lista de medicamentos, con el boton de reabastecer.
+            El inventario se ajusta desde la lista de medicamentos, con el botón de reabastecer.
           </Texto>
         )}
 

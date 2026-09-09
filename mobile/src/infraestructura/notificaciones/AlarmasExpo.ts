@@ -23,7 +23,7 @@ import type {
  *
  *  - NOTIFICACIONES REMOTAS: las envia el servidor cuando ocurre algo
  *    que este telefono no puede saber solo, como que el paciente al que
- *    acompanas se salto una toma. Son sobre todo para el cuidador.
+ *    acompanas se saltó una toma. Son sobre todo para el cuidador.
  */
 
 const CANAL_ANDROID = 'chronova-tomas';
@@ -189,7 +189,7 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
         })
       : 'desconocida';
 
-    console.log(`[alarmas] ${cuantas} alarma(s) programada(s). La proxima: ${cuando}.`);
+    console.log(`[alarmas] ${cuantas} alarma(s) programada(s). La próxima: ${cuando}.`);
   }
 
   /**
@@ -206,9 +206,9 @@ export class AlarmasExpo implements ProgramadorDeAlarmas, RegistroDePush {
     this.yaSeExplicoLaFaltaDeToken = true;
 
     console.warn(
-      `[push] Este dispositivo no recibira avisos REMOTOS. Motivo: ${motivo}\n` +
+      `[push] Este dispositivo no recibirá avisos REMOTOS. Motivo: ${motivo}\n` +
         '       Las alarmas de las tomas son locales y siguen funcionando con normalidad.\n' +
-        '       Lo que no llegara son los avisos del servidor al cuidador ("se salto una toma").\n' +
+        '       Lo que no llegará son los avisos del servidor al cuidador ("se saltó una toma").\n' +
         '       En Android eso exige credenciales de Firebase (FCM); ver docs/NOTIFICACIONES.md.',
     );
   }

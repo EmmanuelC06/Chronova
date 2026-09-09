@@ -67,7 +67,7 @@ export class SolicitarVinculo {
     if (existente && (existente.estado === 'PENDIENTE' || existente.estado === 'ACEPTADO')) {
       throw new ErrorDeConflicto(
         existente.estado === 'ACEPTADO'
-          ? 'Ya existe un vinculo activo entre estas dos personas.'
+          ? 'Ya existe un vínculo activo entre estas dos personas.'
           : 'Ya hay una solicitud pendiente de respuesta.',
       );
     }
@@ -115,8 +115,8 @@ export class SolicitarVinculo {
         tipo: 'SOLICITUD_DE_VINCULO',
         destinatarioId: pacienteId,
         tipoDeDestinatario: 'PACIENTE',
-        titulo: 'Nueva solicitud de acompanamiento',
-        cuerpo: `${cuidador?.nombre ?? 'Un cuidador'} quiere acompanarte en tu tratamiento. Revisa la solicitud.`,
+        titulo: 'Nueva solicitud de acompañamiento',
+        cuerpo: `${cuidador?.nombre ?? 'Un cuidador'} quiere acompañarte en tu tratamiento. Revisa la solicitud.`,
         datos: { vinculoId: vinculo.id.valor },
       });
     } else {

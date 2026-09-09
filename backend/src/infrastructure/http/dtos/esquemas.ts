@@ -24,7 +24,7 @@ const FECHA = z
 export const esquemaDeRegistroDePaciente = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres.').max(120),
   email: z.string().min(1, 'El correo es obligatorio.'),
-  contrasena: z.string().min(1, 'La contrasena es obligatoria.'),
+  contrasena: z.string().min(1, 'La contraseña es obligatoria.'),
   telefono: z.string().nullish(),
   fechaDeNacimiento: FECHA.nullish(),
   // La app envia la zona del telefono. Si no llega, el dominio usa
@@ -79,7 +79,7 @@ export const esquemaDeRegistroDeCuidador = z.object({
 
 export const esquemaDeInicioDeSesion = z.object({
   email: z.string().min(1, 'El correo es obligatorio.'),
-  contrasena: z.string().min(1, 'La contrasena es obligatoria.'),
+  contrasena: z.string().min(1, 'La contraseña es obligatoria.'),
   tipo: z.enum(['PACIENTE', 'CUIDADOR']).optional(),
 });
 
@@ -103,7 +103,7 @@ const FRECUENCIA = z.object({
 });
 
 export const esquemaDeMedicamentoNuevo = z.object({
-  pacienteId: z.string().uuid('El identificador del paciente no es valido.').optional(),
+  pacienteId: z.string().uuid('El identificador del paciente no es válido.').optional(),
   nombre: z.string().min(2, 'El nombre del medicamento es obligatorio.').max(120),
   dosis: DOSIS,
   frecuencia: FRECUENCIA,
@@ -129,7 +129,7 @@ export const esquemaDeMedicamentoActualizado = z.object({
 });
 
 export const esquemaDeReabastecimiento = z.object({
-  unidades: z.number().int().positive('Las unidades deben ser un numero mayor que cero.'),
+  unidades: z.number().int().positive('Las unidades deben ser un número mayor que cero.'),
   nuevoUmbralDeAlerta: z.number().int().min(0).optional(),
 });
 
@@ -170,8 +170,8 @@ export const esquemaDeSolicitudDeRecuperacion = z.object({
 
 export const esquemaDeRestablecimiento = z.object({
   email: z.string().min(1, 'Escribe tu correo.').max(200),
-  codigo: z.string().min(1, 'Escribe el codigo que te llego al correo.').max(20),
-  nuevaContrasena: z.string().min(1, 'Escribe tu contrasena nueva.').max(200),
+  codigo: z.string().min(1, 'Escribe el código que te llegó al correo.').max(20),
+  nuevaContrasena: z.string().min(1, 'Escribe tu contraseña nueva.').max(200),
   tipo: z.enum(['PACIENTE', 'CUIDADOR']).optional(),
 });
 

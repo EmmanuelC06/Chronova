@@ -38,7 +38,7 @@ export function manejadorDeErrores(
     respuesta.status(400).json({
       error: {
         codigo: 'VALIDACION',
-        mensaje: primero?.message ?? 'Los datos enviados no son validos.',
+        mensaje: primero?.message ?? 'Los datos enviados no son válidos.',
         campo: primero?.path.join('.') || undefined,
         detalles: error.issues.map((i) => ({
           campo: i.path.join('.'),
@@ -99,7 +99,7 @@ export function manejadorDeErrores(
   respuesta.status(500).json({
     error: {
       codigo: 'ERROR_INTERNO',
-      mensaje: 'Ocurrio un error inesperado. Intentalo de nuevo en un momento.',
+      mensaje: 'Ocurrió un error inesperado. Inténtalo de nuevo en un momento.',
     },
   });
 }

@@ -60,7 +60,7 @@ export class SolicitarRecuperacion {
   async ejecutar(comando: ComandoSolicitarRecuperacion): Promise<ResultadoDeSolicitud> {
     const respuesta: ResultadoDeSolicitud = {
       mensaje:
-        'Si ese correo tiene una cuenta en Chronova, te enviamos un codigo para restablecer tu contrasena.',
+        'Si ese correo tiene una cuenta en Chronova, te enviamos un código para restablecer tu contraseña.',
       minutosDeVigencia: SolicitudDeRecuperacion.MINUTOS_DE_VIGENCIA,
     };
 
@@ -98,7 +98,7 @@ export class SolicitarRecuperacion {
 
     await this.correo.enviar({
       para: cuenta.email,
-      asunto: 'Tu codigo para recuperar la contrasena de Chronova',
+      asunto: 'Tu código para recuperar la contraseña de Chronova',
       cuerpo: cuerpoDelCorreo(cuenta.nombre, codigo.valor),
     });
 
@@ -148,12 +148,12 @@ function cuerpoDelCorreo(nombre: string, codigo: string): string {
   return [
     `Hola, ${nombre}.`,
     '',
-    `Tu codigo para restablecer la contrasena es:  ${codigo}`,
+    `Tu código para restablecer la contraseña es:  ${codigo}`,
     '',
-    `Escribelo en la aplicacion. Caduca en ${SolicitudDeRecuperacion.MINUTOS_DE_VIGENCIA} minutos.`,
+    `Escríbelo en la aplicación. Caduca en ${SolicitudDeRecuperacion.MINUTOS_DE_VIGENCIA} minutos.`,
     '',
-    'Si no fuiste tu quien lo pidio, no tienes que hacer nada: tu contrasena',
-    'sigue siendo la misma mientras nadie use este codigo.',
+    'Si no fuiste tú quien lo pidió, no tienes que hacer nada: tu contraseña',
+    'sigue siendo la misma mientras nadie use este código.',
     '',
     'Chronova',
   ].join('\n');

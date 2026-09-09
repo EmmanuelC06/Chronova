@@ -76,7 +76,7 @@ export class Toma {
     programadaPara: Date;
   }): Toma {
     if (Number.isNaN(datos.programadaPara.getTime())) {
-      throw new ErrorDeValidacion('La fecha programada de la toma no es valida.', 'programadaPara');
+      throw new ErrorDeValidacion('La fecha programada de la toma no es válida.', 'programadaPara');
     }
     return new Toma(
       datos.id,
@@ -284,7 +284,7 @@ export class Toma {
     }
     if (this._vecesPospuesta >= MAXIMO_DE_APLAZAMIENTOS) {
       throw new ErrorDeReglaDeNegocio(
-        `Esta toma ya se pospuso ${MAXIMO_DE_APLAZAMIENTOS} veces. Confirmala u omitela.`,
+        `Esta toma ya se pospuso ${MAXIMO_DE_APLAZAMIENTOS} veces. Confírmala u omítela.`,
       );
     }
     const base = Math.max(ahora.getTime(), this._programadaPara.getTime());
@@ -302,7 +302,7 @@ export class Toma {
     this._estado = 'OMITIDA';
     this._resueltaEn = ahora;
     this._origenDelRegistro = 'SISTEMA';
-    this._observaciones = 'Cerrada automaticamente: no hubo confirmacion.';
+    this._observaciones = 'Cerrada automáticamente: no hubo confirmación.';
   }
 
   perteneceA(pacienteId: Identificador): boolean {
@@ -327,7 +327,7 @@ export class Toma {
       (this.confirmableDesde(margenEnMinutos).getTime() - ahora.getTime()) / 60_000,
     );
     throw new ErrorDeReglaDeNegocio(
-      'Todavia no es hora de esta toma. Podras confirmarla ' +
+      'Todavía no es hora de esta toma. Podrás confirmarla ' +
         (faltan >= 60
           ? `dentro de ${Math.round(faltan / 60)} hora(s).`
           : `en ${faltan} minuto(s).`),
@@ -347,7 +347,7 @@ export class Toma {
     const limpio = texto.trim();
     if (limpio.length === 0) return null;
     if (limpio.length > 300) {
-      throw new ErrorDeValidacion('La observacion es demasiado larga.', 'observaciones');
+      throw new ErrorDeValidacion('La observación es demasiado larga.', 'observaciones');
     }
     return limpio;
   }

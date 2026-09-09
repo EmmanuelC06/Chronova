@@ -72,13 +72,13 @@ export class ClienteDeExpoHttp implements ClienteDeExpo {
       });
 
       if (!respuesta.ok) {
-        throw new Error(`Expo respondio ${respuesta.status} ${respuesta.statusText}`);
+        throw new Error(`Expo respondió ${respuesta.status} ${respuesta.statusText}`);
       }
 
       const cuerpo = (await respuesta.json()) as { data?: AcuseExpo[]; errors?: unknown };
 
       if (!cuerpo.data) {
-        throw new Error(`Expo no devolvio acuses: ${JSON.stringify(cuerpo.errors ?? cuerpo)}`);
+        throw new Error(`Expo no devolvió acuses: ${JSON.stringify(cuerpo.errors ?? cuerpo)}`);
       }
 
       return cuerpo.data;

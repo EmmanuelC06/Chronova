@@ -43,7 +43,7 @@ export class IniciarSesion {
     const coincide = await this.cifrador.verificar(comando.contrasena ?? '', contrasenaCifrada);
 
     if (!candidato || !coincide || !candidato.activo) {
-      throw new ErrorDeAutenticacion('El correo o la contrasena no son correctos.');
+      throw new ErrorDeAutenticacion('El correo o la contraseña no son correctos.');
     }
 
     return {

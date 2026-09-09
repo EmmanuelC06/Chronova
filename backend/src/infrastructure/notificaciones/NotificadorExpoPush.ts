@@ -54,7 +54,7 @@ export class NotificadorExpoPush implements Notificador {
     } catch (error) {
       // Se registra y se sigue. Ver decision 1 en el comentario de arriba.
       console.error(
-        `[aviso ${aviso.tipo}] No se pudo enviar la notificacion:`,
+        `[aviso ${aviso.tipo}] No se pudo enviar la notificación:`,
         error instanceof Error ? error.message : error,
       );
     }
@@ -106,7 +106,7 @@ export class NotificadorExpoPush implements Notificador {
         await this.olvidar(mensaje.to);
       } else {
         console.warn(
-          `[expo] Envio rechazado (${motivo ?? 'sin detalle'}): ${acuse.message ?? ''}`,
+          `[expo] Envío rechazado (${motivo ?? 'sin detalle'}): ${acuse.message ?? ''}`,
         );
       }
     }

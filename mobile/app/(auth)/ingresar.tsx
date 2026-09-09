@@ -30,7 +30,7 @@ export default function Ingresar() {
     setError(null);
 
     if (email.trim() === '' || contrasena === '') {
-      setError('Escribe tu correo y tu contrasena para continuar.');
+      setError('Escribe tu correo y tu contraseña para continuar.');
       return;
     }
 
@@ -42,7 +42,7 @@ export default function Ingresar() {
       setError(
         problema instanceof ErrorDeApi
           ? problema.message
-          : 'No pudimos iniciar tu sesion. Intentalo de nuevo.',
+          : 'No pudimos iniciar tu sesión. Inténtalo de nuevo.',
       );
     } finally {
       setOcupado(false);
@@ -73,7 +73,7 @@ export default function Ingresar() {
         {error ? <Aviso mensaje={error} tono="error" /> : null}
 
         <Campo
-          etiqueta="Correo electronico"
+          etiqueta="Correo electrónico"
           valor={email}
           onCambio={setEmail}
           marcador="ejemplo@correo.com"
@@ -82,10 +82,10 @@ export default function Ingresar() {
         />
 
         <Campo
-          etiqueta="Contrasena"
+          etiqueta="Contraseña"
           valor={contrasena}
           onCambio={setContrasena}
-          marcador="Tu contrasena"
+          marcador="Tu contraseña"
           secreto
           autoCompletar="password"
         />
@@ -96,14 +96,14 @@ export default function Ingresar() {
             contrasena no funciona. Escondida al final de la pantalla no
             la encontraria quien mas la necesita. */}
         <Boton
-          titulo="Olvide mi contrasena"
+          titulo="Olvidé mi contraseña"
           variante="texto"
           onPress={() => router.push('/(auth)/recuperar')}
         />
 
         <View style={{ gap: espacio.sm, marginTop: espacio.md }}>
           <Texto centrado color={colores.textoSuave}>
-            ¿Todavia no tienes cuenta?
+            ¿Todavía no tienes cuenta?
           </Texto>
           <Boton
             titulo="Crear una cuenta"

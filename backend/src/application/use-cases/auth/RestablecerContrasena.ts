@@ -63,7 +63,7 @@ export class RestablecerContrasena {
 
     if (motivo === 'DEMASIADOS_INTENTOS') {
       throw new ErrorDeAutenticacion(
-        'Ya se agotaron los intentos con ese codigo. Pide uno nuevo.',
+        'Ya se agotaron los intentos con ese código. Pide uno nuevo.',
       );
     }
     if (motivo !== null) throw this.errorGenerico();
@@ -96,7 +96,7 @@ export class RestablecerContrasena {
 
   private errorGenerico(): ErrorDeAutenticacion {
     return new ErrorDeAutenticacion(
-      'El codigo no es correcto o ya caduco. Pide uno nuevo si hace falta.',
+      'El código no es correcto o ya caducó. Pide uno nuevo si hace falta.',
     );
   }
 

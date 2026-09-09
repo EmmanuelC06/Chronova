@@ -57,7 +57,7 @@ function Contenido() {
     return (
       <>
         <Stack.Screen options={{ title: 'Paciente' }} />
-        <Cargando mensaje="Cargando la informacion..." />
+        <Cargando mensaje="Cargando la información..." />
       </>
     );
   }
@@ -155,12 +155,12 @@ const MENSAJE_DE_BLOQUEO: Record<
 > = {
   FALLO_DE_CARGA: () => ({
     mensaje:
-      'No pudimos conectarnos para traer la informacion de este paciente. Revisa tu conexion y baja para reintentar.',
+      'No pudimos conectarnos para traer la información de este paciente. Revisa tu conexión y baja para reintentar.',
     tono: 'error',
   }),
   NO_ENCONTRADO: () => ({
     mensaje:
-      'Este paciente ya no aparece entre los que acompanas. Es probable que el vinculo se haya revocado.',
+      'Este paciente ya no aparece entre los que acompañas. Es probable que el vínculo se haya revocado.',
     tono: 'advertencia',
   }),
   SIN_ACEPTAR: (nombre) => ({

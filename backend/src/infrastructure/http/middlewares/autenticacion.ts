@@ -48,7 +48,7 @@ export function autenticar(verificarSesion: VerificarSesion) {
 
     if (esquema !== 'Bearer' || !token) {
       return siguiente(
-        new ErrorDeAutenticacion('Falta el token de sesion. Inicia sesion de nuevo.'),
+        new ErrorDeAutenticacion('Falta el token de sesión. Inicia sesión de nuevo.'),
       );
     }
 
@@ -73,8 +73,8 @@ export function exigirTipo(tipo: TipoDeUsuario) {
       return siguiente(
         new ErrorDeAutorizacion(
           tipo === 'PACIENTE'
-            ? 'Esta accion solo puede realizarla un paciente.'
-            : 'Esta accion solo puede realizarla un cuidador.',
+            ? 'Esta acción solo puede realizarla un paciente.'
+            : 'Esta acción solo puede realizarla un cuidador.',
         ),
       );
     }
@@ -85,7 +85,7 @@ export function exigirTipo(tipo: TipoDeUsuario) {
 /** Atajo tipado para leer el solicitante ya verificado. */
 export function solicitanteDe(peticion: Request): Solicitante {
   if (!peticion.solicitante) {
-    throw new ErrorDeAutenticacion('No hay una sesion activa.');
+    throw new ErrorDeAutenticacion('No hay una sesión activa.');
   }
   return peticion.solicitante;
 }

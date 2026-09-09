@@ -72,8 +72,8 @@ export default function Privacidad() {
                   {fechaLegible(autorizacion.otorgadaEn)}.
                 </Texto>
                 <Texto variante="pequeno" color={colores.textoTenue}>
-                  Guardamos la version y la fecha para que puedas comprobar exactamente que
-                  autorizaste. Es un derecho que te da la ley, no un detalle tecnico.
+                  Guardamos la versión y la fecha para que puedas comprobar exactamente qué
+                  autorizaste. Es un derecho que te da la ley, no un detalle técnico.
                 </Texto>
                 {autorizacion.hayVersionMasReciente ? (
                   <Aviso
@@ -84,7 +84,7 @@ export default function Privacidad() {
               </>
             ) : (
               <Aviso
-                mensaje="De esta cuenta no nos consta una autorizacion registrada, probablemente porque se creo antes de que empezaramos a guardarla. Te pediremos que la otorgues de nuevo."
+                mensaje="De esta cuenta no nos consta una autorización registrada, probablemente porque se creó antes de que empezáramos a guardarla. Te pediremos que la otorgues de nuevo."
                 tono="advertencia"
               />
             )}
@@ -95,15 +95,15 @@ export default function Privacidad() {
         <Tarjeta>
           <Rotulo>Que puedes hacer</Rotulo>
           <Texto color={colores.textoSuave}>
-            Muchas de estas cosas las haces tu mismo, sin pedirle permiso a nadie ni esperar
+            Muchas de estas cosas las haces tú mismo, sin pedirle permiso a nadie ni esperar
             respuesta:
           </Texto>
           {[
             'Corregir tus datos, desde Mi cuenta.',
-            'Ver quien te acompana y que puede hacer cada persona.',
+            'Ver quién te acompaña y qué puede hacer cada persona.',
             'Quitarle el acceso a un cuidador cuando quieras, sin dar explicaciones.',
-            'Pedir que borremos tu cuenta y toda tu informacion.',
-            'Retirar esta autorizacion.',
+            'Pedir que borremos tu cuenta y toda tu información.',
+            'Retirar esta autorización.',
           ].map((derecho) => (
             <Texto key={derecho} color={colores.textoSuave}>
               • {derecho}
@@ -111,25 +111,25 @@ export default function Privacidad() {
           ))}
           <Texto variante="pequeno" color={colores.textoTenue}>
             Para lo que no puedes hacer desde la app, escribenos y te respondemos: las consultas en
-            maximo 10 dias habiles y los reclamos en 15, que son los plazos que fija la ley.
+            máximo 10 días hábiles y los reclamos en 15, que son los plazos que fija la ley.
           </Texto>
         </Tarjeta>
 
         <Boton
-          titulo="Leer la politica completa"
+          titulo="Leer la política completa"
           variante="secundario"
           onPress={() => void Linking.openURL(URL_DE_LA_POLITICA)}
         />
         <Boton
-          titulo="Leer los terminos y condiciones"
+          titulo="Leer los términos y condiciones"
           variante="secundario"
           onPress={() => void Linking.openURL(URL_DE_LOS_TERMINOS)}
         />
 
         <Texto variante="pequeno" color={colores.textoTenue}>
-          Chronova no es un dispositivo medico. Los recordatorios son una ayuda, no una garantia, y
-          ninguna decision sobre tu tratamiento deberia tomarse por lo que diga esta aplicacion. Esa
-          conversacion es con tu medico.
+          Chronova no es un dispositivo médico. Los recordatorios son una ayuda, no una garantía, y
+          ninguna decisión sobre tu tratamiento debería tomarse por lo que diga esta aplicación. Esa
+          conversación es con tu médico.
         </Texto>
       </ScrollView>
     </>

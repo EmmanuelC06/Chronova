@@ -22,7 +22,7 @@ import { primerNombre } from '../../../src/ui/texto';
  * Panel del cuidador.
  *
  * El orden lo decide el servidor: primero quien necesita atencion. Un
- * cuidador que abre la app a las siete de la manana con seis pacientes a
+ * cuidador que abre la app a las siete de la mañana con seis pacientes a
  * cargo no deberia tener que revisar seis tarjetas para descubrir cual
  * dejo de tomarse la medicina.
  */
@@ -72,7 +72,7 @@ export default function Pacientes() {
         emailDeLaOtraParte: emailDelPaciente.trim(),
       });
       setEmailDelPaciente('');
-      setExito('Solicitud enviada. Podras ver su seguimiento cuando el paciente la acepte.');
+      setExito('Solicitud enviada. Podrás ver su seguimiento cuando el paciente la acepte.');
       await cargar();
     } catch (problema) {
       setError(
@@ -111,10 +111,10 @@ export default function Pacientes() {
         </Texto>
         <Texto color={colores.textoSuave}>
           {pacientes.length === 0
-            ? 'Aun no acompanas a nadie.'
+            ? 'Aún no acompañas a nadie.'
             : requierenAtencion.length === 0
               ? 'Todos tus pacientes van bien.'
-              : `${requierenAtencion.length} paciente(s) necesitan tu atencion.`}
+              : `${requierenAtencion.length} paciente(s) necesitan tu atención.`}
         </Texto>
       </View>
 
@@ -123,8 +123,8 @@ export default function Pacientes() {
 
       {pacientes.length === 0 ? (
         <EstadoVacio
-          titulo="Todavia no acompanas a nadie"
-          descripcion="Escribe abajo el correo del paciente. Cuando acepte tu solicitud, veras aqui como va su tratamiento."
+          titulo="Todavía no acompañas a nadie"
+          descripcion="Escribe abajo el correo del paciente. Cuando acepte tu solicitud, verás aquí cómo va su tratamiento."
         />
       ) : null}
 
@@ -134,11 +134,11 @@ export default function Pacientes() {
 
       <Tarjeta>
         <Texto variante="subtitulo" peso="semi">
-          Acompanar a otro paciente
+          Acompañar a otro paciente
         </Texto>
         <Texto variante="pequeno" color={colores.textoSuave}>
-          El paciente debera aceptar tu solicitud antes de que puedas ver su informacion. Es su
-          decision, no la tuya.
+          El paciente deberá aceptar tu solicitud antes de que puedas ver su información. Es su
+          decisión, no la tuya.
         </Texto>
         <Campo
           etiqueta="Correo del paciente"
@@ -151,7 +151,7 @@ export default function Pacientes() {
       </Tarjeta>
 
       {/*
-        Cerrar sesion ya no vive aqui, al final de una lista que puede
+        Cerrar sesión ya no vive aqui, al final de una lista que puede
         tener quince pacientes: esta en la pestana "Mi cuenta", que es
         donde se busca y donde esta tambien en la aplicacion del
         paciente.
@@ -210,12 +210,12 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
 
       {pendiente ? (
         <Aviso
-          mensaje="Esperando que el paciente acepte tu solicitud. Hasta entonces no puedes ver su informacion."
+          mensaje="Esperando que el paciente acepte tu solicitud. Hasta entonces no puedes ver su información."
           tono="info"
         />
       ) : !conDatos ? (
         <Aviso
-          mensaje={`${primerNombre(paciente.nombre)} no te ha concedido permiso para ver su tratamiento. Puedes pedirselo: es una decision suya y puede cambiarla cuando quiera.`}
+          mensaje={`${primerNombre(paciente.nombre)} no te ha concedido permiso para ver su tratamiento. Puedes pedírselo: es una decisión suya y puede cambiarla cuando quiera.`}
           tono="info"
         />
       ) : (
@@ -271,7 +271,7 @@ function descripcionParaLector(paciente: PacienteEnPanel): string {
   }
 
   if (!paciente.datosClinicosVisibles) {
-    return `${paciente.nombre}. No te ha concedido permiso para ver su tratamiento. Toca para saber mas.`;
+    return `${paciente.nombre}. No te ha concedido permiso para ver su tratamiento. Toca para saber más.`;
   }
 
   const nivel = ESTILO_POR_NIVEL[paciente.adherencia.nivel];
@@ -290,7 +290,7 @@ function descripcionParaLector(paciente: PacienteEnPanel): string {
 }
 
 function tiempoRelativo(iso: string | null): string {
-  if (!iso) return 'sin registros aun';
+  if (!iso) return 'sin registros aún';
 
   const minutos = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   if (minutos < 1) return 'hace un momento';
@@ -300,5 +300,5 @@ function tiempoRelativo(iso: string | null): string {
   if (horas < 24) return `hace ${horas} hora${horas > 1 ? 's' : ''}`;
 
   const dias = Math.round(horas / 24);
-  return `hace ${dias} dia${dias > 1 ? 's' : ''}`;
+  return `hace ${dias} día${dias > 1 ? 's' : ''}`;
 }

@@ -91,8 +91,8 @@ export default function Historial() {
       >
         {error ? <Aviso mensaje={error} tono="error" /> : null}
         <EstadoVacio
-          titulo="Todavia no hay historial"
-          descripcion="A medida que confirmes tus tomas, aqui veras como va tu tratamiento."
+          titulo="Todavía no hay historial"
+          descripcion="A medida que confirmes tus tomas, aquí verás cómo va tu tratamiento."
         />
       </ScrollView>
     );
@@ -161,16 +161,16 @@ export default function Historial() {
 
         <Texto variante="pequeno" color={colores.textoTenue}>
           El cumplimiento compara las dosis tomadas con las que tocaban. La puntualidad solo mira
-          las que si se tomaron: de esas, cuantas fueron a su hora.
+          las que sí se tomaron: de esas, cuántas fueron a su hora.
         </Texto>
       </Tarjeta>
 
       {/* ---- Grafica por dia ---- */}
       {ultimosDias.length > 1 ? (
         <Tarjeta>
-          <Rotulo>Ultimos dias</Rotulo>
+          <Rotulo>Últimos días</Rotulo>
           <View
-            accessibilityLabel={`Grafica de cumplimiento de los ultimos ${ultimosDias.length} dias.`}
+            accessibilityLabel={`Gráfica de cumplimiento de los últimos ${ultimosDias.length} días.`}
             style={{
               flexDirection: 'row',
               alignItems: 'flex-end',

@@ -255,6 +255,6 @@ export const ESTILO_POR_NIVEL = {
   SIN_DATOS: {
     color: colores.textoTenue,
     fondo: colores.superficieSuave,
-    etiqueta: 'Sin datos aun',
+    etiqueta: 'Sin datos aún',
   },
 } as const;

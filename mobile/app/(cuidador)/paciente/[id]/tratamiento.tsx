@@ -42,7 +42,7 @@ export default function Tratamiento() {
     return (
       <ScrollView contentContainerStyle={{ padding: espacio.md }}>
         <Aviso
-          mensaje="No pudimos mostrar la informacion de este paciente. Vuelve atras y entra de nuevo."
+          mensaje="No pudimos mostrar la información de este paciente. Vuelve atrás y entra de nuevo."
           tono="error"
         />
       </ScrollView>
@@ -82,7 +82,7 @@ export default function Tratamiento() {
           titulo={`${nombreCorto} no tiene medicamentos registrados`}
           descripcion={
             puedeGestionar
-              ? 'Agrega el primero y empezara a recibir recordatorios a la hora exacta de cada toma.'
+              ? 'Agrega el primero y empezará a recibir recordatorios a la hora exacta de cada toma.'
               : `Cuando ${nombreCorto} registre su tratamiento, lo veras aqui.`
           }
         />
@@ -122,7 +122,7 @@ export default function Tratamiento() {
             color={medicamento.necesitaReabastecimiento ? colores.advertencia : colores.textoSuave}
           >
             Quedan {medicamento.stock.unidadesDisponibles} unidades
-            {medicamento.necesitaReabastecimiento ? ' — conviene reabastecer' : ''}
+            {medicamento.necesitaReabastecimiento ? ', conviene reabastecer' : ''}
           </Texto>
 
           {puedeGestionar ? (

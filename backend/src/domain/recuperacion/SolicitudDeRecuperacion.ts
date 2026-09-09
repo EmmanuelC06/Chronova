@@ -144,7 +144,7 @@ export class SolicitudDeRecuperacion {
   /** Marca la solicitud como consumida. No se puede repetir. */
   marcarComoUsada(ahora: Date): void {
     if (this.estaUsada) {
-      throw new ErrorDeReglaDeNegocio('Esta solicitud de recuperacion ya se uso.');
+      throw new ErrorDeReglaDeNegocio('Esta solicitud de recuperación ya se usó.');
     }
     this._usadaEn = ahora;
   }

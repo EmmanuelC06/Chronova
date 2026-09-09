@@ -25,7 +25,7 @@ export class NotificadorCompuesto implements Notificador {
           await destino.enviar(aviso);
         } catch (error) {
           console.error(
-            '[aviso] Un destino de notificacion fallo:',
+            '[aviso] Un destino de notificación falló:',
             error instanceof Error ? error.message : error,
           );
         }

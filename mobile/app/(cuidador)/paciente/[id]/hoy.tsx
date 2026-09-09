@@ -52,7 +52,7 @@ export default function Hoy() {
     return (
       <ScrollView contentContainerStyle={{ padding: espacio.md }}>
         <Aviso
-          mensaje="No pudimos mostrar la informacion de este paciente. Vuelve atras y entra de nuevo."
+          mensaje="No pudimos mostrar la información de este paciente. Vuelve atrás y entra de nuevo."
           tono="error"
         />
       </ScrollView>
@@ -67,7 +67,7 @@ export default function Hoy() {
   // Es una distincion que costo un error: `puedeConfirmarse` dejo de
   // significar "sigue pendiente" y paso a significar "se puede tocar
   // ahora". Repartir por el campo viejo mandaba la toma de las 20:00 a
-  // la seccion "Ya registradas" a las nueve de la manana, que es
+  // la seccion "Ya registradas" a las nueve de la mañana, que es
   // exactamente lo contrario de lo que pasa.
   const estaResuelta = (e: ElementoDeAgenda) => e.estado === 'TOMADA' || e.estado === 'OMITIDA';
   const pendientes = agenda?.elementos.filter((e) => !estaResuelta(e)) ?? [];
@@ -225,12 +225,12 @@ function TarjetaDeToma({
             gap: espacio.sm,
           }}
           accessible
-          accessibilityLabel={`Todavia no es hora. Podras registrarla a partir de las ${horaEnPalabras(elemento.disponibleDesde)}.`}
+          accessibilityLabel={`Todavía no es hora. Podrás registrarla a partir de las ${horaEnPalabras(elemento.disponibleDesde)}.`}
         >
           <Icono nombre="reloj" tamano={22} color={colores.textoSuave} />
           <View style={{ flex: 1 }}>
             <Texto variante="pequeno" color={colores.textoSuave}>
-              Todavia no es hora. Podras registrarla a partir de las{' '}
+              Todavía no es hora. Podrás registrarla a partir de las{' '}
               {formatearHora(elemento.disponibleDesde)}.
             </Texto>
           </View>
@@ -247,7 +247,7 @@ function TarjetaDeToma({
         >
           <View style={{ flex: 1 }}>
             <Boton
-              titulo="Ya la tomo"
+              titulo="Ya la tomó"
               variante="exito"
               ocupado={procesando}
               onPress={() => onAccion('CONFIRMAR')}
@@ -256,7 +256,7 @@ function TarjetaDeToma({
           </View>
           <View style={{ flex: 1 }}>
             <Boton
-              titulo="No la tomo"
+              titulo="No la tomó"
               variante="peligro"
               deshabilitado={procesando}
               onPress={() => onAccion('OMITIR')}

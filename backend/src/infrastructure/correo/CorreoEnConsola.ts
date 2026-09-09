@@ -20,7 +20,7 @@ export class CorreoEnConsola implements EnviadorDeCorreo {
     if (this.enviados.length > 50) this.enviados.shift();
 
     console.log('');
-    console.log('  ┌─ CORREO (no se envio de verdad) ───────────────');
+    console.log('  ┌─ CORREO (no se envió de verdad) ───────────────');
     console.log(`  │ Para:   ${correo.para}`);
     console.log(`  │ Asunto: ${correo.asunto}`);
     console.log('  ├────────────────────────────────────────────────');

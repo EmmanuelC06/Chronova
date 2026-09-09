@@ -39,7 +39,7 @@ export class Dosis {
     const unidadNormalizada = (unidad ?? '').trim().toLowerCase();
     if (!UNIDADES_DE_DOSIS.includes(unidadNormalizada as UnidadDeDosis)) {
       throw new ErrorDeValidacion(
-        `La unidad "${unidad}" no es valida. Usa una de: ${UNIDADES_DE_DOSIS.join(', ')}.`,
+        `La unidad "${unidad}" no es válida. Usa una de: ${UNIDADES_DE_DOSIS.join(', ')}.`,
         'dosis',
       );
     }

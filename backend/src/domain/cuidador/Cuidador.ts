@@ -183,7 +183,7 @@ export class Cuidador {
   /** Ver la explicacion equivalente en Paciente: van juntas a proposito. */
   cambiarContrasena(nuevaContrasenaCifrada: string, ahora: Date): void {
     if (!nuevaContrasenaCifrada || nuevaContrasenaCifrada.trim().length === 0) {
-      throw new ErrorDeValidacion('La contrasena cifrada no puede estar vacia.', 'contrasena');
+      throw new ErrorDeValidacion('La contraseña cifrada no puede estar vacía.', 'contrasena');
     }
     this._contrasenaCifrada = nuevaContrasenaCifrada;
     this.cerrarSesionesAbiertas(ahora);
@@ -210,7 +210,7 @@ export class Cuidador {
     const limpio = rol.trim();
     if (limpio.length === 0) return null;
     if (limpio.length > 60) {
-      throw new ErrorDeValidacion('La descripcion del rol es demasiado larga.', 'rol');
+      throw new ErrorDeValidacion('La descripción del rol es demasiado larga.', 'rol');
     }
     return limpio;
   }

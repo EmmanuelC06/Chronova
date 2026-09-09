@@ -43,7 +43,7 @@ export class AutorizacionDeDatos {
 
     if (version === '') {
       throw new ErrorDeValidacion(
-        'Falta la version de la politica de tratamiento que se acepto.',
+        'Falta la versión de la política de tratamiento que se aceptó.',
         'autorizacionDeDatos',
       );
     }
@@ -52,7 +52,7 @@ export class AutorizacionDeDatos {
     // pase por una version real.
     if (!/^\d+\.\d+$/.test(version)) {
       throw new ErrorDeValidacion(
-        `"${version}" no es una version valida de la politica (se espera algo como "1.0").`,
+        `"${version}" no es una versión válida de la política (se espera algo como "1.0").`,
         'autorizacionDeDatos',
       );
     }

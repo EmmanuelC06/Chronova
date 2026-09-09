@@ -102,7 +102,7 @@ export class RegistrarToma {
 
         if (medicamento.stock.necesitaReabastecimiento) {
           avisoDeStock = medicamento.stock.estaAgotado
-            ? `Se acabo el ${medicamento.nombre}. Consigue mas antes de la proxima toma.`
+            ? `Se acabó el ${medicamento.nombre}. Consigue más antes de la próxima toma.`
             : `Te quedan ${medicamento.stock.unidadesDisponibles} unidades de ${medicamento.nombre}.`;
 
           await this.notificador.enviar({

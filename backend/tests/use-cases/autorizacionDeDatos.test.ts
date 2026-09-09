@@ -176,13 +176,13 @@ describe('Autorizacion de tratamiento de datos', () => {
     it('rechaza una version vacia', () => {
       expect(() =>
         AutorizacionDeDatos.otorgar({ versionDePolitica: '  ', ahora: new Date() }),
-      ).toThrow(/version/i);
+      ).toThrow(/versión/i);
     });
 
     it('rechaza algo que no tenga forma de version', () => {
       expect(() =>
         AutorizacionDeDatos.otorgar({ versionDePolitica: 'la ultima', ahora: new Date() }),
-      ).toThrow(/version/i);
+      ).toThrow(/versión/i);
     });
 
     it('acepta el formato mayor.menor', () => {

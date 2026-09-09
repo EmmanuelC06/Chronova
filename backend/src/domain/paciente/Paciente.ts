@@ -258,7 +258,7 @@ export class Paciente {
    */
   cambiarContrasena(nuevaContrasenaCifrada: string, ahora: Date): void {
     if (!nuevaContrasenaCifrada || nuevaContrasenaCifrada.trim().length === 0) {
-      throw new ErrorDeValidacion('La contrasena cifrada no puede estar vacia.', 'contrasena');
+      throw new ErrorDeValidacion('La contraseña cifrada no puede estar vacía.', 'contrasena');
     }
     this._contrasenaCifrada = nuevaContrasenaCifrada;
     this.cerrarSesionesAbiertas(ahora);
