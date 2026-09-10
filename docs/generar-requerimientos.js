@@ -131,7 +131,7 @@ const RNF = [
   ['RNF-04', 'Accesibilidad', 'Ningún estado se comunicará únicamente mediante color: llevará además icono y palabra.', 'Revisión de las tarjetas de toma y de las insignias de estado. Verificado.'],
   ['RNF-05', 'Accesibilidad', 'Todos los controles expondrán etiquetas para lectores de pantalla (TalkBack, VoiceOver).', 'Inspección de las propiedades de accesibilidad de cada componente. Verificado.'],
   ['RNF-06', 'Usabilidad', 'Las acciones sobre una toma se realizarán mediante botones visibles, sin gestos ocultos ni deslizamientos.', 'Revisión de la pantalla principal. Verificado.'],
-  ['RNF-07', 'Seguridad', 'Las contraseñas se almacenarán cifradas con bcrypt —implementación bcryptjs, factor de costo 10— y nunca en texto plano.', 'Inspección del adaptador de cifrado y de la base de datos. Verificado.'],
+  ['RNF-07', 'Seguridad', 'Las contraseñas se almacenarán cifradas con bcrypt (implementación bcryptjs, factor de costo 10) y nunca en texto plano.', 'Inspección del adaptador de cifrado y de la base de datos. Verificado.'],
   ['RNF-08', 'Seguridad', 'El inicio de sesión no revelará si un correo está registrado, ni por el mensaje ni por el tiempo de respuesta.', 'Prueba automatizada que compara ambos mensajes de error. Verificado.'],
   ['RNF-09', 'Seguridad', 'Las sesiones se gestionarán con tokens firmados y expiración de siete días por defecto, configurable.', 'Inspección del servicio de tokens y de la configuración. Verificado.'],
   ['RNF-10', 'Seguridad', 'Todas las consultas a la base de datos usarán parámetros, nunca concatenación de texto.', 'Revisión del único archivo que contiene SQL. Verificado.'],
@@ -167,7 +167,7 @@ const FASES = [
 
 const doc = new Document({
   creator: 'Julián Andrés Herrera Roncancio y Emmanuel Correa Valencia',
-  title: 'Chronova — Actores, cronograma y requerimientos',
+  title: 'Chronova. Actores, cronograma y requerimientos',
   styles: { default: { document: { run: { font: FUENTE, size: 24 } } } },
   sections: [{
     properties: {
