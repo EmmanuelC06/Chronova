@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import type { Medicamento } from '../../dominio/modelos';
@@ -39,6 +39,14 @@ export interface DatosDelFormulario {
   frecuencia: { tipo: 'DIARIA' } | { tipo: 'DIAS_DE_LA_SEMANA'; diasDeLaSemana: number[] };
   horarios: string[];
   instrucciones: string | null;
+  /**
+   * Cuando empieza el tratamiento, en AAAA-MM-DD.
+   *
+   * Solo al crear. Antes no se enviaba nunca, asi que el servidor
+   * asumia siempre "hoy" y no habia forma de registrar un tratamiento
+   * que empieza manana o que ya venia de antes.
+   */
+  fechaInicio?: string;
   /** Solo al crear: al editar, el inventario tiene su propia pantalla. */
   stock?: { unidadesDisponibles: number; umbralDeAlerta: number };
 }
@@ -82,12 +90,30 @@ export function FormularioDeMedicamento({
   const [unidadesDisponibles, setUnidadesDisponibles] = useState('');
   const [umbral, setUmbral] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [cuandoEmpieza, setCuandoEmpieza] = useState<CuandoEmpieza>('HOY');
+  const [fechaEscrita, setFechaEscrita] = useState('');
+
+  /**
+   * El aviso de error se pinta ARRIBA del formulario, y el boton de
+   * guardar esta abajo del todo. Sin esto, la persona toca "Guardar",
+   * el mensaje aparece a dos pantallazos por encima, la vista no se
+   * mueve y el boton parece muerto: se vuelve a tocar, y nada.
+   *
+   * `avisar` hace las dos cosas a la vez, poner el mensaje y subir a
+   * donde se lee, para que no se pueda hacer una sin la otra.
+   */
+  const desplazamiento = useRef<ScrollView>(null);
+
+  const avisar = (mensaje: string) => {
+    setError(mensaje);
+    desplazamiento.current?.scrollTo({ y: 0, animated: true });
+  };
   const [ocupado, setOcupado] = useState(false);
 
   /** Agrega una hora que ya viene en formato de 24 horas (los atajos). */
   const agregarHora = (hora24: string) => {
     if (horarios.includes(hora24)) {
-      setError('Esa hora ya está en la lista.');
+      avisar('Esa hora ya está en la lista.');
       return;
     }
     setError(null);
@@ -103,11 +129,11 @@ export function FormularioDeMedicamento({
   const agregarHoraEscrita = () => {
     const hora24 = aHoraDe24(horaNueva, meridiano);
     if (!hora24) {
-      setError('Escribe la hora como 8:30, y elige si es de la mañana o de la tarde.');
+      avisar('Escribe la hora como 8:30, y elige si es de la mañana o de la tarde.');
       return;
     }
     if (horarios.includes(hora24)) {
-      setError('Esa hora ya está en la lista.');
+      avisar('Esa hora ya está en la lista.');
       return;
     }
     setError(null);
@@ -125,22 +151,36 @@ export function FormularioDeMedicamento({
     setError(null);
 
     if (nombre.trim().length < 2) {
-      setError('Escribe el nombre del medicamento.');
+      avisar('Escribe el nombre del medicamento.');
       return;
     }
     if (horarios.length === 0) {
-      setError('Agrega al menos una hora de toma.');
+      avisar('Agrega al menos una hora de toma.');
       return;
     }
     if (!todosLosDias && diasElegidos.length === 0) {
-      setError('Elige al menos un día de la semana.');
+      avisar('Elige al menos un día de la semana.');
       return;
     }
 
     const numeroDeCantidad = Number(cantidad.replace(',', '.'));
     if (!Number.isFinite(numeroDeCantidad) || numeroDeCantidad <= 0) {
-      setError('La cantidad debe ser un número mayor que cero.');
+      avisar('La cantidad debe ser un número mayor que cero.');
       return;
+    }
+
+    // La fecha de inicio, solo al crear.
+    let fechaInicio: string | undefined;
+    if (!editando) {
+      if (cuandoEmpieza === 'OTRO') {
+        if (!esFechaValida(fechaEscrita)) {
+          avisar('Escribe la fecha de inicio como 2026-09-20 (año-mes-día).');
+          return;
+        }
+        fechaInicio = fechaEscrita;
+      } else {
+        fechaInicio = fechaLocal(cuandoEmpieza === 'MANANA' ? 1 : 0);
+      }
     }
 
     const disponibles = Number(unidadesDisponibles);
@@ -160,6 +200,7 @@ export function FormularioDeMedicamento({
             },
         horarios,
         instrucciones: instrucciones.trim() || null,
+        ...(fechaInicio ? { fechaInicio } : {}),
         ...(llevaInventario
           ? {
               stock: {
@@ -170,7 +211,7 @@ export function FormularioDeMedicamento({
           : {}),
       });
     } catch (problema) {
-      setError(problema instanceof Error ? problema.message : 'No pudimos guardar el medicamento.');
+      avisar(problema instanceof Error ? problema.message : 'No pudimos guardar el medicamento.');
     } finally {
       setOcupado(false);
     }
@@ -182,6 +223,7 @@ export function FormularioDeMedicamento({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
+        ref={desplazamiento}
         contentContainerStyle={{
           padding: espacio.md,
           gap: espacio.lg,
@@ -409,6 +451,62 @@ export function FormularioDeMedicamento({
           marcador="Tomar después de comer"
         />
 
+        {/* -------- Cuando empieza -------- */}
+        {!editando ? (
+          <View style={{ gap: espacio.sm }}>
+            <Rotulo>¿Cuándo empieza?</Rotulo>
+
+            <View style={{ flexDirection: 'row', gap: espacio.sm }}>
+              {(
+                [
+                  ['HOY', 'Hoy'],
+                  ['MANANA', 'Mañana'],
+                  ['OTRO', 'Otro día'],
+                ] as const
+              ).map(([valor, etiqueta]) => (
+                <View key={valor} style={{ flex: 1 }}>
+                  <Boton
+                    titulo={etiqueta}
+                    variante={cuandoEmpieza === valor ? 'primario' : 'secundario'}
+                    onPress={() => setCuandoEmpieza(valor)}
+                    descripcionAccesible={
+                      cuandoEmpieza === valor
+                        ? `Empieza ${etiqueta.toLowerCase()}, seleccionado`
+                        : `Que empiece ${etiqueta.toLowerCase()}`
+                    }
+                  />
+                </View>
+              ))}
+            </View>
+
+            {cuandoEmpieza === 'OTRO' ? (
+              <>
+                <Campo
+                  etiqueta="Fecha de inicio"
+                  valor={fechaEscrita}
+                  onCambio={setFechaEscrita}
+                  marcador={fechaLocal(3)}
+                  ayuda="Escríbela como año-mes-día. Puede ser una fecha pasada, si el tratamiento ya venía de antes."
+                />
+                {/*
+                  La fecha repetida en palabras. Es lo que hace segura la
+                  escritura a mano: nadie nota que tecleo 2026-09-61, pero
+                  cualquiera ve que ahi no dice el dia que queria.
+                */}
+                {fechaEnPalabras(fechaEscrita) ? (
+                  <Texto variante="pequeno" color={colores.primario}>
+                    Empezará el {fechaEnPalabras(fechaEscrita)}.
+                  </Texto>
+                ) : fechaEscrita.length > 0 ? (
+                  <Texto variante="pequeno" color={colores.advertencia}>
+                    Esa fecha no existe. Revísala.
+                  </Texto>
+                ) : null}
+              </>
+            ) : null}
+          </View>
+        ) : null}
+
         {!editando ? (
           <View style={{ gap: espacio.sm }}>
             <Rotulo>Inventario (opcional)</Rotulo>
@@ -481,4 +579,64 @@ function Ficha({
       </Texto>
     </Pressable>
   );
+}
+
+// -----------------------------------------------------------------
+// Cuando empieza el tratamiento
+// -----------------------------------------------------------------
+
+type CuandoEmpieza = 'HOY' | 'MANANA' | 'OTRO';
+
+/**
+ * La fecha de hoy (o la de dentro de N dias) en AAAA-MM-DD.
+ *
+ * Construida a mano y no con `toISOString()`, que convierte a UTC: a las
+ * ocho de la noche en Colombia ya es el dia siguiente en Greenwich, y un
+ * medicamento registrado de noche empezaria manana sin que nadie lo
+ * pidiera.
+ */
+function fechaLocal(masDias = 0, hoy = new Date()): string {
+  const fecha = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + masDias);
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  return `${fecha.getFullYear()}-${mes}-${dia}`;
+}
+
+/**
+ * ¿Es una fecha que existe de verdad?
+ *
+ * El formato no basta: "2026-02-31" lo cumple y no existe. Se reconstruye
+ * la fecha y se comprueba que los tres numeros sobrevivan, que es lo que
+ * delata a los 31 de febrero y a los 29 de febrero de los años que no son
+ * bisiestos.
+ */
+function esFechaValida(texto: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return false;
+  const [anio, mes, dia] = texto.split('-').map(Number) as [number, number, number];
+  const fecha = new Date(anio, mes - 1, dia);
+  return (
+    fecha.getFullYear() === anio && fecha.getMonth() === mes - 1 && fecha.getDate() === dia
+  );
+}
+
+/**
+ * La fecha en palabras: "martes, 16 de septiembre de 2026".
+ *
+ * Es lo que hace segura la escritura a mano. Nadie detecta que tecleo
+ * 2026-09-61, pero cualquiera ve que pone algo raro donde deberia leerse
+ * el dia de su cita.
+ */
+function fechaEnPalabras(texto: string): string | null {
+  if (!esFechaValida(texto)) return null;
+  const [anio, mes, dia] = texto.split('-').map(Number) as [number, number, number];
+  try {
+    return new Date(anio, mes - 1, dia).toLocaleDateString('es-CO', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  } catch {
+    return null;
+  }
 }

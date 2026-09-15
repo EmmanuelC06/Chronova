@@ -5,6 +5,7 @@ import type { VinculoPlano } from '../../../domain/vinculo/Vinculo.js';
 import type { Notificador } from '../../ports/Notificador.js';
 import type { Reloj } from '../../ports/Reloj.js';
 import type { Solicitante } from '../../services/PoliticaDeAcceso.js';
+import { avisarSinRomper } from '../../services/avisarSinRomper.js';
 
 export interface ComandoResponderSolicitud {
   solicitante: Solicitante;
@@ -55,8 +56,10 @@ export class ResponderSolicitudDeVinculo {
 
     await this.vinculos.guardar(vinculo);
 
+    // Sin romper: el vinculo ya esta aceptado y guardado. Si el aviso
+    // falla, el cuidador lo vera al abrir la app.
     if (comando.respuesta === 'ACEPTAR') {
-      await this.notificador.enviar({
+      await avisarSinRomper(this.notificador, {
         tipo: 'VINCULO_ACEPTADO',
         destinatarioId: vinculo.cuidadorId,
         tipoDeDestinatario: 'CUIDADOR',

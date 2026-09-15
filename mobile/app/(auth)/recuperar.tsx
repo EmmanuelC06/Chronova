@@ -70,21 +70,54 @@ export default function Recuperar() {
     }
 
     setOcupado(true);
+
+    /*
+      Dos pasos, dos `try` SEPARADOS, y es lo importante de esta funcion.
+
+      Juntos, si el cambio de contrasena funcionaba y el inicio de sesion
+      fallaba —basta un corte de red de un segundo— el mensaje decia "No
+      pudimos cambiar tu contraseña". Pero si se habia cambiado. La
+      persona volvia a intentarlo con el mismo codigo, que ya se consumio
+      (sirve una sola vez), recibia un error, y se quedaba fuera de su
+      cuenta convencida de que su contrasena vieja seguia sirviendo.
+
+      Decirle a alguien lo contrario de lo que paso con su contrasena es
+      el peor momento posible para equivocarse.
+    */
     try {
       await api.restablecerContrasena({
         email: email.trim(),
         codigo: codigo.trim(),
         nuevaContrasena,
       });
-
-      // Se entra sola: la persona acaba de escribir su contrasena nueva
-      // dos pasos atras, obligarla a teclearla otra vez es maltratarla.
-      await iniciarSesion(email.trim(), nuevaContrasena);
-      router.replace('/');
     } catch (problema) {
       setError(
         problema instanceof ErrorDeApi ? problema.message : 'No pudimos cambiar tu contraseña.',
       );
+      setOcupado(false);
+      return;
+    }
+
+    // A partir de aqui la contrasena YA ESTA CAMBIADA. Pase lo que pase
+    // con el inicio de sesion, eso no se puede deshacer y no se puede
+    // negar.
+    try {
+      // Se entra sola: la persona acaba de escribir su contrasena nueva
+      // dos pasos atras, obligarla a teclearla otra vez es maltratarla.
+      await iniciarSesion(email.trim(), nuevaContrasena);
+      router.replace('/');
+    } catch {
+      // No entro, pero su contrasena es la nueva. Se le manda a la
+      // pantalla de ingreso diciendoselo, en vez de dejarla creyendo que
+      // no cambio nada.
+      router.replace({
+        pathname: '/(auth)/ingresar',
+        params: {
+          aviso:
+            'Tu contraseña ya está cambiada. Entra con la nueva; ' +
+            'no necesitas pedir otro código.',
+        },
+      });
     } finally {
       setOcupado(false);
     }

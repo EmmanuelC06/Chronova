@@ -405,6 +405,13 @@ export default function Perfil() {
       </Tarjeta>
 
       <Boton
+        titulo="Cambiar mi contraseña"
+        variante="secundario"
+        icono="candado"
+        onPress={() => router.push('/contrasena')}
+      />
+
+      <Boton
         titulo="Cerrar sesión"
         variante="peligro"
         onPress={() => {

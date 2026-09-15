@@ -14,6 +14,7 @@ import { OlvidarDispositivo } from './application/use-cases/dispositivos/Olvidar
 import { RegistrarDispositivo } from './application/use-cases/dispositivos/RegistrarDispositivo.js';
 import { SolicitarRecuperacion } from './application/use-cases/auth/SolicitarRecuperacion.js';
 import { RestablecerContrasena } from './application/use-cases/auth/RestablecerContrasena.js';
+import { CambiarContrasena } from './application/use-cases/auth/CambiarContrasena.js';
 import type { RepositorioDeRecuperaciones } from './domain/recuperacion/RepositorioDeRecuperaciones.js';
 import type { EnviadorDeCorreo } from './application/ports/EnviadorDeCorreo.js';
 import type { GeneradorDeCodigos } from './application/ports/GeneradorDeCodigos.js';
@@ -106,6 +107,7 @@ export interface Contenedor {
 
     solicitarRecuperacion: SolicitarRecuperacion;
     restablecerContrasena: RestablecerContrasena;
+    cambiarContrasena: CambiarContrasena;
     registrarDispositivo: RegistrarDispositivo;
     olvidarDispositivo: OlvidarDispositivo;
   };
@@ -278,6 +280,7 @@ export function construirContenedor(
       cifrador,
       reloj,
     ),
+    cambiarContrasena: new CambiarContrasena(pacientes, cuidadores, cifrador, tokens, reloj),
     registrarDispositivo: new RegistrarDispositivo(dispositivos, ids, reloj),
     olvidarDispositivo: new OlvidarDispositivo(dispositivos),
   };

@@ -100,10 +100,20 @@ export interface EntornoDePrueba {
 export function montarAplicacion(
   fechaInicial = new Date("2026-08-31T12:00:00Z"),
   duracionDeToken = "1h",
-  { idsReales = false }: { idsReales?: boolean } = {},
+  {
+    idsReales = false,
+    notificador: notificadorElegido,
+  }: { idsReales?: boolean; notificador?: NotificadorEnConsola } = {},
 ): EntornoDePrueba {
   const reloj = new RelojFijo(fechaInicial);
-  const notificador = new NotificadorEnConsola();
+  /*
+    Casi siempre el de consola. Se puede sustituir para las pruebas que
+    necesitan un notificador que FALLE: los adaptadores reales capturan
+    sus propios errores, asi que con ellos es imposible comprobar que el
+    caso de uso sobrevive a una excepcion. Y esa era justamente la parte
+    que no estaba probada.
+  */
+  const notificador = notificadorElegido ?? new NotificadorEnConsola();
   const correo = new CorreoEnConsola();
   const recuperaciones = new RepositorioDeRecuperacionesEnMemoria();
   const pacientes = new RepositorioDePacientesEnMemoria();

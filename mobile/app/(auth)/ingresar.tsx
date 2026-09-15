@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
+import type { TipoDeUsuario } from '../../src/dominio/modelos';
 import { Aviso, Boton, Campo, Texto } from '../../src/ui/componentes/basicos';
 import { Logo } from '../../src/ui/componentes/Logo';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
@@ -21,12 +22,34 @@ import { colores, espacio } from '../../src/ui/tema';
 export default function Ingresar() {
   const { iniciarSesion } = useSesion();
 
+  /**
+   * Un mensaje que llega de otra pantalla.
+   *
+   * Hoy lo manda una sola: la de recuperar la contrasena, cuando el
+   * cambio SI funciono pero el inicio de sesion automatico no. Sin esto,
+   * esa persona aterrizaba aqui sin saber que su contrasena ya es la
+   * nueva, y volvia a pedir un codigo que no necesita.
+   */
+  const { aviso } = useLocalSearchParams<{ aviso?: string }>();
+
   const [email, setEmail] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
 
-  const entrar = async () => {
+  /**
+   * Este correo abre dos cuentas y hay que preguntar con cual entrar.
+   *
+   * Solo se pone en `true` cuando el servidor lo dice, y el servidor solo
+   * lo dice despues de comprobar que la contrasena es correcta para las
+   * dos. Por eso la pregunta aparece DESPUES de escribir la contrasena y
+   * no antes: quien tiene una sola cuenta, que es casi todo el mundo, no
+   * ve nada y no elige nada. Esa era la razon de no preguntar el tipo de
+   * entrada, y se conserva.
+   */
+  const [hayQueElegir, setHayQueElegir] = useState(false);
+
+  const entrar = async (tipo?: TipoDeUsuario) => {
     setError(null);
 
     if (email.trim() === '' || contrasena === '') {
@@ -36,9 +59,14 @@ export default function Ingresar() {
 
     setOcupado(true);
     try {
-      await iniciarSesion(email.trim(), contrasena);
+      await iniciarSesion(email.trim(), contrasena, tipo);
       router.replace('/');
     } catch (problema) {
+      if (problema instanceof ErrorDeApi && problema.codigo === 'CUENTA_AMBIGUA') {
+        setHayQueElegir(true);
+        setOcupado(false);
+        return;
+      }
       setError(
         problema instanceof ErrorDeApi
           ? problema.message
@@ -70,6 +98,7 @@ export default function Ingresar() {
           </Texto>
         </View>
 
+        {aviso && !error ? <Aviso mensaje={aviso} tono="info" /> : null}
         {error ? <Aviso mensaje={error} tono="error" /> : null}
 
         <Campo
@@ -90,7 +119,27 @@ export default function Ingresar() {
           autoCompletar="password"
         />
 
-        <Boton titulo="Entrar" onPress={entrar} ocupado={ocupado} />
+        {hayQueElegir ? (
+          <View style={{ gap: espacio.sm }}>
+            <Aviso
+              mensaje="Con este correo tienes dos cuentas. ¿Con cuál quieres entrar?"
+              tono="info"
+            />
+            <Boton
+              titulo="Entrar como paciente"
+              onPress={() => void entrar('PACIENTE')}
+              ocupado={ocupado}
+            />
+            <Boton
+              titulo="Entrar como acompañante"
+              variante="secundario"
+              onPress={() => void entrar('CUIDADOR')}
+              ocupado={ocupado}
+            />
+          </View>
+        ) : (
+          <Boton titulo="Entrar" onPress={() => void entrar()} ocupado={ocupado} />
+        )}
 
         {/* Va justo debajo de "Entrar", que es donde se busca cuando la
             contrasena no funciona. Escondida al final de la pantalla no

@@ -29,6 +29,244 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.6.1] — 2026-09-15
+
+### Corregido
+
+- **El servidor se caía entero cuando la base de datos cerraba una conexión.** El síntoma en
+  la terminal era `Connection terminated unexpectedly` seguido de `Unhandled 'error' event`,
+  y el proceso moría: ni try/catch, ni reintento, ni nada. Con Neon pasa solo, porque el plan
+  gratuito suspende la base de datos cuando lleva unos minutos sin uso y su PgBouncer recicla
+  conexiones por su cuenta.
+
+  El pool ya tenía un `pool.on('error')`, y por eso el fallo costaba de ver: ese oyente cubre
+  las conexiones **ociosas** dentro del pool, y esas sí se reponían solas. Pero una conexión
+  **sacada** del pool con `connect()` es otra cosa: mientras está prestada, `pg` le quita al
+  cliente el oyente del pool, y si la conexión se cae en ese rato el cliente emite `error` sin
+  nadie escuchando. En Node eso termina el proceso.
+
+  Chronova saca una conexión en exactamente dos sitios, los dos escribiendo tomas en una
+  transacción, y uno de ellos corre al arrancar y cada quince minutos. De ahí que se cayera
+  poco después de mostrar el banner.
+
+  Comprobado poniendo las dos situaciones lado a lado: con la conexión ociosa el proceso
+  sobrevive, con la conexión prestada muere. Ahora los dos sitios pasan por `enTransaccion`,
+  que escucha al cliente mientras lo tiene prestado, no deja que el `ROLLBACK` de limpieza
+  tape el error de verdad, y devuelve la conexión rota **destruida** en vez de reciclarla.
+  Antes, un corte puntual dejaba una conexión inservible dentro del pool y el siguiente
+  intento fallaba igual, hasta reiniciar.
+
+  Verificado también contra PostgreSQL de verdad: se terminaron sus diez conexiones desde el
+  servidor de base de datos y el proceso siguió vivo, respondiendo y escribiendo. Las cuatro
+  pruebas de extremo a extremo siguen pasando sobre PostgreSQL real, que es lo que cubre los
+  dos caminos reescritos.
+- **`keepAlive` en el pool.** Sin él, una conexión sin tráfico la puede cortar en silencio
+  cualquiera que esté en medio: el router de casa, el NAT del operador o el propio PgBouncer.
+
+---
+
+## [1.6.0] — 2026-09-15
+
+Segundo bloque de la revisión de requisitos. Con esto, los tres requisitos funcionales que
+estaban a medias pasan a cumplirse de punta a punta.
+
+### Añadido
+
+- **Cambiar la contraseña sin salir de la aplicación.** Hasta ahora la única forma era cerrar
+  sesión, decir que se había olvidado, esperar un código de seis dígitos por correo y
+  teclearlo. Para el público de Chronova eso no es un rodeo, es la razón por la que una
+  contraseña no se cambia nunca. Está en *Mi cuenta*, en las dos aplicaciones.
+
+  Se piden tres campos y no dos. La contraseña actual, porque sin ella un teléfono
+  desbloqueado encima de una mesa es una cuenta secuestrada por quien pase por delante; y la
+  nueva dos veces, porque va oculta y un dedo torcido deja a la persona fuera de su propia
+  cuenta sin saber qué escribió. El cambio cierra las sesiones de los demás teléfonos, que es
+  para lo que sirve, y devuelve un token nuevo para este: echar a alguien de su teléfono por
+  haber hecho lo correcto enseña a no volver a hacerlo.
+- **Elegir el período del historial** (RF-19): semana, mes o tres meses, en el historial del
+  paciente y en el que ve el cuidador. El servidor aceptaba `desde` y `hasta` desde el
+  principio y ninguna pantalla los enviaba. Son tres botones y no un calendario a propósito:
+  elegir dos fechas en un calendario de teléfono es de las interacciones más difíciles que
+  existen para una persona mayor, y las preguntas reales son «¿cómo voy esta semana?» y «¿qué
+  le llevo al médico?».
+- **Elegir cuándo empieza un tratamiento** (RF-06): hoy, mañana u otro día. Antes el
+  formulario nunca enviaba `fechaInicio`, así que todo empezaba hoy y no había forma de
+  registrar un tratamiento que ya venía de antes. Cuando se escribe una fecha a mano se
+  muestra debajo en palabras («martes, 16 de septiembre de 2026»), que es lo que permite
+  darse cuenta de una errata antes de guardarla.
+- **El parentesco del cuidador** (RF-02): un campo opcional en el registro. El servidor lo
+  aceptaba y la pantalla de cuenta ya lo mostraba, pero nadie lo pedía nunca, así que aquel
+  bloque era código muerto. Sirve para que el paciente sepa quién le pide acompañarlo:
+  «Ana Correa» dice bastante menos que «Ana Correa, su hija».
+
+### Corregido
+
+- **Un correo con dos cuentas dejaba una inalcanzable.** Chronova permite a propósito tener
+  cuenta de paciente y de cuidadora con el mismo correo, y el inicio de sesión acepta un
+  `tipo` justamente para eso, pero la app nunca lo enviaba: el servidor devolvía siempre la de
+  paciente y la otra no se podía abrir nunca más, ni recuperando la contraseña.
+
+  Ahora, cuando la contraseña abre las dos, el servidor responde `CUENTA_AMBIGUA` y la app
+  pregunta con cuál entrar. Y solo entonces: si las contraseñas son distintas, la propia
+  contraseña ya dice cuál es y no se pregunta nada. Quien tiene una sola cuenta, que es casi
+  todo el mundo, no ve ningún cambio.
+- **La resiliencia ante fallos de notificación era una casualidad, no una garantía**
+  (RNF-21). Los casos de uso llamaban al notificador sin protección y se salvaban solo porque
+  los adaptadores capturan sus propios errores. Ahora los cinco puntos de envío pasan por un
+  único servicio que aísla el fallo, y hay dos pruebas con un notificador que lanza de verdad.
+
+  Al escribirlas aparecieron **tres** puntos sin proteger y no dos: la revisión había visto
+  los de las tomas y se le escaparon los dos del vínculo. Es la diferencia entre auditar
+  leyendo y auditar ejecutando.
+
+### Cambiado
+
+- **El Entregable 1 se regeneró con las cifras reales.** RNF-12 deja de estar «Parcial» y
+  pasa a verificado con los percentiles medidos; RNF-17 pasa de 166 pruebas a 205 más 4 de
+  extremo a extremo; RNF-02 deja de afirmar un contraste que nadie había calculado y dice el
+  resultado real de los 26 pares. Y tres criterios que decían «Verificado» sin serlo del todo
+  (RNF-03, RNF-04 y RNF-18) ahora dicen exactamente qué falta. Un requisito que se declara
+  cumplido sin estarlo es peor que uno que se declara a medias.
+
+---
+
+## [1.5.1] — 2026-09-15
+
+Correcciones salidas de la revisión de requisitos (`docs/REVISION-DE-REQUISITOS.md`), que
+comparó los 59 requisitos del Entregable 1 contra el código. Cumplen 55; los cuatro que no,
+y los huecos que ningún requisito cubría, están en ese documento.
+
+### Corregido
+
+- **El panel del cuidador decía «Todavía no acompañas a nadie» cuando lo que fallaba era la
+  red.** La lista arrancaba en `[]` en vez de `null`, así que un fallo de carga pintaba a la
+  vez el aviso de error y el estado vacío, a un cuidador que sí acompaña a alguien. Es el
+  mismo arreglo que ya llevaban `medicamentos.tsx`, `historial.tsx` y el perfil del paciente;
+  esta pantalla se había quedado fuera, y es la primera que se ve al entrar como cuidador.
+  Ahora distingue «no he podido preguntar» de «pregunté y no hay ninguno», y en el primer
+  caso ofrece un botón de reintentar en lugar de obligar a tirar hacia abajo.
+- **Los errores de formulario se pintaban arriba mientras el botón estaba abajo.** En el
+  formulario de medicamento y en el registro, `setError` dejaba el mensaje a dos pantallazos
+  por encima y la vista no se movía: el botón parecía muerto y la gente lo tocaba otra vez.
+  Las dos pantallas usan ahora una función `avisar` que pone el mensaje **y** sube hasta él,
+  de modo que no se pueda hacer una cosa sin la otra.
+- **Si fallaba el último paso del restablecimiento, la app decía lo contrario de lo que había
+  pasado.** `restablecerContrasena` y el inicio de sesión automático compartían un `try`: si
+  la contraseña se cambiaba y el inicio de sesión fallaba por un corte de red, el mensaje
+  decía «No pudimos cambiar tu contraseña». La persona lo reintentaba con un código ya
+  consumido y se quedaba fuera de su cuenta creyendo que la contraseña vieja servía. Ahora
+  son dos `try` separados: si falla el segundo, se va a la pantalla de ingreso con «Tu
+  contraseña ya está cambiada, entra con la nueva».
+- **Un par de colores incumplía el contraste mínimo de la norma.** `textoTenue` sobre
+  `superficieSuave` daba 4.35:1, por debajo del 4.5:1 de WCAG 2.1 AA, y no era un par
+  hipotético: es el estado «sin datos» del historial y del panel del cuidador, además a
+  13 pt, donde no vale la excepción de texto grande. El gris pasa de `#67737D` a `#636F79`:
+  ese par sube a 4.61:1 y los otros dos usos mejoran (4.87 sobre `fondo`, 5.15 sobre
+  `superficie`) sin que ninguno empeore. Comprobado calculando los 26 pares en uso.
+- Tildes que faltaban en el historial del cuidador: «Últimos días» y «período», incluida la
+  etiqueta que lee TalkBack en voz alta.
+
+---
+
+## [1.5.0] — 2026-09-11
+
+### Cambiado
+
+- **La Política de Tratamiento de Datos pasa a la versión 2.0**, y con ella el aviso de
+  privacidad y los términos. El cambio de fondo es quién figura como **Responsable del
+  Tratamiento**: ya no está sin definir, y no es uno sino **tres**, que responden de forma
+  conjunta. La **Universidad Católica Luis Amigó** (NIT 890.985.189-9), que aprueba el
+  proyecto, fija sus lineamientos y supervisa, y **Emmanuel Correa Valencia** y **Julián
+  Andrés Herrera Roncancio**, que deciden qué recoge el sistema y cómo se protege. Es lo que
+  la institución les confirmó al equipo, y encaja con la definición legal: es Responsable
+  quien decide sobre la base de datos, y cuando deciden varios, responden varios.
+
+  La §1.3 de la política reparte las obligaciones entre los tres, porque la corresponsabilidad
+  no está regulada en detalle en Colombia y lo que la ley no reparte hay que repartirlo por
+  escrito. Los tres comparten un solo canal de contacto, el de la oficina de protección de
+  datos de la universidad, para que el titular no tenga que averiguar a cuál escribirle.
+
+  No es un retoque de redacción: cambia a quién le otorga la autorización el titular. Por eso
+  sube la versión completa y no la menor, y por eso a quien hubiera aceptado la 1.0 la
+  aplicación le pedirá autorizar de nuevo. El mecanismo ya existía; esta es la primera vez que
+  se usa.
+
+- **Los tres documentos legales se reordenaron para seguir el contenido mínimo que exige el
+  artículo 2.2.2.25.3.1 del Decreto 1074 de 2015**, numeral por numeral, con una tabla de
+  correspondencia al comienzo. Ese es el «formato específico» que pide la norma: no impone
+  plantilla ni diseño, impone contenido, y faltaban tres de los seis puntos.
+
+### Añadido
+
+- **Procedimiento de consultas y reclamos con sus plazos** en la política (10 y 15 días
+  hábiles, con sus prórrogas), que era el numeral 5 que faltaba, y el **período de vigencia de
+  la base de datos**, que era el numeral 6.
+- **`docs/legal/QUE-PEDIRLE-A-LA-UNIVERSIDAD.md`**: la lista corta de lo que todavía depende
+  de la institución (el acto formal por el que asume esta base de datos, si el equipo es parte
+  interna o Encargado, si la base se registra en el RNBD) con el porqué de cada punto.
+- **El Responsable aparece dentro de la app**, no solo en el documento largo: en el aviso de
+  privacidad de la pantalla de registro, en el texto de la casilla de autorización y en *Mis
+  datos y privacidad*, con un botón que abre el correo de la oficina de protección de datos.
+  El numeral 1 del artículo 2.2.2.25.3.2 lo exige donde la persona autoriza, no en un enlace.
+
+### Corregido
+
+- **Los botones «Leer la política completa» y «Leer los términos» abrían una página en
+  blanco.** Apuntaban a `chronova.app`, un dominio que no existe todavía, así que el
+  navegador se abría sobre nada. El arreglo no fue corregir la dirección sino quitarla: los
+  dos documentos viven ahora **dentro de la app** (`src/dominio/textosLegales.ts`, pantalla
+  `app/legal.tsx`), se leen sin conexión y quedan congelados en la versión que cada persona
+  aceptó. Un documento legal que solo existe si hay internet, si el dominio está contratado
+  y si el navegador abre, no es un documento al que el titular tenga acceso, y el numeral 4
+  del artículo 2.2.2.25.3.2 exige que ese acceso exista.
+
+  Los dos son alcanzables además desde la pantalla de registro, que es donde se firma.
+- **El correo de contacto se salía de la tarjeta.** `protecciondedatos@amigo.edu.co` son
+  treinta caracteres sin un solo espacio donde partirlo. Con la letra en «muy grande», que
+  es justo la que pondría alguien que ve mal, se desbordaba 110 px y quedaba cortado, o sea
+  inservible como forma de ejercer derechos. Ahora la etiqueta va encima del valor, el valor
+  se parte por la arroba y por los puntos, y el correo salió de dentro de los párrafos.
+  Comprobado en los dos documentos con la escala de letra más grande de las tres.
+- Tildes que faltaban en la pantalla de privacidad y en la cuenta del cuidador
+  («autorización», «política», «versión», «aquí», «qué»).
+
+---
+
+## [1.4.0] — 2026-09-09
+
+### Añadido
+
+- **Pruebas de extremo a extremo** (`backend/tests/e2e/`). Cuatro recorridos completos contra
+  un servidor que corre en otro proceso y un PostgreSQL de verdad, comprobando al final las
+  filas en la base de datos. Se diferencian de las 194 anteriores en que no hay ningún doble:
+  ni repositorio en memoria, ni reloj fijo, ni servidor simulado.
+
+  Es lo único que puede ver que el esquema SQL y las entidades encajan —un repositorio en
+  memoria acepta cualquier objeto; una tabla con una columna que falta, no—, que los tipos de
+  PostgreSQL van y vuelven bien (TIMESTAMPTZ, JSONB, SMALLINT[], TEXT[]) y que la concurrencia
+  real sobre la misma fila se resuelve. Van en `npm run test:e2e`, aparte de `npm test`, para
+  que el proyecto siga pudiendo probarse en una máquina recién clonada sin encender nada.
+- **Medición de rendimiento** (`npm run rendimiento`). Percentiles y peticiones por segundo de
+  los siete endpoints del camino crítico, con carga sostenida y peticiones simultáneas. Reporta
+  percentiles y no la media, porque la media esconde justo lo que se nota: si una de cada veinte
+  peticiones tarda tres segundos, la media apenas se mueve.
+
+  Primer hallazgo: el panel del cuidador es el que peor escala —167 ms con diez pacientes,
+  frente a 21 ms de la lista de medicamentos— porque calcula la adherencia de cada paciente por
+  separado. Anotado en el trabajo futuro.
+- **Entregable 3 (Capítulo 3: Desarrollo)**, con su generador `docs/generar-entregable3.js`.
+  Incluye los tres manuales completos —instalación, usuario y técnico— y las cifras medidas,
+  no estimadas. El generador avisa si una línea de código pasa de 84 caracteres, porque Word
+  la parte y la segunda mitad pierde la sangría.
+
+### Corregido
+
+- La primera versión de la medición de rendimiento calentaba omitiendo diez tomas y luego medía
+  omitir esas mismas, que ya estaban resueltas. Salían nueve errores y «2,3 ms de tiempo de
+  respuesta», que era lo que tarda el servidor en decir que no. Un número rápido y mentiroso.
+
+---
+
 ## [1.3.2] — 2026-09-09
 
 ### Añadido

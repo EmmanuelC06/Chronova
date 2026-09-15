@@ -53,6 +53,7 @@ const CATALOGO = {
   agregar: 'plus',
   editar: 'pencil-outline',
   inventario: 'package-variant',
+  candado: 'lock-outline',
 
   // Avisos
   aviso: 'alert-outline',

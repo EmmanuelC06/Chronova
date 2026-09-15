@@ -11,7 +11,7 @@ import {
   esquemaDeRegistroDePaciente,
   esquemaDeRestablecimiento,
   esquemaDeSolicitudDeRecuperacion,
-} from '../dtos/esquemas.js';
+  esquemaDeCambioDeContrasena,} from '../dtos/esquemas.js';
 
 /**
  * Rutas de autenticacion y perfil.
@@ -108,6 +108,31 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
         ...datos,
       });
       respuesta.json(preferencias);
+    }),
+  );
+
+  // PATCH /api/auth/contrasena
+  //
+  // Cambiar la contrasena SIN salir de la app. Antes solo se podia por
+  // el camino de "olvide mi contrasena", que obliga a cerrar sesion y a
+  // esperar un correo: para alguien mayor, eso significa que no se
+  // cambia nunca.
+  //
+  // Devuelve un token nuevo porque el cambio invalida todas las sesiones
+  // abiertas, incluida esta. Sin el, la persona quedaria fuera de su
+  // cuenta justo despues de hacer lo correcto.
+  router.patch(
+    '/contrasena',
+    autenticar(casosDeUso.verificarSesion),
+    asincrono(async (peticion, respuesta) => {
+      const datos = esquemaDeCambioDeContrasena.parse(peticion.body);
+      const solicitante = solicitanteDe(peticion);
+      const resultado = await casosDeUso.cambiarContrasena.ejecutar({
+        usuarioId: solicitante.id,
+        tipo: solicitante.tipo,
+        ...datos,
+      });
+      respuesta.json(resultado);
     }),
   );
 

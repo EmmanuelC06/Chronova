@@ -1,10 +1,11 @@
 import { Linking, ScrollView, View } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 
 import {
   AVISO_DE_PRIVACIDAD,
-  URL_DE_LA_POLITICA,
-  URL_DE_LOS_TERMINOS,
+  RESPONSABLES,
+  RUTA_DE_LA_POLITICA,
+  RUTA_DE_LOS_TERMINOS,
   VERSION_DE_LA_POLITICA,
 } from '../src/dominio/politicaDeDatos';
 import { Aviso, Boton, Rotulo, Tarjeta, Texto } from '../src/ui/componentes/basicos';
@@ -63,12 +64,12 @@ export default function Privacidad() {
         {/* ---- Constancia de lo que autorizó ---- */}
         {perfil ? (
           <Tarjeta>
-            <Rotulo>Tu autorizacion</Rotulo>
+            <Rotulo>Tu autorización</Rotulo>
 
             {autorizacion?.consta ? (
               <>
                 <Texto color={colores.textoSuave}>
-                  Aceptaste la version {autorizacion.versionDePolitica} de esta politica el{' '}
+                  Aceptaste la versión {autorizacion.versionDePolitica} de esta política el{' '}
                   {fechaLegible(autorizacion.otorgadaEn)}.
                 </Texto>
                 <Texto variante="pequeno" color={colores.textoTenue}>
@@ -77,7 +78,7 @@ export default function Privacidad() {
                 </Texto>
                 {autorizacion.hayVersionMasReciente ? (
                   <Aviso
-                    mensaje={`Hay una version mas reciente de la politica (la ${VERSION_DE_LA_POLITICA}). Te pediremos que la revises.`}
+                    mensaje={`Hay una versión más reciente de la política (la ${VERSION_DE_LA_POLITICA}). Te pediremos que la revises.`}
                     tono="info"
                   />
                 ) : null}
@@ -93,7 +94,7 @@ export default function Privacidad() {
 
         {/* ---- Derechos ---- */}
         <Tarjeta>
-          <Rotulo>Que puedes hacer</Rotulo>
+          <Rotulo>Qué puedes hacer</Rotulo>
           <Texto color={colores.textoSuave}>
             Muchas de estas cosas las haces tú mismo, sin pedirle permiso a nadie ni esperar
             respuesta:
@@ -110,20 +111,33 @@ export default function Privacidad() {
             </Texto>
           ))}
           <Texto variante="pequeno" color={colores.textoTenue}>
-            Para lo que no puedes hacer desde la app, escribenos y te respondemos: las consultas en
-            máximo 10 días hábiles y los reclamos en 15, que son los plazos que fija la ley.
+            Para lo que no puedes hacer desde la app, escríbenos con el botón de abajo y te
+            respondemos: las consultas en máximo 10 días hábiles y los reclamos en 15, que son los
+            plazos que fija la ley.
           </Texto>
         </Tarjeta>
 
         <Boton
+          titulo="Escribir para ejercer mis derechos"
+          variante="secundario"
+          onPress={() =>
+            void Linking.openURL(
+              `mailto:${RESPONSABLES.contacto.correo}?subject=${encodeURIComponent(
+                'Derechos sobre mis datos personales en Chronova',
+              )}`,
+            )
+          }
+        />
+
+        <Boton
           titulo="Leer la política completa"
           variante="secundario"
-          onPress={() => void Linking.openURL(URL_DE_LA_POLITICA)}
+          onPress={() => router.push(RUTA_DE_LA_POLITICA)}
         />
         <Boton
           titulo="Leer los términos y condiciones"
           variante="secundario"
-          onPress={() => void Linking.openURL(URL_DE_LOS_TERMINOS)}
+          onPress={() => router.push(RUTA_DE_LOS_TERMINOS)}
         />
 
         <Texto variante="pequeno" color={colores.textoTenue}>

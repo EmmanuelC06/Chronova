@@ -175,6 +175,19 @@ export const esquemaDeRestablecimiento = z.object({
   tipo: z.enum(['PACIENTE', 'CUIDADOR']).optional(),
 });
 
+/**
+ * Cambiar la contrasena estando dentro.
+ *
+ * No lleva email ni codigo: quien puede hacerlo es quien ya tiene una
+ * sesion abierta, y la identidad sale del token, no del cuerpo. Enviarla
+ * en el cuerpo permitiria a alguien con sesion propia intentar cambiar la
+ * de otro.
+ */
+export const esquemaDeCambioDeContrasena = z.object({
+  contrasenaActual: z.string().min(1, 'Escribe tu contraseña actual.').max(200),
+  nuevaContrasena: z.string().min(1, 'Escribe tu contraseña nueva.').max(200),
+});
+
 export const esquemaDeDispositivo = z.object({
   token: z.string().min(1, 'El token del dispositivo es obligatorio.').max(200),
   plataforma: z.enum(['android', 'ios', 'web']),

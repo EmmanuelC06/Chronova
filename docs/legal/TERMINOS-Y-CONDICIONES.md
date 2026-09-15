@@ -1,19 +1,25 @@
-# Términos y Condiciones de Uso — Chronova
+# Términos y Condiciones de Uso de Chronova
 
-**Versión 1.0 · Vigente desde el [FECHA DE PUBLICACIÓN]**
+**Versión 2.0 · Vigente desde el [FECHA DE PUBLICACIÓN]**
 
-> ⚠️ **Mismo aviso que en la Política de Tratamiento:** este texto lo redactó Claude, no un
+> **Mismo aviso que en la Política de Tratamiento:** este texto lo redactó Claude, no un
 > abogado. Describe con exactitud lo que la aplicación hace, pero antes de publicarlo hay
-> que completar los campos entre corchetes y hacerlo revisar por alguien con formación
-> jurídica.
+> que completar los campos entre corchetes y hacerlo revisar por la oficina de protección de
+> datos de la universidad.
 
 ---
 
-## 1. Qué es esto
+## 1. Qué es esto y quién responde
 
 Estos términos regulan el uso de **Chronova**, una aplicación móvil desarrollada como
 proyecto académico por Emmanuel Correa Valencia y Julián Andrés Herrera Roncancio en la
-Universidad Católica Luis Amigó (Medellín, Colombia).
+**Universidad Católica Luis Amigó** (NIT 890.985.189-9, Transversal 51A #67B 90, Medellín,
+Colombia).
+
+Los datos personales que la aplicación recoge tienen **tres Responsables del Tratamiento**:
+la universidad y los dos desarrolladores. El reparto de obligaciones entre ellos está
+descrito en la [Política de Tratamiento de Datos Personales](POLITICA-DE-TRATAMIENTO-DE-DATOS.md),
+§1.3, y los tres atienden por un mismo canal.
 
 Al crear una cuenta, el usuario acepta estos términos. Quien no los acepte no debe usar la
 aplicación.
@@ -93,10 +99,10 @@ no está preparada hoy para ese supuesto.
 - El usuario puede **modificar sus datos** y **revocar el acceso de cualquier cuidador**
   en cualquier momento, sin justificación.
 - Puede solicitar la **eliminación de su cuenta** escribiendo a
-  **[CORREO POR COMPLETAR]**.
+  **protecciondedatos@amigo.edu.co**.
 - Suspender un medicamento **conserva su historial de tomas**, porque ese historial es
   evidencia del tratamiento seguido y borrarlo distorsionaría el registro clínico.
-- El responsable puede suspender una cuenta que incumpla estos términos de forma grave,
+- Los responsables pueden suspender una cuenta que incumpla estos términos de forma grave,
   informando al usuario.
 
 ---
@@ -125,10 +131,15 @@ momento.
 
 Chronova se ofrece **tal cual**, en el marco de un proyecto académico y sin ánimo de lucro.
 
-Dentro de lo permitido por la ley colombiana, los autores no responden por daños derivados
-de: la imposibilidad de usar la aplicación, la pérdida de información por fallos técnicos,
-alarmas no recibidas o recibidas tarde, o **decisiones sobre un tratamiento tomadas con
-base en la aplicación en lugar de con un profesional de la salud**.
+Dentro de lo permitido por la ley colombiana, ni la universidad ni los autores responden por
+daños derivados de: la imposibilidad de usar la aplicación, la pérdida de información por
+fallos técnicos, alarmas no recibidas o recibidas tarde, o **decisiones sobre un tratamiento
+tomadas con base en la aplicación en lugar de con un profesional de la salud**.
+
+Esta cláusula limita la responsabilidad por el **funcionamiento de la aplicación**. No
+limita, ni podría limitar, las obligaciones que la Ley 1581 de 2012 les impone a los
+Responsables del Tratamiento frente al titular de los datos: esas se cumplen en los términos
+de la Política de Tratamiento y no se renuncian aceptando estos términos.
 
 Nada en esta cláusula excluye la responsabilidad que la ley no permite excluir.
 
@@ -150,12 +161,13 @@ Los cambios sustanciales se comunicarán dentro de la aplicación antes de entra
 Cada versión de este documento lleva número y fecha, y las anteriores se conservan en el
 repositorio del proyecto.
 
-**Contacto:** [CORREO POR COMPLETAR]
+**Contacto:** protecciondedatos@amigo.edu.co · +57 (604) 448 7666
 
 ---
 
-## Anexo — Historial de versiones
+## Anexo. Historial de versiones
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| 1.0 | [PENDIENTE] | Versión inicial |
+| 1.0 | [NO PUBLICADA] | Versión inicial |
+| 2.0 | [PENDIENTE] | Se identifican tres Responsables del Tratamiento, la universidad y los dos desarrolladores, con el reparto de obligaciones entre ellos, y se precisa que la limitación de responsabilidad no alcanza a los deberes de la Ley 1581. |

@@ -80,6 +80,11 @@ interface ValorDeSesion {
     rol?: string | null;
     aceptaPoliticaDeDatos: boolean;
   }): Promise<void>;
+  /** Cambia la contrasena sin cerrar la sesion de este telefono. */
+  cambiarContrasena(datos: {
+    contrasenaActual: string;
+    nuevaContrasena: string;
+  }): Promise<void>;
   cambiarPreferencias(cambios: Partial<Preferencias>): Promise<void>;
   cerrarSesion(): Promise<void>;
 }
@@ -305,6 +310,32 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
     [api, activar],
   );
 
+  /**
+   * Cambiar la contrasena y quedarse dentro.
+   *
+   * El servidor cierra TODAS las sesiones al cambiarla, incluida esta, y
+   * devuelve un token de recambio para este telefono. Guardarlo es lo que
+   * separa "cambie mi contrasena" de "cambie mi contrasena y me echo
+   * sola de la app".
+   *
+   * Se reutiliza el mismo camino que usa la renovacion automatica de
+   * sesion, para que solo haya un sitio que sepa como se reemplaza un
+   * token.
+   */
+  const cambiarContrasena = useCallback<ValorDeSesion['cambiarContrasena']>(
+    async (datos) => {
+      const { token } = await api.cambiarContrasena(datos);
+      api.usarToken(token);
+      setSesion((anterior) => {
+        if (!anterior) return anterior;
+        const renovada = { ...anterior, token };
+        void almacen.guardar(renovada);
+        return renovada;
+      });
+    },
+    [api, almacen],
+  );
+
   const cambiarPreferencias = useCallback(
     async (cambios: Partial<Preferencias>) => {
       // Se aplica de inmediato en pantalla y luego se confirma con el
@@ -357,6 +388,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       iniciarSesion,
       registrarPaciente,
       registrarCuidador,
+      cambiarContrasena,
       cambiarPreferencias,
       cerrarSesion,
     }),
@@ -373,6 +405,7 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       iniciarSesion,
       registrarPaciente,
       registrarCuidador,
+      cambiarContrasena,
       cambiarPreferencias,
       cerrarSesion,
     ],

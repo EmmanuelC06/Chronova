@@ -121,7 +121,7 @@ export default function CuentaDelCuidador() {
             </Texto>
             {autorizacion.hayVersionMasReciente ? (
               <Aviso
-                mensaje={`La politica cambio desde entonces. La version vigente es la ${VERSION_DE_LA_POLITICA}; puedes leerla aqui abajo.`}
+                mensaje={`La política cambió desde entonces. La versión vigente es la ${VERSION_DE_LA_POLITICA}; puedes leerla aquí abajo.`}
                 tono="info"
               />
             ) : null}
@@ -140,6 +140,13 @@ export default function CuentaDelCuidador() {
           onPress={() => router.push('/privacidad')}
         />
       </Tarjeta>
+
+      <Boton
+        titulo="Cambiar mi contraseña"
+        variante="secundario"
+        icono="candado"
+        onPress={() => router.push('/contrasena')}
+      />
 
       <Boton
         titulo="Cerrar sesión"

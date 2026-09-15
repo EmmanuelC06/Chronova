@@ -29,7 +29,21 @@ import { primerNombre } from '../../../src/ui/texto';
 export default function Pacientes() {
   const { api, perfil } = useSesion();
 
-  const [pacientes, setPacientes] = useState<PacienteEnPanel[]>([]);
+  /**
+   * `null` mientras no se haya conseguido la lista ni una sola vez.
+   *
+   * Es el mismo arreglo que ya llevan `medicamentos.tsx`, `historial.tsx`
+   * y el perfil del paciente, y esta pantalla se habia quedado fuera. Con
+   * `[]` como valor inicial, un fallo de red pintaba a la vez el aviso de
+   * error y el estado vacio: "Todavia no acompañas a nadie", a un
+   * cuidador que acompaña a seis. Es falso, es alarmante (parece que la
+   * app perdio los vinculos) y ademas es lo primero que se ve al entrar
+   * como cuidador.
+   *
+   * Distinguir "no he podido preguntar" de "pregunte y no hay ninguno"
+   * es lo unico que hace falta para no mentir.
+   */
+  const [pacientes, setPacientes] = useState<PacienteEnPanel[] | null>(null);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +99,7 @@ export default function Pacientes() {
 
   if (cargando) return <Cargando mensaje="Cargando tus pacientes..." />;
 
-  const requierenAtencion = pacientes.filter((p) => p.requiereAtencion);
+  const requierenAtencion = (pacientes ?? []).filter((p) => p.requiereAtencion);
 
   return (
     <ScrollView
@@ -110,25 +124,36 @@ export default function Pacientes() {
           Hola, {perfil ? primerNombre(perfil.nombre) : 'cuidador'}
         </Texto>
         <Texto color={colores.textoSuave}>
-          {pacientes.length === 0
-            ? 'Aún no acompañas a nadie.'
-            : requierenAtencion.length === 0
-              ? 'Todos tus pacientes van bien.'
-              : `${requierenAtencion.length} paciente(s) necesitan tu atención.`}
+          {pacientes === null
+            ? 'No pudimos consultar a tus pacientes.'
+            : pacientes.length === 0
+              ? 'Aún no acompañas a nadie.'
+              : requierenAtencion.length === 0
+                ? 'Todos tus pacientes van bien.'
+                : `${requierenAtencion.length} paciente(s) necesitan tu atención.`}
         </Texto>
       </View>
 
       {error ? <Aviso mensaje={error} tono="error" /> : null}
       {exito ? <Aviso mensaje={exito} tono="exito" /> : null}
 
-      {pacientes.length === 0 ? (
+      {/*
+        El estado vacio SOLO cuando de verdad consta que no hay ninguno.
+        Si `pacientes` es null la lista no se pudo traer, y ahi lo unico
+        honesto es el aviso de error de arriba mas un boton para volver a
+        intentarlo: tirar hacia abajo para refrescar es un gesto que este
+        usuario no tiene por que conocer.
+      */}
+      {pacientes === null ? (
+        <Boton titulo="Reintentar" variante="secundario" onPress={() => void cargar()} />
+      ) : pacientes.length === 0 ? (
         <EstadoVacio
           titulo="Todavía no acompañas a nadie"
           descripcion="Escribe abajo el correo del paciente. Cuando acepte tu solicitud, verás aquí cómo va su tratamiento."
         />
       ) : null}
 
-      {pacientes.map((paciente) => (
+      {(pacientes ?? []).map((paciente) => (
         <TarjetaDePaciente key={paciente.vinculoId} paciente={paciente} />
       ))}
 

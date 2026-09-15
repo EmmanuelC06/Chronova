@@ -5,6 +5,7 @@ import type { RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas
 import type { TomaPlana } from '../../../domain/toma/Toma.js';
 import type { Notificador } from '../../ports/Notificador.js';
 import type { Reloj } from '../../ports/Reloj.js';
+import { avisarSinRomper } from '../../services/avisarSinRomper.js';
 import type { PoliticaDeAcceso, Solicitante } from '../../services/PoliticaDeAcceso.js';
 
 export type AccionSobreLaToma = 'CONFIRMAR' | 'OMITIR' | 'POSPONER';
@@ -105,7 +106,9 @@ export class RegistrarToma {
             ? `Se acabó el ${medicamento.nombre}. Consigue más antes de la próxima toma.`
             : `Te quedan ${medicamento.stock.unidadesDisponibles} unidades de ${medicamento.nombre}.`;
 
-          await this.notificador.enviar({
+          // Sin romper: la toma ya esta guardada dos lineas mas arriba.
+          // Si el aviso falla se pierde el aviso, no el registro.
+          await avisarSinRomper(this.notificador, {
             tipo: 'STOCK_BAJO',
             destinatarioId: toma.pacienteId,
             tipoDeDestinatario: 'PACIENTE',

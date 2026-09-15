@@ -4,6 +4,7 @@ import type { RepositorioDeTomas } from '../../../domain/toma/RepositorioDeTomas
 import type { RepositorioDeVinculos } from '../../../domain/vinculo/RepositorioDeVinculos.js';
 import type { Notificador } from '../../ports/Notificador.js';
 import type { Reloj } from '../../ports/Reloj.js';
+import { avisarSinRomper } from '../../services/avisarSinRomper.js';
 
 export interface ResultadoDelCierre {
   tomasCerradas: number;
@@ -86,7 +87,11 @@ export class CerrarTomasVencidas {
     for (const vinculo of vinculos) {
       if (!vinculo.autorizar('recibeAlertas')) continue;
 
-      await this.notificador.enviar({
+      // Sin romper, y aqui importa todavia mas que al registrar una
+      // toma: esto corre en bucle sobre TODOS los pacientes. Que el
+      // cuidador de uno tenga un token invalido no puede dejar sin
+      // cerrar las tomas de los demas.
+      const llego = await avisarSinRomper(this.notificador, {
         tipo: 'TOMA_PERDIDA',
         destinatarioId: vinculo.cuidadorId,
         tipoDeDestinatario: 'CUIDADOR',
@@ -97,7 +102,8 @@ export class CerrarTomasVencidas {
             : `${nombreDelPaciente} no confirmó ${cantidad} tomas de su tratamiento.`,
         datos: { pacienteId: pacienteId.valor, cantidad },
       });
-      enviados += 1;
+
+      if (llego) enviados += 1;
     }
 
     return enviados;

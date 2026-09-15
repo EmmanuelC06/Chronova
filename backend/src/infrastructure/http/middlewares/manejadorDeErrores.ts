@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 import {
   ErrorDeAutenticacion,
+  ErrorDeCuentaAmbigua,
   ErrorDeAutorizacion,
   ErrorDeConflicto,
   ErrorDeDominio,
@@ -23,6 +24,7 @@ const CODIGOS: Record<string, number> = {
   NO_AUTORIZADO: 403,
   NO_ENCONTRADO: 404,
   CONFLICTO: 409,
+  CUENTA_AMBIGUA: 409,
   REGLA_DE_NEGOCIO: 422,
 };
 
@@ -112,4 +114,5 @@ export const ERRORES_MAPEADOS = {
   ErrorDeAutenticacion,
   ErrorDeAutorizacion,
   ErrorDeReglaDeNegocio,
+  ErrorDeCuentaAmbigua,
 };

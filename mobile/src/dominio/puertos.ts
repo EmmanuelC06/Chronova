@@ -69,6 +69,15 @@ export interface ApiDeChronova {
     tipo?: TipoDeUsuario;
   }): Promise<Sesion>;
 
+  /**
+   * Cambiar la contrasena con la sesion abierta. Devuelve un token nuevo
+   * porque el cambio invalida todas las sesiones, esta incluida.
+   */
+  cambiarContrasena(datos: {
+    contrasenaActual: string;
+    nuevaContrasena: string;
+  }): Promise<{ token: string }>;
+
   obtenerPerfil(): Promise<Perfil>;
 
   /**

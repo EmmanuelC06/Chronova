@@ -48,11 +48,23 @@ export const colores = {
   /**
    * Solo para rotulos y notas al pie.
    *
-   * Empezo siendo #8494A0 y se oscurecio hasta aqui porque aquel se
-   * quedaba en 2.96:1 sobre el fondo, por debajo del minimo de la norma.
-   * Es el limite: cualquier gris mas claro incumple.
+   * Empezo siendo #8494A0, que se quedaba en 2.96:1 sobre el fondo, muy
+   * por debajo del minimo de la norma. Se oscurecio a #67737D, que
+   * pasaba sobre `fondo` (4.60:1) y sobre `superficie` (4.86:1).
+   *
+   * Pero no sobre `superficieSuave`: ahi daba 4.35:1, por debajo del
+   * 4.5:1 que exige WCAG 2.1 AA, y ese par no era hipotetico: es
+   * ESTILO_POR_NIVEL.SIN_DATOS, que se pinta en el historial del
+   * paciente y en el panel del cuidador, ademas a 13 pt, donde la norma
+   * no admite la excepcion de texto grande.
+   *
+   * De ahi este #636F79. Sube ese par a 4.61:1 y mejora los otros dos
+   * usos del gris (4.87 sobre `fondo`, 5.15 sobre `superficie`) sin
+   * empeorar ninguno. Ahora SI es el limite: cualquier gris mas claro
+   * vuelve a incumplir sobre `superficieSuave`, que es el fondo mas
+   * oscuro sobre el que este gris llega a pintarse.
    */
-  textoTenue: '#67737D',
+  textoTenue: '#636F79',
   textoInverso: '#FFFFFF',
 
   /**

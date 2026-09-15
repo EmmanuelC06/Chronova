@@ -13,6 +13,11 @@ import {
   Tarjeta,
   Texto,
 } from '../../src/ui/componentes/basicos';
+import {
+  SelectorDePeriodo,
+  fechaHaceDias,
+  type DiasDePeriodo,
+} from '../../src/ui/componentes/SelectorDePeriodo';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
 import { colores, espacio, ESTILO_POR_ESTADO, ESTILO_POR_NIVEL, radio } from '../../src/ui/tema';
 
@@ -30,11 +35,12 @@ export default function Historial() {
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dias, setDias] = useState<DiasDePeriodo>(30);
 
   const cargar = useCallback(async () => {
     try {
       setError(null);
-      setHistorial(await api.consultarHistorial());
+      setHistorial(await api.consultarHistorial({ desde: fechaHaceDias(dias) }));
     } catch (problema) {
       setError(
         problema instanceof ErrorDeApi ? problema.message : 'No pudimos cargar tu historial.',
@@ -43,7 +49,7 @@ export default function Historial() {
       setCargando(false);
       setRefrescando(false);
     }
-  }, [api]);
+  }, [api, dias]);
 
   useFocusEffect(
     useCallback(() => {
@@ -90,6 +96,11 @@ export default function Historial() {
         refreshControl={recargar}
       >
         {error ? <Aviso mensaje={error} tono="error" /> : null}
+
+        {/* Tambien aqui: "no hay nada" puede ser solo de esta semana, y
+            con tres meses quiza si haya algo que ver. */}
+        <SelectorDePeriodo dias={dias} onCambiar={setDias} ocupado={refrescando} />
+
         <EstadoVacio
           titulo="Todavía no hay historial"
           descripcion="A medida que confirmes tus tomas, aquí verás cómo va tu tratamiento."
@@ -111,6 +122,8 @@ export default function Historial() {
       refreshControl={recargar}
     >
       {error ? <Aviso mensaje={error} tono="error" /> : null}
+
+      <SelectorDePeriodo dias={dias} onCambiar={setDias} ocupado={refrescando} />
 
       {/* ---- Resumen ---- */}
       <Tarjeta>

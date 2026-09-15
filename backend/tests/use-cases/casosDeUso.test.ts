@@ -8,6 +8,7 @@ import {
   montarAplicacion,
 } from '../ayudas.js';
 import type { EntornoDePrueba } from '../ayudas.js';
+import { NotificadorEnConsola } from '../../src/infrastructure/notificaciones/NotificadorEnConsola.js';
 
 /**
  * Pruebas de los casos de uso completos.
@@ -96,6 +97,56 @@ describe('Registro e inicio de sesion', () => {
 
     expect(comoPac.usuario.tipo).toBe('PACIENTE');
     expect(comoCui.usuario.tipo).toBe('CUIDADOR');
+  });
+
+  it('si el correo abre dos cuentas y no se dice cual, se pregunta', async () => {
+    await crearPacienteDePrueba(app, 'mismo@test.com');
+    await crearCuidadorDePrueba(app, 'mismo@test.com');
+
+    // Sin `tipo`, antes entraba siempre como paciente y la cuenta de
+    // cuidadora quedaba inalcanzable desde la app, que nunca lo envia.
+    await expect(
+      app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+        email: 'mismo@test.com',
+        contrasena: 'contrasena-segura',
+      }),
+    ).rejects.toMatchObject({ codigo: 'CUENTA_AMBIGUA' });
+  });
+
+  it('con una sola cuenta no pregunta nada, aunque no se diga el tipo', async () => {
+    await crearCuidadorDePrueba(app, 'solo-cuidadora@test.com');
+
+    const sesion = await app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+      email: 'solo-cuidadora@test.com',
+      contrasena: 'contrasena-segura',
+    });
+
+    expect(sesion.usuario.tipo).toBe('CUIDADOR');
+  });
+
+  it('si las dos cuentas tienen contrasenas distintas, la contrasena decide', async () => {
+    await crearPacienteDePrueba(app, 'dos@test.com');
+    await app.contenedor.casosDeUso.registrarCuidador.ejecutar({
+      nombre: 'Ana Correa',
+      email: 'dos@test.com',
+      contrasena: 'otra-contrasena-distinta',
+      aceptaPoliticaDeDatos: true,
+    });
+
+    // No hay ambiguedad que resolver: solo una de las dos abre con esta.
+    const sesion = await app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+      email: 'dos@test.com',
+      contrasena: 'otra-contrasena-distinta',
+      tipo: 'CUIDADOR',
+    });
+    expect(sesion.usuario.tipo).toBe('CUIDADOR');
+
+    // Y la de paciente sigue abriendo con la suya, sin preguntar.
+    const comoPaciente = await app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+      email: 'dos@test.com',
+      contrasena: 'contrasena-segura',
+    });
+    expect(comoPaciente.usuario.tipo).toBe('PACIENTE');
   });
 });
 
@@ -1357,3 +1408,107 @@ async function registrarLosartan(
     stock,
   });
 }
+
+// =================================================================
+/**
+ * Resistencia del CASO DE USO a un notificador que lanza.
+ *
+ * Ya habia una prueba de que el adaptador de Expo se traga sus errores,
+ * y por eso el RNF-21 parecia cumplido. Pero eso probaba el adaptador,
+ * no el caso de uso: `RegistrarToma` y `CerrarTomasVencidas` hacian
+ * `await notificador.enviar(...)` sin proteccion, asi que la garantia
+ * dependia de que TODOS los adaptadores, presentes y futuros, se
+ * portaran bien.
+ *
+ * Estas dos pruebas usan un notificador que SI lanza, que es lo unico
+ * que distingue "no falla" de "no puede fallar".
+ */
+class NotificadorQueFalla extends NotificadorEnConsola {
+  override async enviar(): Promise<void> {
+    throw new Error('el servicio de avisos esta caido');
+  }
+}
+
+describe('Un notificador que falla no arrastra al caso de uso', () => {
+  let roto: EntornoDePrueba;
+
+  beforeEach(() => {
+    roto = montarAplicacion(MANANA_7AM_EN_BOGOTA, '1h', {
+      notificador: new NotificadorQueFalla(),
+    });
+  });
+
+  it('la toma queda confirmada aunque el aviso de stock bajo reviente', async () => {
+    const paciente = await crearPacienteDePrueba(roto);
+    await roto.contenedor.casosDeUso.registrarMedicamento.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      nombre: 'Losartan',
+      dosis: { cantidad: 1, unidad: 'tableta' },
+      frecuencia: { tipo: 'DIARIA' },
+      horarios: ['08:00'],
+      fechaInicio: HOY,
+      // Con dos unidades y umbral tres, confirmar dispara STOCK_BAJO,
+      // que es la unica notificacion que manda RegistrarToma.
+      stock: { unidadesDisponibles: 2, umbralDeAlerta: 3 },
+    });
+
+    const agenda = await roto.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      fecha: HOY,
+    });
+
+    const resultado = await roto.contenedor.casosDeUso.registrarToma.ejecutar({
+      solicitante: paciente.solicitante,
+      tomaId: agenda.elementos[0]!.tomaId,
+      accion: 'CONFIRMAR',
+    });
+
+    // Lo que importa: la toma esta registrada y la persona no ve un error.
+    expect(resultado.toma.estado).toBe('TOMADA');
+    expect(resultado.avisoDeStock).not.toBeNull();
+
+    // Y sigue estandolo cuando se vuelve a preguntar.
+    const despues = await roto.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      fecha: HOY,
+    });
+    expect(despues.elementos[0]?.estado).toBe('TOMADA');
+  });
+
+  it('las tomas vencidas se cierran aunque no se pueda avisar a nadie', async () => {
+    const paciente = await crearPacienteDePrueba(roto);
+    await crearCuidadorDePrueba(roto);
+    await roto.contenedor.casosDeUso.registrarMedicamento.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      nombre: 'Losartan',
+      dosis: { cantidad: 1, unidad: 'tableta' },
+      frecuencia: { tipo: 'DIARIA' },
+      horarios: ['08:00'],
+      fechaInicio: HOY,
+    });
+
+    await roto.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+      permisos: { recibeAlertas: true },
+    });
+
+    await roto.contenedor.casosDeUso.obtenerAgendaDelDia.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+      fecha: HOY,
+    });
+
+    roto.reloj.mover(new Date('2026-08-31T15:01:00Z'));
+    const resultado = await roto.contenedor.casosDeUso.cerrarTomasVencidas.ejecutar();
+
+    // La toma se cierra igual. El aviso no sale, y eso se refleja en el
+    // contador en vez de mentir diciendo que se envio.
+    expect(resultado.tomasCerradas).toBe(1);
+    expect(resultado.avisosEnviados).toBe(0);
+  });
+});

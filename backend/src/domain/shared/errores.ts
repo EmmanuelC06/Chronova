@@ -65,3 +65,30 @@ export class ErrorDeAutorizacion extends ErrorDeDominio {
 export class ErrorDeReglaDeNegocio extends ErrorDeDominio {
   readonly codigo = 'REGLA_DE_NEGOCIO';
 }
+
+/**
+ * El correo y la contrasena sirven para DOS cuentas distintas.
+ *
+ * Chronova permite a proposito que una misma persona tenga cuenta de
+ * paciente y de cuidadora con el mismo correo: una hija que acompaña a
+ * su madre y que ademas sigue su propio tratamiento es un caso real, no
+ * rebuscado. El inicio de sesion acepta un `tipo` justamente para eso.
+ *
+ * El problema era que la app nunca lo enviaba, y sin `tipo` el servidor
+ * devolvia siempre la cuenta de paciente. La de cuidadora quedaba
+ * inalcanzable para siempre, y ni recuperar la contrasena la rescataba.
+ *
+ * Con este error el servidor deja de elegir por su cuenta cuando no
+ * puede saberlo, y le pasa la pregunta a quien si la puede responder.
+ * No revela nada: solo se lanza DESPUES de comprobar que la contrasena
+ * es correcta para las dos cuentas.
+ */
+export class ErrorDeCuentaAmbigua extends ErrorDeDominio {
+  readonly codigo = 'CUENTA_AMBIGUA';
+  constructor(
+    mensaje = 'Este correo tiene una cuenta de paciente y otra de acompañante. ' +
+      'Elige con cuál quieres entrar.',
+  ) {
+    super(mensaje);
+  }
+}

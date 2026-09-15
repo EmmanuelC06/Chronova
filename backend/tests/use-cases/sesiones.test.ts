@@ -268,3 +268,125 @@ describe('M-4 · La sesion se renueva sola antes de caducar', () => {
     expect(VerificarSesion.DIAS_PARA_RENOVAR).toBeLessThan(7);
   });
 });
+
+// =================================================================
+describe('Cambiar la contrasena estando dentro', () => {
+  it('cambia la contrasena y devuelve un token que sigue sirviendo', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+
+    const { token } = await app.contenedor.casosDeUso.cambiarContrasena.ejecutar({
+      usuarioId: Identificador.desde(paciente.id),
+      tipo: 'PACIENTE',
+      contrasenaActual: 'contrasena-segura',
+      nuevaContrasena: 'una-contrasena-nueva',
+    });
+
+    // El token devuelto vale: no se echa a la persona de su telefono por
+    // haber hecho lo correcto.
+    expect(app.contenedor.tokens.verificar(token)).toMatchObject({
+      usuarioId: paciente.id,
+      tipo: 'PACIENTE',
+    });
+
+    // Y la contrasena nueva es la que abre.
+    const sesion = await app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+      email: 'rosa@test.com',
+      contrasena: 'una-contrasena-nueva',
+    });
+    expect(sesion.usuario.id).toBe(paciente.id);
+  });
+
+  it('la contrasena vieja deja de servir', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+
+    await app.contenedor.casosDeUso.cambiarContrasena.ejecutar({
+      usuarioId: Identificador.desde(paciente.id),
+      tipo: 'PACIENTE',
+      contrasenaActual: 'contrasena-segura',
+      nuevaContrasena: 'una-contrasena-nueva',
+    });
+
+    await expect(
+      app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+        email: 'rosa@test.com',
+        contrasena: 'contrasena-segura',
+      }),
+    ).rejects.toThrow(/no son correctos/);
+  });
+
+  it('sin la contrasena actual no se cambia nada', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+
+    await expect(
+      app.contenedor.casosDeUso.cambiarContrasena.ejecutar({
+        usuarioId: Identificador.desde(paciente.id),
+        tipo: 'PACIENTE',
+        contrasenaActual: 'la-que-no-es',
+        nuevaContrasena: 'una-contrasena-nueva',
+      }),
+    ).rejects.toThrow(/actual no es correcta/);
+
+    // Y la vieja sigue valiendo: no se cambio a medias.
+    const sesion = await app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+      email: 'rosa@test.com',
+      contrasena: 'contrasena-segura',
+    });
+    expect(sesion.usuario.id).toBe(paciente.id);
+  });
+
+  it('rechaza una contrasena nueva debil', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+
+    await expect(
+      app.contenedor.casosDeUso.cambiarContrasena.ejecutar({
+        usuarioId: Identificador.desde(paciente.id),
+        tipo: 'PACIENTE',
+        contrasenaActual: 'contrasena-segura',
+        nuevaContrasena: '12345678',
+      }),
+    ).rejects.toThrow(/fácil de adivinar/);
+  });
+
+  it('cierra las sesiones abiertas en OTROS dispositivos', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+
+    // El token del otro telefono, emitido antes del cambio.
+    const otroTelefono = (
+      await app.contenedor.casosDeUso.iniciarSesion.ejecutar({
+        email: 'rosa@test.com',
+        contrasena: 'contrasena-segura',
+      })
+    ).token;
+
+    // Un milimetro de reloj: la marca de "sesiones validas desde" se
+    // compara contra la hora del cambio, y con el reloj congelado las dos
+    // caerian en el mismo instante.
+    app.reloj.mover(new Date(app.reloj.ahora().getTime() + 1000));
+
+    await app.contenedor.casosDeUso.cambiarContrasena.ejecutar({
+      usuarioId: Identificador.desde(paciente.id),
+      tipo: 'PACIENTE',
+      contrasenaActual: 'contrasena-segura',
+      nuevaContrasena: 'una-contrasena-nueva',
+    });
+
+    // Esa es la razon de pedir el cambio: si alguien mas tenia la
+    // contrasena, su sesion muere aqui.
+    await expect(
+      app.contenedor.casosDeUso.verificarSesion.ejecutar(otroTelefono),
+    ).rejects.toThrow();
+  });
+
+  it('funciona igual para un cuidador', async () => {
+    const cuidador = await crearCuidadorDePrueba(app);
+
+    const { token } = await app.contenedor.casosDeUso.cambiarContrasena.ejecutar({
+      usuarioId: Identificador.desde(cuidador.id),
+      tipo: 'CUIDADOR',
+      contrasenaActual: 'contrasena-segura',
+      nuevaContrasena: 'una-contrasena-nueva',
+    });
+
+    expect(app.contenedor.tokens.verificar(token)).toMatchObject({ tipo: 'CUIDADOR' });
+  });
+});

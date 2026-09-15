@@ -48,6 +48,22 @@ export default function LayoutRaiz() {
             name="privacidad"
             options={{ title: 'Mis datos y privacidad', presentation: 'modal' }}
           />
+          {/*
+            La politica y los terminos, completos y dentro de la app.
+            Se abren desde privacidad y desde el registro, asi que viven
+            aqui por la misma razon que la pantalla de arriba. El titulo
+            lo pone la propia pantalla, que es la que sabe cual de los
+            dos documentos le pidieron.
+          */}
+          <Stack.Screen name="legal" options={{ presentation: 'modal' }} />
+          {/*
+            Cambiar la contrasena. Fuera de los grupos por la misma razon
+            que las dos de arriba: la abren el paciente y el cuidador.
+          */}
+          <Stack.Screen
+            name="contrasena"
+            options={{ title: 'Cambiar mi contraseña', presentation: 'modal' }}
+          />
         </Stack>
       </ProveedorDeSesion>
     </SafeAreaProvider>

@@ -53,26 +53,38 @@ Quedó un hueco pequeño y acotado, descrito abajo en §8.
 
 ---
 
-## 3. Completar los documentos legales · **depende de otra persona, empieza ya**
+## 3. Completar los documentos legales · **el hueco grande ya se cerró**
 
-Los tres documentos de `docs/legal/` están redactados pero tienen huecos que **solo puede
-llenar un humano**, y uno de ellos exige preguntarle a la profesora.
+La pregunta que bloqueaba todo, quién es el Responsable del Tratamiento, **ya tiene
+respuesta**: la universidad. Lo confirmaron ustedes con la institución, y coincide con lo
+que sostiene la Guía de la SIC sobre datos personales en el contexto universitario. Los
+tres documentos de `docs/legal/` ya están reescritos con eso, reordenados según los seis
+numerales del artículo 2.2.2.25.3.1 del Decreto 1074 de 2015, y la política subió a la
+versión **2.0**.
+
+Lo que queda está en **`docs/legal/QUE-PEDIRLE-A-LA-UNIVERSIDAD.md`**, que es la lista para
+llevar a la reunión. En resumen:
 
 | Hueco | Quién lo resuelve |
 |---|---|
-| Responsable del Tratamiento: nombre, identificación, domicilio | La profesora / la universidad |
-| Correo para ejercer derechos | Tú, una vez se sepa quién responde |
+| Responsable del Tratamiento | **Ya resuelto: Universidad Católica Luis Amigó, NIT 890.985.189-9** |
+| Correo para ejercer derechos | **Ya resuelto: protecciondedatos@amigo.edu.co** |
 | Región de Neon | **Ya resuelto: AWS `us-east-1`, Virginia, Estados Unidos** |
+| Acto formal por el que la universidad asume esta base de datos | La universidad |
+| Si el equipo es parte interna o Encargado (y si hay que firmar contrato) | La universidad |
+| Si la base de datos se registra en el RNBD | La universidad |
+| Revisión jurídica de los tres documentos | Oficina de protección de datos |
 | Proveedor de alojamiento | Cuando se contrate (§1) |
 
-Lo pongo primero en la lista de "empezar", aunque no sea lo más urgente, porque **depende
-de la disponibilidad de otra persona** y eso no lo controlas tú.
+Sigue primero en la lista de "empezar" porque lo que falta **depende de la disponibilidad
+de otra persona** y eso no lo controlas tú.
 
 Dos cosas que no se pueden saltar:
 
-- **No publiques los documentos con un responsable inventado.** Un responsable falso es
-  peor que no tener política: es una declaración incorrecta sobre quién responde por datos
-  de salud ajenos.
+- **No publiques los documentos hasta que la universidad confirme por escrito que asume
+  esta base de datos.** Que sus datos de contacto sean públicos no equivale a que haya
+  aceptado responder por Chronova. Nombrar a un responsable que no ha aceptado serlo es tan
+  incorrecto como inventarlo.
 - La base de datos está **fuera de Colombia**. Eso es una transferencia internacional
   (artículo 26 de la Ley 1581) y hay que declararla explícitamente en la autorización. El
   texto de registro ya la menciona; verifica que siga diciéndolo cuando cierres el

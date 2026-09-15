@@ -17,6 +17,18 @@ export function crearPool(entorno: Entorno): pg.Pool {
     max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
+    /*
+      Mantiene viva la conexion a nivel de TCP.
+
+      Sin esto, una conexion que pasa un rato sin trafico la puede cortar
+      cualquiera que este en medio sin avisar a nadie: el enrutador de
+      casa, el NAT del operador, o el propio PgBouncer de Neon. El
+      resultado es una conexion que parece buena hasta que se usa y
+      entonces falla. Los 10 segundos iniciales son un margen para no
+      empezar a insistir antes de que la conexion se asiente.
+    */
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10_000,
   });
 
   /**

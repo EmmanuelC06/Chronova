@@ -6,10 +6,11 @@ import {
   DIAS_DE_RESUMEN,
   usePacienteObservado,
 } from '../../../../src/ui/contexto/PacienteObservadoContexto';
+import { SelectorDePeriodo } from '../../../../src/ui/componentes/SelectorDePeriodo';
 import { colores, espacio, ESTILO_POR_ESTADO, radio } from '../../../../src/ui/tema';
 
 /**
- * PESTANA "Historial": que ha pasado en la ultima semana.
+ * PESTANA "Historial": que ha pasado en el periodo elegido.
  *
  * Dos cosas, y en este orden. Primero las tomas que se saltaron, que es
  * lo concreto que conviene hablar con la persona; despues la grafica,
@@ -17,8 +18,15 @@ import { colores, espacio, ESTILO_POR_ESTADO, radio } from '../../../../src/ui/t
  * dice QUE fue.
  */
 export default function HistorialDelPaciente() {
-  const { historial, nombreCorto, error, refrescando, alTirarParaRefrescar } =
-    usePacienteObservado();
+  const {
+    historial,
+    nombreCorto,
+    error,
+    refrescando,
+    alTirarParaRefrescar,
+    diasDeHistorial,
+    cambiarPeriodo,
+  } = usePacienteObservado();
 
   const sinTomar = (historial?.registros ?? []).filter((r) => r.estado === 'OMITIDA').slice(0, 10);
   const ultimosDias = (historial?.porDia ?? []).slice(-DIAS_DE_RESUMEN);
@@ -39,6 +47,12 @@ export default function HistorialDelPaciente() {
       }
     >
       {error ? <Aviso mensaje={error} tono="error" /> : null}
+
+      <SelectorDePeriodo
+        dias={diasDeHistorial}
+        onCambiar={cambiarPeriodo}
+        ocupado={refrescando}
+      />
 
       {historial === null ? (
         <Texto color={colores.textoSuave}>No pudimos cargar el historial.</Texto>
@@ -62,16 +76,16 @@ export default function HistorialDelPaciente() {
       ) : historial ? (
         <Aviso
           tono="exito"
-          mensaje={`${nombreCorto} no ha dejado de tomar ninguna dosis en el periodo consultado.`}
+          mensaje={`${nombreCorto} no ha dejado de tomar ninguna dosis en el período consultado.`}
         />
       ) : null}
 
       {/* ---- Evolucion ---- */}
       {ultimosDias.length > 1 ? (
         <Tarjeta>
-          <Rotulo>Ultimos dias</Rotulo>
+          <Rotulo>Últimos días</Rotulo>
           <View
-            accessibilityLabel={`Grafica de cumplimiento de ${nombreCorto} en los ultimos ${ultimosDias.length} dias.`}
+            accessibilityLabel={`Gráfica de cumplimiento de ${nombreCorto} en los últimos ${ultimosDias.length} días.`}
             style={{
               flexDirection: 'row',
               alignItems: 'flex-end',

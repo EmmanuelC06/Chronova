@@ -1,5 +1,5 @@
 import { Email } from '../../../domain/shared/Email.js';
-import { ErrorDeAutenticacion } from '../../../domain/shared/errores.js';
+import { ErrorDeAutenticacion, ErrorDeCuentaAmbigua } from '../../../domain/shared/errores.js';
 import type { RepositorioDeCuidadores } from '../../../domain/cuidador/RepositorioDeCuidadores.js';
 import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
 import type { CifradorDeContrasenas } from '../../ports/CifradorDeContrasenas.js';
@@ -37,13 +37,34 @@ export class IniciarSesion {
   async ejecutar(comando: ComandoIniciarSesion): Promise<ResultadoDeAutenticacion> {
     const email = Email.desde(comando.email);
 
-    const candidato = await this.buscarCandidato(email, comando.tipo);
+    const candidatos = await this.buscarCandidatos(email, comando.tipo);
+    const candidato = candidatos[0] ?? null;
 
     const contrasenaCifrada = candidato?.contrasenaCifrada ?? IniciarSesion.HASH_SENUELO;
     const coincide = await this.cifrador.verificar(comando.contrasena ?? '', contrasenaCifrada);
 
     if (!candidato || !coincide || !candidato.activo) {
       throw new ErrorDeAutenticacion('El correo o la contraseña no son correctos.');
+    }
+
+    /*
+      Este correo tiene DOS cuentas y no nos dijeron a cual entrar.
+
+      La segunda comprobacion solo se hace aqui, cuando ya sabemos que la
+      primera contrasena era correcta y que existe otra cuenta. Es decir,
+      casi nunca: el coste de bcrypt no se paga en el caso normal.
+
+      Y si las dos cuentas tienen contrasenas distintas, no hay nada que
+      preguntar: la propia contrasena dice cual es. Solo se pregunta
+      cuando de verdad es imposible saberlo.
+    */
+    const segundo = candidatos[1];
+    if (segundo && segundo.activo) {
+      const tambienCoincide = await this.cifrador.verificar(
+        comando.contrasena ?? '',
+        segundo.contrasenaCifrada,
+      );
+      if (tambienCoincide) throw new ErrorDeCuentaAmbigua();
     }
 
     return {
@@ -61,23 +82,28 @@ export class IniciarSesion {
     };
   }
 
-  private async buscarCandidato(
+  /**
+   * Las cuentas que ese correo puede abrir, en orden de preferencia.
+   *
+   * Devuelve una LISTA y no una sola porque un mismo correo puede tener
+   * cuenta de paciente y de cuidadora a la vez. Antes esto devolvia la
+   * primera que encontraba, con el resultado de que la segunda no se
+   * podia alcanzar nunca desde la app, que no envia `tipo`.
+   *
+   * El orden se conserva: paciente primero. Eso mantiene el
+   * comportamiento de siempre para el 99 % de los casos, en los que solo
+   * hay una.
+   */
+  private async buscarCandidatos(
     email: Email,
     tipo: TipoDeUsuario | undefined,
-  ): Promise<{
-    id: string;
-    nombre: string;
-    email: string;
-    contrasenaCifrada: string;
-    activo: boolean;
-    tipo: TipoDeUsuario;
-    /** Marca que llevara el token, en milisegundos. */
-    sesionesValidasDesde: number;
-  } | null> {
+  ): Promise<Candidato[]> {
+    const encontrados: Candidato[] = [];
+
     if (tipo !== 'CUIDADOR') {
       const paciente = await this.pacientes.buscarPorEmail(email);
       if (paciente) {
-        return {
+        encontrados.push({
           id: paciente.id.valor,
           nombre: paciente.nombre,
           email: paciente.email.valor,
@@ -85,14 +111,14 @@ export class IniciarSesion {
           activo: paciente.activo,
           tipo: 'PACIENTE',
           sesionesValidasDesde: paciente.sesionesValidasDesde.getTime(),
-        };
+        });
       }
     }
 
     if (tipo !== 'PACIENTE') {
       const cuidador = await this.cuidadores.buscarPorEmail(email);
       if (cuidador) {
-        return {
+        encontrados.push({
           id: cuidador.id.valor,
           nombre: cuidador.nombre,
           email: cuidador.email.valor,
@@ -100,10 +126,22 @@ export class IniciarSesion {
           activo: cuidador.activo,
           tipo: 'CUIDADOR',
           sesionesValidasDesde: cuidador.sesionesValidasDesde.getTime(),
-        };
+        });
       }
     }
 
-    return null;
+    return encontrados;
   }
+}
+
+/** Una cuenta candidata a abrirse con ese correo. */
+interface Candidato {
+  id: string;
+  nombre: string;
+  email: string;
+  contrasenaCifrada: string;
+  activo: boolean;
+  tipo: TipoDeUsuario;
+  /** Marca que llevara el token, en milisegundos. */
+  sesionesValidasDesde: number;
 }

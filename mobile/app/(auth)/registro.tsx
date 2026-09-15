@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
 import {
+  RUTA_DE_LA_POLITICA,
+  RUTA_DE_LOS_TERMINOS,
   TEXTO_DE_LA_ADVERTENCIA,
   TEXTO_DE_LA_AUTORIZACION,
 } from '../../src/dominio/politicaDeDatos';
@@ -32,7 +34,33 @@ export default function Registro() {
   const [contrasena, setContrasena] = useState('');
   const [telefono, setTelefono] = useState('');
   const [fechaDeNacimiento, setFechaDeNacimiento] = useState('');
+  /*
+    El parentesco del cuidador: "Hija", "Enfermero", "Vecino".
+
+    El servidor lo aceptaba desde el principio y la pantalla de cuenta
+    ya lo mostraba, pero el registro no lo pedia nunca, asi que no
+    existia en ninguna cuenta y aquel bloque era codigo muerto. Sirve
+    para que el paciente, al recibir una solicitud, sepa quien se la
+    manda: "Ana Correa" dice mucho menos que "Ana Correa, su hija".
+  */
+  const [parentesco, setParentesco] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * El aviso de error se pinta ARRIBA del formulario, y el boton de
+   * guardar esta abajo del todo. Sin esto, la persona toca "Guardar",
+   * el mensaje aparece a dos pantallazos por encima, la vista no se
+   * mueve y el boton parece muerto: se vuelve a tocar, y nada.
+   *
+   * `avisar` hace las dos cosas a la vez, poner el mensaje y subir a
+   * donde se lee, para que no se pueda hacer una sin la otra.
+   */
+  const desplazamiento = useRef<ScrollView>(null);
+
+  const avisar = (mensaje: string) => {
+    setError(mensaje);
+    desplazamiento.current?.scrollTo({ y: 0, animated: true });
+  };
   const [ocupado, setOcupado] = useState(false);
 
   /**
@@ -49,22 +77,22 @@ export default function Registro() {
     setError(null);
 
     if (nombre.trim().length < 2) {
-      setError('Escribe tu nombre completo.');
+      avisar('Escribe tu nombre completo.');
       return;
     }
     if (contrasena.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres.');
+      avisar('La contraseña debe tener al menos 8 caracteres.');
       return;
     }
     if (!autoriza) {
-      setError(
+      avisar(
         'Para crear la cuenta necesitamos que autorices el tratamiento de tus datos. ' +
           'Marca la casilla del final si estás de acuerdo.',
       );
       return;
     }
     if (fechaDeNacimiento && !/^\d{4}-\d{2}-\d{2}$/.test(fechaDeNacimiento)) {
-      setError('La fecha de nacimiento debe escribirse como 1952-04-18 (año-mes-día).');
+      avisar('La fecha de nacimiento debe escribirse como 1952-04-18 (año-mes-día).');
       return;
     }
 
@@ -84,11 +112,15 @@ export default function Registro() {
           aceptaPoliticaDeDatos: autoriza,
         });
       } else {
-        await registrarCuidador({ ...comunes, aceptaPoliticaDeDatos: autoriza });
+        await registrarCuidador({
+          ...comunes,
+          rol: parentesco.trim() || null,
+          aceptaPoliticaDeDatos: autoriza,
+        });
       }
       router.replace('/');
     } catch (problema) {
-      setError(
+      avisar(
         problema instanceof ErrorDeApi
           ? problema.message
           : 'No pudimos crear tu cuenta. Inténtalo de nuevo.',
@@ -104,6 +136,7 @@ export default function Registro() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
+        ref={desplazamiento}
         contentContainerStyle={{ padding: espacio.lg, gap: espacio.lg }}
         keyboardShouldPersistTaps="handled"
       >
@@ -175,7 +208,15 @@ export default function Registro() {
             marcador="1952-04-18"
             ayuda="Escríbela como año-mes-día."
           />
-        ) : null}
+        ) : (
+          <Campo
+            etiqueta="¿Qué eres de la persona? (opcional)"
+            valor={parentesco}
+            onCambio={setParentesco}
+            marcador="Hija, enfermero, vecino..."
+            ayuda="Se lo mostramos al paciente cuando le pidas acompañarlo, para que sepa quién eres."
+          />
+        )}
 
         <CasillaDeAutorizacion marcada={autoriza} onCambiar={() => setAutoriza((v) => !v)} />
 
@@ -249,10 +290,26 @@ function CasillaDeAutorizacion({
         {TEXTO_DE_LA_ADVERTENCIA}
       </Texto>
 
+      {/*
+        Los dos documentos que la casilla nombra, alcanzables desde la
+        misma pantalla en la que se firma. Pedirle a alguien que acepte
+        un texto y dejarselo a dos toques de distancia es la forma
+        educada de que no lo lea.
+      */}
       <Boton
         titulo="Leer qué datos guardamos y por qué"
         variante="texto"
         onPress={() => router.push('/privacidad')}
+      />
+      <Boton
+        titulo="Leer la política de tratamiento de datos"
+        variante="texto"
+        onPress={() => router.push(RUTA_DE_LA_POLITICA)}
+      />
+      <Boton
+        titulo="Leer los términos y condiciones"
+        variante="texto"
+        onPress={() => router.push(RUTA_DE_LOS_TERMINOS)}
       />
     </View>
   );

@@ -167,6 +167,20 @@ export class ClienteChronova implements ApiDeChronova {
     return this.pedir<Sesion>('POST', '/api/auth/sesion', datos);
   }
 
+  /**
+   * Cambiar la contrasena con la sesion ya abierta.
+   *
+   * Devuelve un token NUEVO: el cambio invalida todas las sesiones, esta
+   * incluida, asi que hay que reemplazar el que se estaba usando o la
+   * siguiente peticion daria 401.
+   */
+  cambiarContrasena(datos: {
+    contrasenaActual: string;
+    nuevaContrasena: string;
+  }): Promise<{ token: string }> {
+    return this.pedir<{ token: string }>('PATCH', '/api/auth/contrasena', datos);
+  }
+
   obtenerPerfil(): Promise<Perfil> {
     return this.pedir<Perfil>('GET', '/api/auth/perfil');
   }

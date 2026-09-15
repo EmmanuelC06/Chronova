@@ -11,6 +11,7 @@ import type {
 } from '../../dominio/modelos';
 import { confirmarSuspension, pedirReabastecimiento } from '../componentes/accionesDeMedicamento';
 import { primerNombre } from '../texto';
+import { fechaHaceDias, type DiasDePeriodo } from '../componentes/SelectorDePeriodo';
 import { useSesion } from './SesionContexto';
 
 /**
@@ -66,6 +67,10 @@ interface Valor {
   recargar: () => Promise<void>;
   alTirarParaRefrescar: () => void;
 
+  /** Cuantos dias de historial se estan mirando, y como cambiarlo. */
+  diasDeHistorial: DiasDePeriodo;
+  cambiarPeriodo: (dias: DiasDePeriodo) => void;
+
   registrarToma: (elemento: ElementoDeAgenda, accion: 'CONFIRMAR' | 'OMITIR') => void;
   reabastecer: (medicamento: Medicamento) => void;
   suspender: (medicamento: Medicamento) => void;
@@ -100,6 +105,7 @@ export function ProveedorDePacienteObservado({
   const [error, setError] = useState<string | null>(null);
   const [bloqueo, setBloqueo] = useState<MotivoDeBloqueo>(null);
   const [procesando, setProcesando] = useState<string | null>(null);
+  const [diasDeHistorial, setDiasDeHistorial] = useState<DiasDePeriodo>(30);
 
   /**
    * ¿Llegamos alguna vez a tener la ficha?
@@ -149,7 +155,10 @@ export function ProveedorDePacienteObservado({
       const [resAgenda, resMedicamentos, resHistorial] = await Promise.allSettled([
         api.obtenerAgenda({ pacienteId: fila.pacienteId }),
         api.listarMedicamentos(fila.pacienteId),
-        api.consultarHistorial({ pacienteId: fila.pacienteId }),
+        api.consultarHistorial({
+          pacienteId: fila.pacienteId,
+          desde: fechaHaceDias(diasDeHistorial),
+        }),
       ]);
 
       if (resAgenda.status === 'fulfilled') setAgenda(resAgenda.value);
@@ -183,7 +192,7 @@ export function ProveedorDePacienteObservado({
       setCargando(false);
       setRefrescando(false);
     }
-  }, [api, pacienteId]);
+  }, [api, pacienteId, diasDeHistorial]);
 
   // Al volver de la pantalla de edicion —que es una modal encima de
   // esta— se refresca sola. Sin esto, el cuidador cambiaba una dosis y
@@ -193,6 +202,18 @@ export function ProveedorDePacienteObservado({
       void recargar();
     }, [recargar]),
   );
+
+  /**
+   * Cambiar el periodo recarga TODO, no solo el historial.
+   *
+   * Es una peticion de mas (la agenda y los medicamentos no dependen del
+   * periodo), pero mantiene una sola ruta de carga en vez de dos que
+   * pueden desincronizarse. Con tres pantallas leyendo del mismo estado,
+   * esa simplicidad vale mas que la peticion que ahorra.
+   */
+  const cambiarPeriodo = useCallback((dias: DiasDePeriodo) => {
+    setDiasDeHistorial(dias);
+  }, []);
 
   const alTirarParaRefrescar = useCallback(() => {
     setRefrescando(true);
@@ -299,6 +320,8 @@ export function ProveedorDePacienteObservado({
         procesando,
         recargar,
         alTirarParaRefrescar,
+        diasDeHistorial,
+        cambiarPeriodo,
         registrarToma,
         reabastecer,
         suspender,

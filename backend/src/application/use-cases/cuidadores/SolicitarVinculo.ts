@@ -10,6 +10,7 @@ import type { GeneradorDeIds } from '../../ports/GeneradorDeIds.js';
 import type { Notificador } from '../../ports/Notificador.js';
 import type { Reloj } from '../../ports/Reloj.js';
 import type { Solicitante } from '../../services/PoliticaDeAcceso.js';
+import { avisarSinRomper } from '../../services/avisarSinRomper.js';
 
 export interface ComandoSolicitarVinculo {
   solicitante: Solicitante;
@@ -104,6 +105,12 @@ export class SolicitarVinculo {
     return vinculo.aPlano();
   }
 
+  /**
+   * Los dos avisos del vinculo, ninguno de los cuales puede tumbar la
+   * operacion: cuando esto se llama, `vinculos.guardar` ya ocurrio. Que
+   * no salga la notificacion significa que la otra persona se enterara
+   * al abrir la app, no que la solicitud no exista.
+   */
   private async avisar(
     vinculo: Vinculo,
     cuidadorId: Identificador,
@@ -111,7 +118,7 @@ export class SolicitarVinculo {
   ): Promise<void> {
     if (vinculo.estado === 'PENDIENTE') {
       const cuidador = await this.cuidadores.buscarPorId(cuidadorId);
-      await this.notificador.enviar({
+      await avisarSinRomper(this.notificador, {
         tipo: 'SOLICITUD_DE_VINCULO',
         destinatarioId: pacienteId,
         tipoDeDestinatario: 'PACIENTE',
@@ -120,7 +127,7 @@ export class SolicitarVinculo {
         datos: { vinculoId: vinculo.id.valor },
       });
     } else {
-      await this.notificador.enviar({
+      await avisarSinRomper(this.notificador, {
         tipo: 'VINCULO_ACEPTADO',
         destinatarioId: cuidadorId,
         tipoDeDestinatario: 'CUIDADOR',

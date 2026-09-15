@@ -25,22 +25,70 @@
  * el texto de forma sustancial se sube este número **y** el del
  * documento, en el mismo commit.
  */
-export const VERSION_DE_LA_POLITICA = '1.0';
+export const VERSION_DE_LA_POLITICA = '2.0';
 
-/** Dónde puede leerse el texto completo. Se completa al publicarlo. */
-export const URL_DE_LA_POLITICA = 'https://chronova.app/politica-de-datos';
-export const URL_DE_LOS_TERMINOS = 'https://chronova.app/terminos';
+/**
+ * Dónde se lee el texto completo.
+ *
+ * Antes esto eran dos direcciones a `chronova.app`, un dominio que no
+ * existe: los botones abrían el navegador en una página en blanco. Los
+ * documentos viven ahora dentro de la app, en `textosLegales.ts`, y se
+ * abren con estas rutas. Funcionan sin conexión, que para este caso no
+ * es un lujo: el titular tiene derecho a conocer la política, y ese
+ * derecho no debería depender de que haya señal.
+ */
+export const RUTA_DE_LA_POLITICA = '/legal?doc=politica';
+export const RUTA_DE_LOS_TERMINOS = '/legal?doc=terminos';
+
+/**
+ * Quiénes responden por estos datos, y cómo se les contacta.
+ *
+ * El numeral 1 del artículo 2.2.2.25.3.2 del Decreto 1074 de 2015 exige
+ * que el aviso de privacidad diga el nombre y los datos de contacto del
+ * Responsable. No basta con que aparezca en el documento largo: tiene
+ * que estar donde la persona autoriza.
+ *
+ * Son TRES, no uno. La Ley 1581 define al Responsable por lo que hace,
+ * quien decide sobre la base de datos y sus finalidades, y aquí eso se
+ * decide entre la universidad, que aprueba el proyecto y lo supervisa, y
+ * los dos desarrolladores, que deciden qué recoge el sistema y cómo se
+ * guarda. Así se lo confirmó la institución al equipo.
+ *
+ * Los tres comparten un solo canal de contacto a propósito: un titular
+ * no tiene por qué averiguar a cuál de los tres escribirle. El buzón es
+ * el de la oficina de protección de datos de la universidad, y usarlo
+ * así está pendiente de que la propia universidad lo acepte.
+ */
+export const RESPONSABLES = {
+  universidad: {
+    razonSocial: 'Universidad Católica Luis Amigó',
+    nit: '890.985.189-9',
+  },
+  desarrolladores: ['Emmanuel Correa Valencia', 'Julián Andrés Herrera Roncancio'],
+  /** El canal común de los tres. */
+  contacto: {
+    direccion: 'Transversal 51A #67B 90, Medellín, Colombia',
+    correo: 'protecciondedatos@amigo.edu.co',
+    telefono: '+57 (604) 448 7666',
+  },
+} as const;
 
 /**
  * Lo que dice la casilla de autorización.
  *
  * Va sin marcar por defecto: una casilla premarcada no es autorización
  * expresa, es una suposición.
+ *
+ * Nombra a los responsables porque una autorización se le otorga a
+ * alguien. Sin destinatario, no queda claro a quién autorizó la persona,
+ * y eso es justamente lo que el artículo 8 le da derecho a probar.
  */
 export const TEXTO_DE_LA_AUTORIZACION =
-  'Autorizo el tratamiento de mis datos personales, incluidos mis datos de salud, ' +
-  'y que se guarden en servidores fuera de Colombia, según la Política de ' +
-  'Tratamiento de Datos y los Términos y Condiciones.';
+  'Autorizo a los responsables de Chronova, la ' +
+  `${RESPONSABLES.universidad.razonSocial} y su equipo de desarrollo, el tratamiento ` +
+  'de mis datos personales, incluidos mis datos de salud, y que se guarden en servidores ' +
+  'fuera de Colombia, según la Política de Tratamiento de Datos y los Términos y ' +
+  'Condiciones.';
 
 /**
  * La advertencia que la ley obliga a dar y que casi ninguna app da.
@@ -86,6 +134,19 @@ export const AVISO_DE_PRIVACIDAD: { titulo: string; parrafos: string[] }[] = [
     parrafos: [
       'Puedes conocer tus datos, corregirlos, pedirnos prueba de esta autorización, retirarla y pedir que borremos todo.',
       'Muchos de esos derechos los ejerces desde la propia app: corriges tu perfil, cambias los permisos de cada cuidador y revocas un acceso cuando quieras.',
+      'Si crees que no cumplimos, puedes presentar una queja ante la Superintendencia de Industria y Comercio.',
+    ],
+  },
+  {
+    titulo: 'Quién responde',
+    parrafos: [
+      `Tus datos tienen tres responsables, que responden juntos: la ${RESPONSABLES.universidad.razonSocial} (NIT ${RESPONSABLES.universidad.nit}, ${RESPONSABLES.contacto.direccion}) y los dos desarrolladores del proyecto, ${RESPONSABLES.desarrolladores.join(' y ')}.`,
+      'Los tres atienden por la misma dirección, así que no tienes que averiguar a cuál escribirle.',
+      // El correo no va dentro de la frase a proposito: son treinta
+      // caracteres sin espacios y, con la letra en "muy grande", no cabe
+      // en el ancho de la tarjeta. Va en el boton de abajo, que ademas
+      // abre el correo con la direccion ya puesta.
+      `Para ejercer tus derechos escríbeles con el botón que hay al final de esta pantalla, o llama al ${RESPONSABLES.contacto.telefono}.`,
     ],
   },
 ];

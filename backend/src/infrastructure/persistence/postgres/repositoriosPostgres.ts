@@ -17,6 +17,7 @@ import type { RepositorioDeDispositivos } from '../../../domain/dispositivo/Repo
 import type { TokenDeDispositivo } from '../../../domain/dispositivo/TokenDeDispositivo.js';
 import { Vinculo } from '../../../domain/vinculo/Vinculo.js';
 import type { RepositorioDeVinculos } from '../../../domain/vinculo/RepositorioDeVinculos.js';
+import { enTransaccion } from './transaccion.js';
 
 /**
  * ADAPTADORES de persistencia con PostgreSQL.
@@ -356,9 +357,7 @@ export class RepositorioDeTomasPostgres implements RepositorioDeTomas {
     if (tomas.length === 0) return;
 
     // Una sola transaccion para todo el lote: o entran todas o ninguna.
-    const cliente = await this.pool.connect();
-    try {
-      await cliente.query('BEGIN');
+    await enTransaccion(this.pool, async (cliente) => {
       for (const toma of tomas) {
         const t = toma.aPlano();
         await cliente.query(
@@ -389,22 +388,14 @@ export class RepositorioDeTomasPostgres implements RepositorioDeTomas {
           ],
         );
       }
-      await cliente.query('COMMIT');
-    } catch (error) {
-      await cliente.query('ROLLBACK');
-      throw error;
-    } finally {
-      cliente.release();
-    }
+    });
   }
 
   async programarSiNoExisten(tomas: readonly Toma[]): Promise<number> {
     if (tomas.length === 0) return 0;
 
-    const cliente = await this.pool.connect();
     let insertadas = 0;
-    try {
-      await cliente.query('BEGIN');
+    await enTransaccion(this.pool, async (cliente) => {
       for (const toma of tomas) {
         const t = toma.aPlano();
         // La restriccion UNIQUE (medicamento_id, programada_originalmente_para)
@@ -432,13 +423,7 @@ export class RepositorioDeTomasPostgres implements RepositorioDeTomas {
         );
         insertadas += rowCount ?? 0;
       }
-      await cliente.query('COMMIT');
-    } catch (error) {
-      await cliente.query('ROLLBACK');
-      throw error;
-    } finally {
-      cliente.release();
-    }
+    });
     return insertadas;
   }
 
