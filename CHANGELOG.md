@@ -29,6 +29,106 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.7.0] — 2026-10-12
+
+Lo que pidió el profesor: analítica, un módulo de curiosidades y poder mandar el reporte por
+WhatsApp. Las tres cosas salen del mismo cálculo y por eso llegan juntas.
+
+### Añadido
+
+- **Mapa de riesgo: cuándo se quedan las tomas, no cuántas.** El historial ya decía el
+  porcentaje, y un porcentaje no se puede accionar: saber que vas al 72% no te dice qué
+  cambiar. La analítica responde la otra pregunta. Reparte las tomas resueltas en 28 casillas
+  (siete días por cuatro franjas: madrugada, mañana, tarde y noche) y señala las que se
+  repiten como problemáticas.
+
+  Lo importante de este cálculo es lo que **no** hace. Una casilla con una sola omisión daría
+  100% de riesgo y encabezaría la lista, que es el error clásico de las medias sobre pocos
+  datos; aquí cada casilla se suaviza contra la tasa general de la propia persona
+  (`(omitidas + 4 × tasaGeneral) ÷ (observaciones + 4)`), así que solo se despega del promedio
+  cuando acumula evidencia propia. Además hace falta un mínimo de cinco observaciones para
+  afirmar algo de una casilla, y como mucho se muestran tres hallazgos: quien abre esto quiere
+  saber qué cambiar esta semana, no leer quince líneas.
+
+  El día y la franja se calculan **en la zona del paciente**. Las 8 de la noche en Bogotá son
+  la 1 de la madrugada en UTC: calculándolo en UTC el mapa entero saldría corrido un día.
+
+- **Módulo de curiosidades.** La parte motivacional de la aplicación, y la única. Arriba, lo
+  que la persona lleva hecho: tomas confirmadas, mejor racha, racha actual, puntualidad, mejor
+  día, mejor momento y cuánto lleva registrando. Las rachas se cuentan **por días limpios y no
+  por tomas**, porque «doce tomas seguidas» no significa nada para quien toma tres al día y
+  además premiaría a quien tiene más medicamentos.
+
+  Se eligieron rachas y no puntos ni medallas por un motivo medido: en mayores de 65 años las
+  rachas aumentan el uso de una aplicación y los premios lo **bajan**. A esta edad no motiva
+  competir, motiva ver la propia historia.
+
+  Abajo, cinco datos generales sobre memoria y hábitos, **con su fuente a la vista**. Son una
+  lista fija escrita a mano, no texto generado en el momento: lo generado no se puede revisar
+  antes de que alguien lo lea, y si un día hablara de una dosis o de una enfermedad la
+  aplicación dejaría de ser de recordatorios. Ninguna tarjeta nombra un medicamento, ninguna
+  dice qué hacer con un tratamiento y ninguna regaña.
+
+- **Reporte para llevar al médico.** Un PDF de una página con el cumplimiento, los patrones
+  encontrados y el mapa en forma de tabla, que se envía por el menú de compartir del teléfono:
+  WhatsApp, correo o lo que la persona prefiera.
+
+  **Por qué se comparte desde el teléfono y no lo manda el servidor.** La alternativa era la
+  WhatsApp Business API. Exige cuenta de Meta Business verificada y plantillas aprobadas, que
+  son semanas de trámite, y el número de prueba gratuito solo alcanza a unos pocos
+  destinatarios registrados a mano. Pero lo que decidió no fue el trámite: esa vía haría pasar
+  datos de salud por los servidores de Meta bajo la cuenta del proyecto, lo que convierte a
+  Meta en un **encargado del tratamiento** que habría que declarar en la política, con
+  transferencia internacional incluida. Compartiendo desde el teléfono no hay encargado nuevo
+  y, sobre todo, **es el paciente quien decide a quién le enseña sus datos**, que es el mismo
+  modelo de consentimiento sobre el que está construida toda la aplicación.
+
+- **`GET /api/tomas/analitica`**, con los mismos permisos del historial (`puedeVerHistorial`).
+  No se inventó un permiso nuevo: si alguien autorizó a su hija a ver su historial, la
+  analítica de ese historial va incluida. Devuelve las tres cosas en una sola petición porque
+  las tres salen del mismo conjunto de tomas, y partirlas en tres rutas sería leer la base de
+  datos tres veces para lo mismo. Mira 90 días por defecto, no 30: con 30 días hay cuatro
+  lunes, y con 90 hay trece, que ya permite distinguir un patrón de una mala racha.
+
+- **`npm run datos:demo`** en el backend. Siembra una cuenta de demostración
+  (`demo@chronova.test`) con seis meses de historia y un patrón de olvido **conocido de
+  antemano**: los domingos por la noche al 45%, el resto alrededor del 6%. Sirve para enseñar
+  la pantalla en la sustentación, pero sobre todo sirve para **validar**: si el mapa señala
+  esa casilla el modelo funciona, y si señala otra no funciona. Es la única forma honesta de
+  comprobar esto sin pacientes reales, porque la verdad se conoce antes de calcular nada.
+
+  La primera versión del sembrador falló, y el fallo valió la pena. Muestreaba la casilla con
+  una moneda cargada al 45% sobre 120 días, salía al 22% por azar, y la analítica señalaba los
+  viernes por la mañana, que habían sacado un 23% por casualidad. No era un fallo del modelo
+  ni del generador: con veinte observaciones por casilla y veintiocho casillas, el ruido
+  produce picos que compiten con la señal. Es el problema de las comparaciones múltiples, y es
+  exactamente la razón de ser del suavizado y del mínimo de evidencia.
+
+### Cambiado
+
+- **Los textos de los hallazgos ya no hablan en segunda persona.** Decían «se te han quedado»,
+  que suena bien cuando lo lee el propio paciente, y la misma frase viaja sin cambios a la
+  pantalla del cuidador: allí le hablaba a la hija de las tomas de su madre como si fueran
+  suyas. Ahora dicen «se han quedado 6 tomas de 13», que vale para los dos. Lo mismo en las
+  etiquetas del mapa que lee el lector de pantalla. Queda una prueba que lo fija, porque es un
+  fallo que no rompe nada y por eso puede volver sin que nadie lo note.
+
+- **Las fechas de la analítica y del reporte se escriben en palabras**, «15 de abril de 2026»
+  en vez de «2026-04-15». Se arman a mano y no con `toLocaleDateString` porque esa función
+  depende de los datos de idioma del motor y en Android varía: el mismo reporte saldría en
+  inglés en unos equipos.
+
+- **`mobile/app.json` pasa de 1.3.2 a 1.7.0.** Llevaba cuatro versiones sin moverse: es
+  justamente el despiste del que avisa la tabla del principio de este archivo.
+
+### Hace falta un build nuevo
+
+`expo-print` y `expo-sharing` son **módulos nativos**: no basta con `npm install` y recargar.
+Hay que generar un development build nuevo con EAS para que el botón de reporte funcione en el
+teléfono.
+
+---
+
 ## [1.6.1] — 2026-09-15
 
 ### Corregido

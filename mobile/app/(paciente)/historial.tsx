@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { ErrorDeApi } from '../../src/dominio/modelos';
 import type { Historial as HistorialModelo } from '../../src/dominio/modelos';
 import {
   Aviso,
+  Boton,
   Cargando,
   EstadoVacio,
   Insignia,
@@ -30,6 +31,7 @@ import { colores, espacio, ESTILO_POR_ESTADO, ESTILO_POR_NIVEL, radio } from '..
  */
 export default function Historial() {
   const { api } = useSesion();
+  const router = useRouter();
 
   const [historial, setHistorial] = useState<HistorialModelo | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -105,6 +107,16 @@ export default function Historial() {
           titulo="Todavía no hay historial"
           descripcion="A medida que confirmes tus tomas, aquí verás cómo va tu tratamiento."
         />
+
+        {/* Las curiosidades si tienen algo que contar desde el primer
+            dia: la mitad de esa pantalla son datos generales sobre
+            memoria y habitos, que no dependen de tener historial. */}
+        <Boton
+          titulo="Ver curiosidades"
+          variante="secundario"
+          icono="idea"
+          onPress={() => router.push('/curiosidades')}
+        />
       </ScrollView>
     );
   }
@@ -178,6 +190,32 @@ export default function Historial() {
         </Texto>
       </Tarjeta>
 
+      {/* ---- Las dos pantallas que salen de estos mismos datos ----
+
+          Van aqui y no en la barra de pestanas a proposito. La barra
+          tiene cuatro pestanas y es lo que una persona mayor recorre sin
+          perderse; una quinta y una sexta la volverian ilegible. Y estas
+          dos responden preguntas que solo aparecen DESPUES de ver el
+          porcentaje: "¿y cuando se me quedan?" y "¿como voy en general?".
+      */}
+      <Tarjeta>
+        <Rotulo>Mirar más a fondo</Rotulo>
+        <Boton
+          titulo="Cuándo se me quedan"
+          variante="secundario"
+          icono="historial"
+          descripcionAccesible="Ver en qué días y a qué horas se quedan las tomas"
+          onPress={() => router.push('/analitica')}
+        />
+        <Boton
+          titulo="Curiosidades"
+          variante="secundario"
+          icono="idea"
+          descripcionAccesible="Ver tus rachas y datos sobre hábitos"
+          onPress={() => router.push('/curiosidades')}
+        />
+      </Tarjeta>
+
       {/* ---- Grafica por dia ---- */}
       {ultimosDias.length > 1 ? (
         <Tarjeta>
@@ -245,7 +283,7 @@ export default function Historial() {
 
             {registro.puntualidad === 'CON_RETRASO' && registro.minutosDeDesfase !== null ? (
               <Texto variante="pequeno" color={colores.advertencia}>
-                Se tomo {formatearDemora(registro.minutosDeDesfase)} despues de la hora.
+                Se tomó {formatearDemora(registro.minutosDeDesfase)} después de la hora.
               </Texto>
             ) : null}
 

@@ -31,6 +31,7 @@ import { RegistrarMedicamento } from './application/use-cases/medicamentos/Regis
 import { SuspenderMedicamento } from './application/use-cases/medicamentos/SuspenderMedicamento.js';
 import { CerrarTomasVencidas } from './application/use-cases/tomas/CerrarTomasVencidas.js';
 import { ConsultarHistorial } from './application/use-cases/tomas/ConsultarHistorial.js';
+import { ObtenerAnalitica } from './application/use-cases/tomas/ObtenerAnalitica.js';
 import { ObtenerAgendaDelDia } from './application/use-cases/tomas/ObtenerAgendaDelDia.js';
 import { RegistrarToma } from './application/use-cases/tomas/RegistrarToma.js';
 
@@ -97,6 +98,7 @@ export interface Contenedor {
     obtenerAgendaDelDia: ObtenerAgendaDelDia;
     registrarToma: RegistrarToma;
     consultarHistorial: ConsultarHistorial;
+    obtenerAnalitica: ObtenerAnalitica;
     cerrarTomasVencidas: CerrarTomasVencidas;
 
     solicitarVinculo: SolicitarVinculo;
@@ -235,6 +237,7 @@ export function construirContenedor(
       reloj,
       tolerancia,
     ),
+    obtenerAnalitica: new ObtenerAnalitica(tomas, pacientes, politica, reloj, tolerancia),
     cerrarTomasVencidas: new CerrarTomasVencidas(
       tomas,
       pacientes,

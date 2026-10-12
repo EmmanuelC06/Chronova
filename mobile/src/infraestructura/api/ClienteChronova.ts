@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 
 import { ErrorDeApi } from '../../dominio/modelos';
 import type {
+  Analitica,
   AgendaDelDia,
   CuidadorDelPaciente,
   Historial,
@@ -278,6 +279,17 @@ export class ClienteChronova implements ApiDeChronova {
     }
     const cadena = parametros.toString();
     return this.pedir<Historial>('GET', `/api/tomas/historial${cadena ? `?${cadena}` : ''}`);
+  }
+
+  obtenerAnalitica(
+    opciones: { pacienteId?: string; desde?: string; hasta?: string } = {},
+  ): Promise<Analitica> {
+    const parametros = new URLSearchParams();
+    for (const [clave, valor] of Object.entries(opciones)) {
+      if (valor) parametros.set(clave, valor);
+    }
+    const cadena = parametros.toString();
+    return this.pedir<Analitica>('GET', `/api/tomas/analitica${cadena ? `?${cadena}` : ''}`);
   }
 
   // ---------------------------------------------------------------

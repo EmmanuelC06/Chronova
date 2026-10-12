@@ -1,4 +1,5 @@
 import type {
+  Analitica,
   AgendaDelDia,
   CuidadorDelPaciente,
   Historial,
@@ -110,6 +111,13 @@ export interface ApiDeChronova {
     accion: 'CONFIRMAR' | 'OMITIR' | 'POSPONER',
     extras?: { observaciones?: string; minutos?: number },
   ): Promise<{ avisoDeStock: string | null }>;
+  /** Analítica: mapa de riesgo por franja, curiosidades y resumen. */
+  obtenerAnalitica(opciones?: {
+    pacienteId?: string;
+    desde?: string;
+    hasta?: string;
+  }): Promise<Analitica>;
+
   consultarHistorial(opciones?: {
     pacienteId?: string;
     desde?: string;

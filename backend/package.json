@@ -17,7 +17,8 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "tsx src/infrastructure/persistence/postgres/migrate.ts",
     "db:seed": "tsx src/infrastructure/persistence/postgres/seed.ts",
-    "push:probar": "tsx src/infrastructure/notificaciones/probar.ts"
+    "push:probar": "tsx src/infrastructure/notificaciones/probar.ts",
+    "datos:demo": "tsx src/infrastructure/demo/sembrarAnalitica.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

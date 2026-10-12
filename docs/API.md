@@ -371,6 +371,73 @@ La puntualidad se mide contra la hora **original** de la agenda, no contra la ho
 
 ---
 
+### `GET /api/tomas/analitica`
+
+Parámetros opcionales: `desde`, `hasta` (`AAAA-MM-DD`, por defecto los últimos **90** días), `pacienteId`. Exige el mismo permiso que el historial, `puedeVerHistorial`.
+
+Devuelve el resumen, el mapa de riesgo y las curiosidades en una sola respuesta: las tres cosas salen del mismo conjunto de tomas, y separarlas en tres rutas sería leer la base de datos tres veces para lo mismo.
+
+```json
+{
+  "desde": "2026-07-14",
+  "hasta": "2026-10-12",
+  "zonaHoraria": "America/Bogota",
+  "resumen": { "porcentaje": 91, "nivel": "BUENA", "..." : "..." },
+  "mapaDeRiesgo": {
+    "celdas": [
+      {
+        "franja": "NOCHE",
+        "diaDeLaSemana": 0,
+        "observaciones": 26,
+        "omitidas": 12,
+        "riesgo": 0.442,
+        "suficiente": true
+      }
+    ],
+    "tasaGeneral": 0.09,
+    "totalDeObservaciones": 364,
+    "hallazgos": [
+      {
+        "franja": "NOCHE",
+        "diaDeLaSemana": 0,
+        "riesgo": 0.442,
+        "observaciones": 26,
+        "omitidas": 12,
+        "texto": "Los domingos por la noche se han quedado 12 tomas de 26."
+      }
+    ],
+    "peorCelda": { "...": "..." },
+    "mejorCelda": { "...": "..." }
+  },
+  "curiosidades": [
+    { "clave": "MEJOR_RACHA", "titulo": "Tu mejor racha", "valor": "23 días", "detalle": "..." }
+  ],
+  "evidencia": { "tomasResueltas": 364, "suficienteParaElMapa": true }
+}
+```
+
+**Las 28 casillas siempre vienen**, incluidas las vacías: `celdas` trae las cuatro franjas (`MADRUGADA`, `MANANA`, `TARDE`, `NOCHE`) por los siete días (`diaDeLaSemana`: 0 = domingo). Una casilla sin tomas programadas llega con `observaciones: 0`, y la app la dibuja vacía y no en verde, porque «ahí va perfecto» y «ahí no pasa nada» no son lo mismo.
+
+**Cómo se calcula el riesgo.** No es `omitidas ÷ observaciones`. Es un suavizado contra la tasa general de la propia persona:
+
+```
+riesgo = (omitidas + 4 × tasaGeneral) ÷ (observaciones + 4)
+```
+
+Sin eso, una casilla con una sola omisión daría 100% y encabezaría la lista. El `4` es el peso del suavizado: equivale a añadirle a cada casilla cuatro observaciones imaginarias que se comportan como el promedio de la persona, de modo que una casilla solo se despega de ese promedio cuando acumula evidencia propia.
+
+`suficiente` es `observaciones >= 5`. Por debajo de eso no se afirma nada de una casilla.
+
+**Los hallazgos** son como mucho tres, ordenados de mayor a menor riesgo, y solo entra una casilla que tenga evidencia suficiente **y** supere claramente la línea base de la persona (`max(tasaGeneral × 1.5, tasaGeneral + 0.1)`). Un riesgo igual al promedio no es un patrón.
+
+**El día y la franja se calculan en la zona horaria del paciente**, no en UTC ni en la de quien consulta. Las 20:00 en Bogotá son las 01:00Z del día siguiente: en UTC el mapa entero saldría corrido.
+
+`evidencia.suficienteParaElMapa` es `totalDeObservaciones >= 40`, unas tres semanas de un tratamiento de dos tomas diarias. Por debajo el mapa se calcula igual, pero la app avisa de que todavía hay poca historia.
+
+> **Lo que este endpoint no hace, y conviene que siga siendo así.** No recomienda cambios de tratamiento, no interpreta los números en clave clínica y no afirma nada sobre la enfermedad de nadie. Describe la conducta de una persona con sus propios registros. Esa frontera es la que mantiene a Chronova fuera del régimen de dispositivos médicos del Decreto 4725 de 2005, que clasifica el software por su **finalidad prevista**.
+
+---
+
 ## Vínculos cuidador-paciente
 
 ### `POST /api/vinculos`

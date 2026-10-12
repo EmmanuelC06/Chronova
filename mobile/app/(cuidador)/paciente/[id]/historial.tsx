@@ -1,7 +1,15 @@
 import { RefreshControl, ScrollView, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 import type { RegistroDeHistorial } from '../../../../src/dominio/modelos';
-import { Aviso, Insignia, Rotulo, Tarjeta, Texto } from '../../../../src/ui/componentes/basicos';
+import {
+  Aviso,
+  Boton,
+  Insignia,
+  Rotulo,
+  Tarjeta,
+  Texto,
+} from '../../../../src/ui/componentes/basicos';
 import {
   DIAS_DE_RESUMEN,
   usePacienteObservado,
@@ -18,8 +26,11 @@ import { colores, espacio, ESTILO_POR_ESTADO, radio } from '../../../../src/ui/t
  * dice QUE fue.
  */
 export default function HistorialDelPaciente() {
+  const router = useRouter();
   const {
+    paciente,
     historial,
+    nombre,
     nombreCorto,
     error,
     refrescando,
@@ -58,12 +69,41 @@ export default function HistorialDelPaciente() {
         <Texto color={colores.textoSuave}>No pudimos cargar el historial.</Texto>
       ) : null}
 
+      {/* ---- La analitica, con el paciente y su nombre por delante ----
+
+          Se le pasan las dos cosas a proposito. `pacienteId` porque sin
+          el la pantalla pediria la analitica del propio cuidador, que no
+          tiene ninguna; y `nombre` porque es lo que hace que los textos
+          de alla hablen de la madre y no al cuidador en segunda persona.
+      */}
+      {paciente ? (
+        <Tarjeta>
+          <Rotulo>Mirar más a fondo</Rotulo>
+          <Texto variante="pequeno" color={colores.textoSuave}>
+            En qué días y a qué horas se le quedan las tomas a {nombreCorto}, y el reporte
+            para llevar a la cita.
+          </Texto>
+          <Boton
+            titulo="Ver patrones y reporte"
+            variante="secundario"
+            icono="historial"
+            descripcionAccesible={`Ver en qué momentos se le quedan las tomas a ${nombreCorto}`}
+            onPress={() =>
+              router.push({
+                pathname: '/analitica',
+                params: { pacienteId: paciente.pacienteId, nombre },
+              })
+            }
+          />
+        </Tarjeta>
+      ) : null}
+
       {/* ---- Lo que fallo ---- */}
       {sinTomar.length > 0 ? (
         <>
           <Rotulo>Tomas sin tomar</Rotulo>
           <Texto variante="pequeno" color={colores.textoSuave}>
-            Las mas recientes. Es lo que conviene revisar con {nombreCorto}.
+            Las más recientes. Es lo que conviene revisar con {nombreCorto}.
           </Texto>
           {sinTomar.map((registro) => (
             <TarjetaDeOmision
@@ -154,7 +194,7 @@ function TarjetaDeOmision({
       </Texto>
       {registro.registradaPor === 'SISTEMA' ? (
         <Texto variante="pequeno" color={colores.textoSuave}>
-          Se cerro sola: nadie respondio al recordatorio.
+          Se cerró sola: nadie respondió al recordatorio.
         </Texto>
       ) : registro.registradaPor === 'CUIDADOR' ? (
         <Texto variante="pequeno" color={colores.textoSuave}>

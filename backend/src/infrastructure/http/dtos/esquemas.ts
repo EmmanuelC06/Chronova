@@ -228,6 +228,19 @@ export const esquemaDeConsultaDeHistorial = z.object({
   medicamentoId: textoDeConsulta(),
 });
 
+/**
+ * Consulta de analitica.
+ *
+ * Sin `medicamentoId`: el mapa de riesgo tiene sentido sobre el
+ * tratamiento completo. Filtrado a un solo medicamento quedarian cuatro
+ * observaciones por casilla y cualquier patron seria ruido.
+ */
+export const esquemaDeConsultaDeAnalitica = z.object({
+  pacienteId: textoDeConsulta(),
+  desde: textoDeConsulta(10),
+  hasta: textoDeConsulta(10),
+});
+
 export const esquemaDeConsultaDeMedicamentos = z.object({
   pacienteId: textoDeConsulta(),
   incluirSuspendidos: textoDeConsulta(10),

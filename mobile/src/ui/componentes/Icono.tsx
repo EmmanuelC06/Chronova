@@ -62,6 +62,15 @@ const CATALOGO = {
 
   // Personas
   cuidador: 'account-heart-outline',
+
+  // Analitica y curiosidades
+  racha: 'fire',
+  logro: 'trophy-outline',
+  calendario: 'calendar-outline',
+  idea: 'lightbulb-on-outline',
+  libro: 'book-open-variant',
+  compartir: 'share-variant',
+  diana: 'target',
 } as const;
 
 export type NombreDeIcono = keyof typeof CATALOGO;

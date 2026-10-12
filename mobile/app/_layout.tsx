@@ -64,6 +64,22 @@ export default function LayoutRaiz() {
             name="contrasena"
             options={{ title: 'Cambiar mi contraseña', presentation: 'modal' }}
           />
+          {/*
+            La analitica. Fuera de los grupos porque entran los dos: el
+            paciente desde su historial y el cuidador desde el historial
+            del paciente que esta mirando. El titulo lo pone la propia
+            pantalla, que es la unica que sabe de quien son los datos.
+
+            Sin `presentation: 'modal'`: se empuja encima del historial
+            para que quede el boton de volver. Es una pantalla para
+            mirar un rato, no un dialogo que se cierra.
+          */}
+          <Stack.Screen name="analitica" />
+          {/*
+            Las curiosidades, en cambio, solo las abre el paciente: una
+            racha es de quien se toma la pastilla.
+          */}
+          <Stack.Screen name="curiosidades" options={{ title: 'Curiosidades' }} />
         </Stack>
       </ProveedorDeSesion>
     </SafeAreaProvider>

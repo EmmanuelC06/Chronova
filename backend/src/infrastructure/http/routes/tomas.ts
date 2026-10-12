@@ -6,7 +6,7 @@ import {
   esquemaDeConsultaDeAgenda,
   esquemaDeConsultaDeHistorial,
   esquemaDeRegistroDeToma,
-} from '../dtos/esquemas.js';
+  esquemaDeConsultaDeAnalitica,} from '../dtos/esquemas.js';
 
 /** Rutas de agenda, registro de tomas e historial de adherencia. */
 export function rutasDeTomas(contenedor: Contenedor): Router {
@@ -58,6 +58,27 @@ export function rutasDeTomas(contenedor: Contenedor): Router {
         medicamentoId: consulta.medicamentoId,
       });
       respuesta.json(historial);
+    }),
+  );
+
+  // GET /api/tomas/analitica?desde=...&hasta=...
+  //
+  // El mapa de riesgo, las curiosidades y el resumen en una sola
+  // peticion: las tres cosas salen del mismo conjunto de tomas, y
+  // partirlas en tres rutas seria leer la base de datos tres veces para
+  // lo mismo.
+  router.get(
+    '/analitica',
+    asincrono(async (peticion, respuesta) => {
+      const solicitante = solicitanteDe(peticion);
+      const consulta = esquemaDeConsultaDeAnalitica.parse(peticion.query);
+      const analitica = await casosDeUso.obtenerAnalitica.ejecutar({
+        solicitante,
+        pacienteId: consulta.pacienteId ?? solicitante.id.valor,
+        desde: consulta.desde,
+        hasta: consulta.hasta,
+      });
+      respuesta.json(analitica);
     }),
   );
 

@@ -155,6 +155,56 @@ export interface Historial {
   porDia: { fecha: string; tomadas: number; omitidas: number; porcentaje: number }[];
 }
 
+export type Franja = 'MADRUGADA' | 'MANANA' | 'TARDE' | 'NOCHE';
+
+export interface CeldaDeRiesgo {
+  franja: Franja;
+  /** 0 = domingo ... 6 = sábado. */
+  diaDeLaSemana: number;
+  observaciones: number;
+  omitidas: number;
+  /** De 0 a 1, ya suavizado por el servidor. */
+  riesgo: number;
+  /** Si hay evidencia suficiente para afirmar algo de esta casilla. */
+  suficiente: boolean;
+}
+
+export interface Hallazgo {
+  franja: Franja;
+  diaDeLaSemana: number;
+  riesgo: number;
+  observaciones: number;
+  omitidas: number;
+  texto: string;
+}
+
+export interface Curiosidad {
+  clave: string;
+  titulo: string;
+  valor: string;
+  detalle: string;
+}
+
+export interface Analitica {
+  desde: string;
+  hasta: string;
+  zonaHoraria: string;
+  resumen: ResumenDeAdherencia;
+  mapaDeRiesgo: {
+    celdas: CeldaDeRiesgo[];
+    tasaGeneral: number;
+    totalDeObservaciones: number;
+    hallazgos: Hallazgo[];
+    peorCelda: CeldaDeRiesgo | null;
+    mejorCelda: CeldaDeRiesgo | null;
+  };
+  curiosidades: Curiosidad[];
+  evidencia: {
+    tomasResueltas: number;
+    suficienteParaElMapa: boolean;
+  };
+}
+
 export interface PermisosDelCuidador {
   puedeVerHistorial: boolean;
   puedeRegistrarTomas: boolean;

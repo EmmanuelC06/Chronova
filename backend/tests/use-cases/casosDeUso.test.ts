@@ -1389,6 +1389,81 @@ describe('Lo que un cuidador puede ver de su paciente', () => {
   });
 });
 
+
+// =================================================================
+/**
+ * La analitica es historial, y se rige por el mismo permiso.
+ *
+ * Es la parte que de verdad habia que probar al añadirla: una pantalla
+ * nueva que lee tomas es una via nueva por la que se pueden escapar
+ * datos clinicos. Si `puedeVerHistorial` esta apagado, el mapa de riesgo
+ * y las curiosidades tienen que ser tan inalcanzables como el historial
+ * mismo, porque dicen lo mismo con otro dibujo.
+ */
+describe('Acceso a la analitica', () => {
+  it('el propio paciente siempre puede ver su analitica', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+
+    const analitica = await app.contenedor.casosDeUso.obtenerAnalitica.ejecutar({
+      solicitante: paciente.solicitante,
+      pacienteId: paciente.id,
+    });
+
+    expect(analitica.mapaDeRiesgo.celdas).toHaveLength(28);
+    expect(analitica.evidencia.suficienteParaElMapa).toBe(false);
+  });
+
+  it('un cuidador sin vinculo no puede verla', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    const cuidador = await crearCuidadorDePrueba(app);
+
+    await expect(
+      app.contenedor.casosDeUso.obtenerAnalitica.ejecutar({
+        solicitante: cuidador.solicitante,
+        pacienteId: paciente.id,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('un cuidador vinculado SIN permiso de historial tampoco', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    await crearCuidadorDePrueba(app);
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+      permisos: { puedeVerHistorial: false },
+    });
+
+    const cuidador = comoCuidador(vinculo.cuidadorId);
+
+    await expect(
+      app.contenedor.casosDeUso.obtenerAnalitica.ejecutar({
+        solicitante: cuidador,
+        pacienteId: paciente.id,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('un cuidador vinculado CON permiso de historial si', async () => {
+    const paciente = await crearPacienteDePrueba(app);
+    await crearCuidadorDePrueba(app);
+
+    const vinculo = await app.contenedor.casosDeUso.solicitarVinculo.ejecutar({
+      solicitante: paciente.solicitante,
+      emailDeLaOtraParte: 'ana@test.com',
+      permisos: { puedeVerHistorial: true },
+    });
+
+    const analitica = await app.contenedor.casosDeUso.obtenerAnalitica.ejecutar({
+      solicitante: comoCuidador(vinculo.cuidadorId),
+      pacienteId: paciente.id,
+    });
+
+    expect(analitica.zonaHoraria).toBe('America/Bogota');
+  });
+});
+
 // -----------------------------------------------------------------
 // Ayuda local
 // -----------------------------------------------------------------
