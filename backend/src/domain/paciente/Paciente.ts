@@ -7,6 +7,8 @@ import { ZonaHoraria } from '../shared/ZonaHoraria.js';
 import { FechaLocal } from '../shared/FechaLocal.js';
 import { ErrorDeValidacion } from '../shared/errores.js';
 import { PreferenciasDeAccesibilidad } from '../shared/PreferenciasDeAccesibilidad.js';
+import { TemasDeInteres } from './TemasDeInteres.js';
+import type { Tema } from './TemasDeInteres.js';
 
 export interface PacientePlano {
   id: string;
@@ -24,6 +26,14 @@ export interface PacientePlano {
     alertasVibracion: boolean;
     minutosDeGracia: number;
   };
+  /**
+   * Temas sobre los que quiere leer, de una lista cerrada.
+   *
+   * Opcional al leer: las cuentas anteriores a que existiera esto no lo
+   * traen, y no tenerlo significa "todavia no ha elegido", que es un
+   * estado legitimo y no un error.
+   */
+  temasDeInteres?: Tema[] | null;
   activo: boolean;
   creadoEn: string;
   /** Version de la politica que acepto y cuando. Ausente en cuentas antiguas. */
@@ -54,6 +64,7 @@ export class Paciente {
     private _contrasenaCifrada: string,
     private _zonaHoraria: ZonaHoraria,
     private _preferencias: PreferenciasDeAccesibilidad,
+    private _temasDeInteres: TemasDeInteres,
     private _activo: boolean,
     readonly creadoEn: Date,
     private _sesionesValidasDesde: Date,
@@ -91,6 +102,10 @@ export class Paciente {
       datos.contrasenaCifrada,
       datos.zonaHoraria ?? ZonaHoraria.porDefecto(),
       datos.preferencias ?? PreferenciasDeAccesibilidad.porDefecto(),
+      // Nadie empieza con temas marcados. Suponer que a alguien le
+      // interesa el sueño porque tiene setenta años es justo la clase
+      // de suposicion que esta funcion existe para evitar.
+      TemasDeInteres.ninguno(),
       true,
       datos.ahora,
       datos.ahora,
@@ -111,6 +126,7 @@ export class Paciente {
       plano.contrasenaCifrada,
       ZonaHoraria.desdeOPorDefecto(plano.zonaHoraria),
       PreferenciasDeAccesibilidad.desde(plano.preferencias),
+      TemasDeInteres.desdePlano(plano.temasDeInteres),
       plano.activo,
       new Date(plano.creadoEn),
       new Date(plano.sesionesValidasDesde ?? plano.creadoEn),
@@ -130,6 +146,7 @@ export class Paciente {
       contrasenaCifrada: this._contrasenaCifrada,
       zonaHoraria: this._zonaHoraria.valor,
       preferencias: this._preferencias.toJSON(),
+      temasDeInteres: this._temasDeInteres.toJSON(),
       activo: this._activo,
       creadoEn: this.creadoEn.toISOString(),
       sesionesValidasDesde: this._sesionesValidasDesde.toISOString(),
@@ -236,6 +253,22 @@ export class Paciente {
 
   cambiarPreferencias(preferencias: PreferenciasDeAccesibilidad): void {
     this._preferencias = preferencias;
+  }
+
+  get temasDeInteres(): TemasDeInteres {
+    return this._temasDeInteres;
+  }
+
+  /**
+   * Cambia los temas marcados.
+   *
+   * Reemplaza la lista entera en vez de añadir o quitar de a uno. La
+   * pantalla manda siempre lo que esta marcado despues del toque, y asi
+   * dos telefonos de la misma persona no pueden acabar sumando temas que
+   * ella ya habia quitado en el otro.
+   */
+  cambiarTemasDeInteres(temas: TemasDeInteres): void {
+    this._temasDeInteres = temas;
   }
 
   /**

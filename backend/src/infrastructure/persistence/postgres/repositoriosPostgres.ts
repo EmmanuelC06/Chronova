@@ -62,9 +62,9 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
     await this.pool.query(
       `INSERT INTO pacientes
          (id, nombre, email, telefono, fecha_de_nacimiento, contrasena_cifrada,
-          zona_horaria, preferencias, activo, creado_en, sesiones_validas_desde,
-          politica_version, politica_aceptada_en)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+          zona_horaria, preferencias, temas_de_interes, activo, creado_en,
+          sesiones_validas_desde, politica_version, politica_aceptada_en)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
        ON CONFLICT (id) DO UPDATE SET
          nombre = EXCLUDED.nombre,
          telefono = EXCLUDED.telefono,
@@ -72,6 +72,7 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
          contrasena_cifrada = EXCLUDED.contrasena_cifrada,
          zona_horaria = EXCLUDED.zona_horaria,
          preferencias = EXCLUDED.preferencias,
+         temas_de_interes = EXCLUDED.temas_de_interes,
          activo = EXCLUDED.activo,
          sesiones_validas_desde = EXCLUDED.sesiones_validas_desde,
          politica_version = EXCLUDED.politica_version,
@@ -85,6 +86,7 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
         p.contrasenaCifrada,
         p.zonaHoraria,
         JSON.stringify(p.preferencias),
+        JSON.stringify(p.temasDeInteres ?? []),
         p.activo,
         p.creadoEn,
         p.sesionesValidasDesde,
@@ -131,6 +133,9 @@ export class RepositorioDePacientesPostgres implements RepositorioDePacientes {
       contrasenaCifrada: fila.contrasena_cifrada,
       zonaHoraria: fila.zona_horaria ?? 'America/Bogota',
       preferencias: fila.preferencias ?? {},
+      // Las cuentas anteriores a esta columna la tienen nula, que es lo
+      // mismo que "todavia no ha elegido ningun tema".
+      temasDeInteres: fila.temas_de_interes ?? [],
       activo: fila.activo,
       creadoEn: aFechaIso(fila.creado_en)!,
       // Las cuentas anteriores a esta columna la tienen nula: se toma la

@@ -46,6 +46,8 @@ export interface Perfil extends UsuarioAutenticado {
   /** Zona horaria IANA del paciente, por ejemplo "America/Bogota". */
   zonaHoraria?: string;
   preferencias?: Preferencias;
+  /** Solo para pacientes: los temas que marcó en curiosidades. */
+  temasDeInteres?: string[];
   rol?: string | null;
   /**
    * Constancia de la autorizacion de tratamiento de datos que otorgo.
@@ -199,6 +201,11 @@ export interface Analitica {
     mejorCelda: CeldaDeRiesgo | null;
   };
   curiosidades: Curiosidad[];
+  /**
+   * Claves de los temas que el paciente marcó. Los títulos los pone la
+   * app: si llega una clave que esta versión no conoce, la omite.
+   */
+  temasDeInteres: string[];
   evidencia: {
     tomasResueltas: number;
     suficienteParaElMapa: boolean;

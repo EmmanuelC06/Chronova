@@ -190,6 +190,24 @@ ALTER TABLE cuidadores
   ADD COLUMN IF NOT EXISTS preferencias JSONB NOT NULL DEFAULT '{}'::jsonb;
 
 -- ---------------------------------------------------------------
+-- Temas de interes del paciente
+-- ---------------------------------------------------------------
+-- Que temas quiere leer en el modulo de curiosidades. Son CLAVES de una
+-- lista cerrada, nunca texto libre: un campo abierto aqui seria el sitio
+-- donde la gente escribiria el nombre de su enfermedad, y eso convertiria
+-- una preferencia de lectura en un dato de salud guardado sin que nadie
+-- lo hubiera decidido.
+--
+-- Columna propia y no dentro de `preferencias` porque `preferencias` la
+-- comparten paciente y cuidador, y esto solo tiene sentido para quien se
+-- toma la medicina. Un cuidador no elige temas.
+--
+-- La lista vacia es el estado de salida y es valido: significa que
+-- todavia no ha elegido.
+ALTER TABLE pacientes
+  ADD COLUMN IF NOT EXISTS temas_de_interes JSONB NOT NULL DEFAULT '[]'::jsonb;
+
+-- ---------------------------------------------------------------
 -- Recuperaciones de contrasena
 -- ---------------------------------------------------------------
 -- El codigo se guarda CIFRADO, igual que una contrasena: quien leyera

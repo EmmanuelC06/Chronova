@@ -7,6 +7,7 @@ import {
   esquemaDeDispositivo,
   esquemaDeInicioDeSesion,
   esquemaDePreferencias,
+  esquemaDeTemasDeInteres,
   esquemaDeRegistroDeCuidador,
   esquemaDeRegistroDePaciente,
   esquemaDeRestablecimiento,
@@ -108,6 +109,28 @@ export function rutasDeAutenticacion(contenedor: Contenedor): Router {
         ...datos,
       });
       respuesta.json(preferencias);
+    }),
+  );
+
+  // PATCH /api/auth/temas-de-interes
+  //
+  // CON exigirTipo('PACIENTE'), al reves que la ruta de arriba. Alla el
+  // cuidador tambien manda porque agrandar la letra es cosa de quien
+  // mira la pantalla; aqui no, porque el reporte dice "marco que le
+  // interesa" y esa frase solo es verdad si lo marco la persona.
+  router.patch(
+    '/temas-de-interes',
+    autenticar(casosDeUso.verificarSesion),
+    exigirTipo('PACIENTE'),
+    asincrono(async (peticion, respuesta) => {
+      const { temas } = esquemaDeTemasDeInteres.parse(peticion.body);
+      const solicitante = solicitanteDe(peticion);
+      respuesta.json(
+        await casosDeUso.actualizarTemasDeInteres.ejecutar({
+          pacienteId: solicitante.id.valor,
+          temas,
+        }),
+      );
     }),
   );
 

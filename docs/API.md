@@ -412,6 +412,7 @@ Devuelve el resumen, el mapa de riesgo y las curiosidades en una sola respuesta:
   "curiosidades": [
     { "clave": "MEJOR_RACHA", "titulo": "Tu mejor racha", "valor": "23 días", "detalle": "..." }
   ],
+  "temasDeInteres": ["MEMORIA", "SUENO"],
   "evidencia": { "tomasResueltas": 364, "suficienteParaElMapa": true }
 }
 ```
@@ -433,6 +434,39 @@ Sin eso, una casilla con una sola omisión daría 100% y encabezaría la lista. 
 **El día y la franja se calculan en la zona horaria del paciente**, no en UTC ni en la de quien consulta. Las 20:00 en Bogotá son las 01:00Z del día siguiente: en UTC el mapa entero saldría corrido.
 
 `evidencia.suficienteParaElMapa` es `totalDeObservaciones >= 40`, unas tres semanas de un tratamiento de dos tomas diarias. Por debajo el mapa se calcula igual, pero la app avisa de que todavía hay poca historia.
+
+`temasDeInteres` son las claves que el paciente marcó en el módulo de curiosidades. Viajan aquí y no solo en el perfil porque el reporte las menciona, y el reporte lo puede generar también el cuidador desde su teléfono: su propio perfil no sabe nada de esto. El servidor devuelve claves y los títulos los pone la app, así que una versión antigua que no conozca una clave nueva la omite en vez de imprimir algo ilegible.
+
+---
+
+### `PATCH /api/auth/temas-de-interes`
+
+Solo pacientes. Guarda los temas sobre los que quiere leer en el módulo de curiosidades.
+
+```json
+{ "temas": ["SUENO", "MEMORIA"] }
+```
+
+Responde `{ "temasDeInteres": ["MEMORIA", "SUENO"] }`.
+
+**Se manda la lista completa de lo que queda marcado**, no un añadir ni un quitar. Así dos teléfonos de la misma persona no pueden acabar sumando temas que ella ya había quitado en el otro.
+
+| Regla | Valor |
+|---|---|
+| Claves válidas | `MEMORIA`, `CITA`, `SUENO`, `ALIMENTACION`, `MOVIMIENTO`, `ANIMO` |
+| Máximo a la vez | 4 |
+| Repetidos | Se ignoran, no se rechaza la petición |
+| Orden guardado | El del catálogo, no el de llegada |
+
+**La lista es cerrada, y eso no es una comodidad de implementación.** Un campo de texto libre aquí sería el sitio donde la gente escribiría el nombre de su enfermedad, y eso convertiría una preferencia de lectura en un dato de salud guardado sin que nadie lo hubiera decidido. Una clave que no esté en el catálogo se rechaza con `400`.
+
+El orden se normaliza para que dos reportes del mismo mes no se diferencien solo en que una vez se tocó antes el sueño que la cita: un documento que cambia sin que haya cambiado nada hace dudar de todo lo demás que dice.
+
+**Lo cambia solo su dueño.** La ruta exige sesión de paciente y actúa sobre quien la tiene; un cuidador no puede marcar por él ni con permiso de gestionar medicamentos. El reporte dice «marcó que le interesa», y esa frase solo es verdad si lo marcó la persona.
+
+**Lo que el reporte NO dice** es cuántas veces abrió cada tema. Contar aperturas sería vigilar su lectura, necesitaría su consentimiento explícito para aparecer en un documento que va a un tercero, y además mentiría: con tres o cuatro toques al mes, «el tema que más consultó» es ruido con aspecto de dato.
+
+---
 
 > **Lo que este endpoint no hace, y conviene que siga siendo así.** No recomienda cambios de tratamiento, no interpreta los números en clave clínica y no afirma nada sobre la enfermedad de nadie. Describe la conducta de una persona con sus propios registros. Esa frontera es la que mantiene a Chronova fuera del régimen de dispositivos médicos del Decreto 4725 de 2005, que clasifica el software por su **finalidad prevista**.
 

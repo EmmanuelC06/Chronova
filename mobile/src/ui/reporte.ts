@@ -1,5 +1,6 @@
 import type { Analitica, CeldaDeRiesgo, Franja } from '../dominio/modelos';
 import { fechaEnPalabras } from './fechas';
+import { tituloDeTema } from './datosDeHabitos';
 import { colores } from './tema';
 
 /**
@@ -176,6 +177,37 @@ export function construirHtml(analitica: Analitica, nombreDelPaciente?: string):
     y no debían.
   */
 
+  /*
+    LOS TEMAS DE INTERES.
+
+    Dice lo que la persona MARCO, no lo que abrio. La diferencia no es
+    cosmetica, son dos cosas distintas y solo una se puede poner en un
+    documento que va a manos de otro.
+
+    Contar aperturas seria vigilar su lectura, y ademas mentiria: con
+    tres o cuatro toques al mes, "el tema que mas consulto" es ruido con
+    aspecto de dato. Lo que marco, en cambio, lo decidio ella, lo puede
+    cambiar cuando quiera y no depende de cuanto haya usado el telefono.
+
+    La frase esta redactada para que se lea como un tema de conversacion
+    y no como un sintoma: "le interesa leer sobre" y no "consulta sobre",
+    que sonaria a que algo le preocupa de su salud.
+  */
+  const titulosDeTemas = analitica.temasDeInteres
+    .map((clave) => tituloDeTema(clave))
+    .filter((titulo): titulo is string => titulo !== null)
+    .map((titulo) => titulo.toLowerCase());
+
+  const temas =
+    titulosDeTemas.length > 0
+      ? `<h2>Qué le interesa leer</h2>
+         <p>${escapar(nombreDelPaciente ? nombreDelPaciente.split(' ')[0]! : 'La persona')}
+            marcó en la aplicación que le interesa leer sobre
+            <strong>${escapar(enumerar(titulosDeTemas))}</strong>.</p>
+         <p class="suave">Es una preferencia que marcó por su cuenta, no una consulta ni un
+            síntoma. Se incluye por si sirve para abrir la conversación.</p>`
+      : '';
+
   return `<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <style>
@@ -221,6 +253,8 @@ export function construirHtml(analitica: Analitica, nombreDelPaciente?: string):
   <h2>Cuándo se quedan las tomas</h2>
   ${hallazgos}
   ${tablaDelMapa(mapaDeRiesgo.celdas)}
+
+  ${temas}
 
   <p class="nota">
     Este documento lo genera Chronova a partir de los registros que la propia persona
@@ -268,6 +302,19 @@ function tablaDelMapa(celdas: CeldaDeRiesgo[]): string {
   <p class="suave" style="font-size:8.5pt;margin-top:2mm">
     Cada casilla muestra cuántas tomas se quedaron de cuántas programadas.
   </p>`;
+}
+
+/**
+ * Une una lista con comas y una «y» al final, como se escribe en español.
+ *
+ * `join(', ')` daría «el sueño, moverse, el ánimo», que dentro de una
+ * frase suena a lista de la compra. Son tres líneas y hacen que el
+ * documento parezca escrito por alguien.
+ */
+function enumerar(partes: readonly string[]): string {
+  if (partes.length === 0) return '';
+  if (partes.length === 1) return partes[0]!;
+  return `${partes.slice(0, -1).join(', ')} y ${partes[partes.length - 1]!}`;
 }
 
 /**

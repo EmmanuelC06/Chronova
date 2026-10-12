@@ -52,6 +52,8 @@ export interface PerfilDeUsuario {
   edad?: number | null;
   zonaHoraria?: string;
   preferencias?: Record<string, unknown>;
+  /** Solo para pacientes: los temas que marco en curiosidades. */
+  temasDeInteres?: string[];
   /** Solo para cuidadores. */
   rol?: string | null;
   /**
@@ -101,6 +103,7 @@ export class ObtenerPerfil {
         edad: paciente.edadEn(paciente.zonaHoraria.fechaLocalDe(this.reloj.ahora())),
         zonaHoraria: paciente.zonaHoraria.valor,
         preferencias: paciente.preferencias.toJSON(),
+        temasDeInteres: paciente.temasDeInteres.toJSON(),
         autorizacionDeDatos: aVistaDeAutorizacion(paciente.autorizacionDeDatos),
       };
     }

@@ -202,6 +202,14 @@ export class ClienteChronova implements ApiDeChronova {
     return this.pedir<Preferencias>('PATCH', '/api/auth/preferencias', cambios);
   }
 
+  actualizarTemasDeInteres(temas: string[]): Promise<{ temasDeInteres: string[] }> {
+    return this.pedir<{ temasDeInteres: string[] }>(
+      'PATCH',
+      '/api/auth/temas-de-interes',
+      { temas },
+    );
+  }
+
   // ---------------------------------------------------------------
   // Dispositivo (notificaciones push)
   // ---------------------------------------------------------------

@@ -29,6 +29,76 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.8.0] — 2026-10-12
+
+### Añadido
+
+- **Temas de interés en curiosidades.** El paciente marca hasta cuatro temas de una lista
+  cerrada de seis (acordarse mejor, hablar con el médico, el sueño, la alimentación, moverse,
+  el ánimo) y esos datos pasan a salir de primeros. Con ellos llegan cuatro tarjetas nuevas,
+  cada una con su fuente a la vista: la recomendación de sueño a partir de los 65, por qué la
+  sed deja de ser un buen aviso con la edad, lo que recomienda la OMS sobre moverse, y que
+  sentirse solo es más común de lo que parece.
+
+  **Se ordena, no se filtra.** Marcar «el sueño» no esconde el dato de moverse: lo baja. Es la
+  diferencia entre una lista personalizada y una lista censurada, y la segunda vacía de
+  sentido un módulo que existe para que la gente se tropiece con cosas. Quien no marca nada lo
+  ve todo.
+
+  El tope de cuatro no es técnico: marcarlos todos equivale a no elegir nada, y la frase del
+  reporte tiene que caber en una línea legible.
+
+- **El reporte dice qué le interesa leer**, debajo del mapa. Una línea: «Rosa marcó en la
+  aplicación que le interesa leer sobre acordarse mejor, el sueño y el ánimo», con la
+  aclaración de que es una preferencia que marcó por su cuenta y no una consulta ni un síntoma.
+
+  **Dice lo que MARCÓ, no lo que abrió**, y esa fue la decisión de diseño de esta versión. La
+  petición original era contar qué temas consultó más en el período. Contar aperturas es
+  vigilar la lectura de una persona, y ponerlo en un documento que sale por WhatsApp a un
+  tercero necesitaría su consentimiento explícito y poder apagarlo. Pero lo que lo descartó no
+  fue eso: es que con tres o cuatro toques al mes, «el tema que más consultó» son dos o tres
+  eventos, y de ahí no sale una afirmación. Es el mismo problema de comparaciones múltiples del
+  mapa de riesgo. Lo que marcó, en cambio, lo decidió ella, lo puede cambiar cuando quiera, no
+  depende de cuánto haya usado el teléfono, y le sirve igual al médico como tema de
+  conversación.
+
+- **`PATCH /api/auth/temas-de-interes`**, solo para pacientes, y `temasDeInteres` en el perfil
+  y en la respuesta de analítica. Va también en la analítica, y no solo en el perfil, porque el
+  reporte lo puede preparar el cuidador desde su teléfono: su propio perfil no sabe nada de los
+  temas del paciente.
+
+  **La lista de claves es cerrada**, y eso no es una comodidad de implementación. Un campo de
+  texto libre aquí sería el sitio donde la gente escribiría el nombre de su enfermedad, y eso
+  convertiría una preferencia de lectura en un dato de salud guardado sin que nadie lo hubiera
+  decidido. Hay una prueba que lo fija.
+
+  **Lo cambia solo su dueño**, al revés que las preferencias de accesibilidad, donde el cuidador
+  también manda porque agrandar la letra es cosa de quien mira la pantalla. Aquí no: el reporte
+  dice «marcó que le interesa», y esa frase solo es verdad si lo marcó la persona.
+
+- Columna `temas_de_interes` en `pacientes`, aditiva (`ADD COLUMN IF NOT EXISTS`), con `[]` por
+  defecto. Columna propia y no dentro de `preferencias` porque esa la comparten paciente y
+  cuidador, y elegir temas solo tiene sentido para quien se toma la medicina.
+
+### Corregido
+
+- **Al llegar al tope de cuatro temas, tocar un quinto no hacía nada.** Un toque sin reacción no
+  se lee como «he llegado al límite», se lee como que la aplicación se colgó, y la persona
+  vuelve a tocar. Ahora contesta con un aviso que explica por qué. Y los temas que no se pueden
+  marcar ya no se atenúan al 45%, que dejaba el texto por debajo de cualquier contraste legible
+  en una aplicación cuyo público son adultos mayores.
+
+### Nota sobre el alcance de los textos
+
+Los temas de sueño, alimentación, movimiento y ánimo son **datos generales con fuente**, no
+recomendaciones. Ninguna tarjeta dice qué hacer, ninguna nombra un medicamento ni una
+enfermedad, y donde la decisión depende del tratamiento de cada quien la tarjeta lo dice y
+remite al médico. La diferencia entre «conviene que bebas más agua» y «la sed deja de ser un
+buen aviso con la edad» es la diferencia entre aconsejar y contar, y es la que mantiene a
+Chronova donde está.
+
+---
+
 ## [1.7.0] — 2026-10-12
 
 Lo que pidió el profesor: analítica, un módulo de curiosidades y poder mandar el reporte por

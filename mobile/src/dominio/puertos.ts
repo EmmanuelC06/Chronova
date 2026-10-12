@@ -95,6 +95,13 @@ export interface ApiDeChronova {
     nuevaContrasena: string;
   }): Promise<unknown>;
   actualizarPreferencias(cambios: Partial<Preferencias>): Promise<Preferencias>;
+  /**
+   * Guarda los temas marcados. Se manda la lista COMPLETA de lo que
+   * queda marcado, no un añadir ni un quitar: así dos teléfonos de la
+   * misma persona no pueden acabar sumando temas que ella ya había
+   * quitado en el otro.
+   */
+  actualizarTemasDeInteres(temas: string[]): Promise<{ temasDeInteres: string[] }>;
 
   listarMedicamentos(pacienteId?: string): Promise<Medicamento[]>;
   registrarMedicamento(datos: Record<string, unknown>): Promise<Medicamento>;

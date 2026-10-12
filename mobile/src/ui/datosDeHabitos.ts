@@ -22,17 +22,86 @@ import type { NombreDeIcono } from './componentes/Icono';
  * todo el mundo. Se puede enseñar en la sustentación, se puede defender
  * y se puede corregir.
  *
- * Las tres reglas de redacción
- * ----------------------------
+ * Las cuatro reglas de redacción
+ * ------------------------------
  * 1. Ninguna tarjeta nombra un medicamento, una dosis ni una
  *    enfermedad concreta.
- * 2. Ninguna tarjeta dice qué hacer con un tratamiento. Habla de
- *    conducta: de memoria, de rutinas y de hábitos.
+ * 2. Ninguna tarjeta dice qué hacer. Describe lo que se sabe y deja la
+ *    decisión donde tiene que estar. La diferencia entre «conviene que
+ *    bebas más agua» y «la sed deja de ser un buen aviso con la edad»
+ *    es la diferencia entre aconsejar y contar.
  * 3. Todo número tiene fuente. Un dato sin fuente en un trabajo
  *    académico es una opinión con cara de dato.
+ * 4. Donde la decisión dependa del tratamiento de cada quien, la tarjeta
+ *    lo dice y remite al médico. No es un parche legal: para algunas
+ *    personas beber más líquido o moverse más está limitado por su
+ *    tratamiento, y una tarjeta que lo ignore sería un mal consejo
+ *    aunque el dato sea cierto.
  */
+
+/**
+ * Los temas que una persona puede marcar.
+ *
+ * Las claves son las mismas que valida el servidor
+ * (`backend/src/domain/paciente/TemasDeInteres.ts`). Si alguien añade un
+ * tema allí sin añadirlo aquí, la app sencillamente no lo dibuja; si lo
+ * añade aquí sin añadirlo allí, el servidor rechaza el guardado. Las dos
+ * mitades fallan de forma visible, que es mejor que una que calle.
+ */
+export const TEMAS = [
+  {
+    clave: 'MEMORIA',
+    titulo: 'Acordarse mejor',
+    descripcion: 'Cómo se forman los hábitos y por qué a veces cuesta.',
+    icono: 'idea' as NombreDeIcono,
+  },
+  {
+    clave: 'CITA',
+    titulo: 'Hablar con el médico',
+    descripcion: 'Sacarle más provecho a los quince minutos de consulta.',
+    icono: 'libro' as NombreDeIcono,
+  },
+  {
+    clave: 'SUENO',
+    titulo: 'El sueño',
+    descripcion: 'Cuánto se duerme y qué cambia con los años.',
+    icono: 'sueno' as NombreDeIcono,
+  },
+  {
+    clave: 'ALIMENTACION',
+    titulo: 'La alimentación',
+    descripcion: 'Lo que cambia en el cuerpo con la edad.',
+    icono: 'alimentacion' as NombreDeIcono,
+  },
+  {
+    clave: 'MOVIMIENTO',
+    titulo: 'Moverse',
+    descripcion: 'Qué recomienda la OMS a partir de los 65.',
+    icono: 'movimiento' as NombreDeIcono,
+  },
+  {
+    clave: 'ANIMO',
+    titulo: 'El ánimo',
+    descripcion: 'La compañía y los días difíciles.',
+    icono: 'animo' as NombreDeIcono,
+  },
+] as const;
+
+export type ClaveDeTema = (typeof TEMAS)[number]['clave'];
+
+/** El mismo tope que el dominio del servidor. */
+export const MAXIMO_DE_TEMAS = 4;
+
 export interface DatoDeHabito {
   clave: string;
+  /**
+   * El tema al que pertenece, o `null` si se enseña siempre.
+   *
+   * Solo hay un dato sin tema, y es a propósito: el que dice que
+   * olvidarse es lo normal. Esa es la idea de la que cuelga todo lo
+   * demás, y nadie debería tener que marcar nada para encontrarla.
+   */
+  tema: ClaveDeTema | null;
   icono: NombreDeIcono;
   titulo: string;
   texto: string;
@@ -43,6 +112,7 @@ export interface DatoDeHabito {
 export const DATOS_DE_HABITOS: readonly DatoDeHabito[] = [
   {
     clave: 'ES_COMUN',
+    tema: null,
     icono: 'informacion',
     titulo: 'No eres el único al que se le queda',
     texto:
@@ -51,8 +121,11 @@ export const DATOS_DE_HABITOS: readonly DatoDeHabito[] = [
       'y es justo el problema que esta aplicación intenta resolver.',
     fuente: 'OMS, "Adherencia a los tratamientos a largo plazo" (2003)',
   },
+
+  // ---- Acordarse mejor ----
   {
     clave: 'SESENTA_Y_SEIS',
+    tema: 'MEMORIA',
     icono: 'calendario',
     titulo: 'Un hábito no se hace en 21 días',
     texto:
@@ -63,17 +136,8 @@ export const DATOS_DE_HABITOS: readonly DatoDeHabito[] = [
     fuente: 'Lally y otros, European Journal of Social Psychology (2010)',
   },
   {
-    clave: 'RECORDATORIOS',
-    icono: 'campana',
-    titulo: 'El recordatorio funciona, y está medido',
-    texto:
-      'Se revisaron 16 ensayos clínicos con 2.742 pacientes para ver si un simple aviso ' +
-      'en el teléfono cambiaba algo. Lo cambiaba: quienes lo recibían tenían alrededor ' +
-      'del doble de probabilidad de tomarse la medicina como estaba indicado.',
-    fuente: 'Thakkar y otros, JAMA Internal Medicine (2016)',
-  },
-  {
     clave: 'ENGANCHAR',
+    tema: 'MEMORIA',
     icono: 'idea',
     titulo: 'Engánchalo a algo que ya haces',
     texto:
@@ -83,7 +147,21 @@ export const DATOS_DE_HABITOS: readonly DatoDeHabito[] = [
     fuente: 'Principio de anclaje de hábitos, usado en psicología de la conducta',
   },
   {
+    clave: 'RECORDATORIOS',
+    tema: 'MEMORIA',
+    icono: 'campana',
+    titulo: 'El recordatorio funciona, y está medido',
+    texto:
+      'Se revisaron 16 ensayos clínicos con 2.742 pacientes para ver si un simple aviso ' +
+      'en el teléfono cambiaba algo. Lo cambiaba: quienes lo recibían tenían alrededor ' +
+      'del doble de probabilidad de tomarse la medicina como estaba indicado.',
+    fuente: 'Thakkar y otros, JAMA Internal Medicine (2016)',
+  },
+
+  // ---- Hablar con el médico ----
+  {
     clave: 'LO_ESCRITO',
+    tema: 'CITA',
     icono: 'libro',
     titulo: 'Lo escrito pesa más que lo recordado',
     texto:
@@ -92,7 +170,95 @@ export const DATOS_DE_HABITOS: readonly DatoDeHabito[] = [
       'bien". Para eso está el botón de preparar el reporte.',
     fuente: 'Chronova',
   },
+
+  // ---- El sueño ----
+  {
+    clave: 'SUENO_HORAS',
+    tema: 'SUENO',
+    icono: 'sueno',
+    titulo: 'No se necesita dormir mucho menos con los años',
+    texto:
+      'Se suele decir que de mayor se duerme poco porque hace falta poco. La ' +
+      'recomendación es de 7 a 9 horas para un adulto y de 7 a 8 a partir de los 65: ' +
+      'baja una hora, no tres. Y dentro de ese rango hay gente que está bien en el ' +
+      'extremo bajo y gente que no.',
+    fuente: 'National Sleep Foundation, recomendaciones de duración del sueño (2015, revisadas en 2026)',
+  },
+
+  // ---- La alimentación ----
+  {
+    clave: 'SED',
+    tema: 'ALIMENTACION',
+    icono: 'alimentacion',
+    titulo: 'La sed deja de ser un buen aviso',
+    texto:
+      'Con la edad, la sensación de sed se atenúa. Es uno de los motivos por los que el ' +
+      'cuerpo puede ir falto de líquido sin que aparezcan ganas de beber, junto con los ' +
+      'cambios en el riñón y el número de medicamentos que se toman. Cuánto conviene ' +
+      'beber depende de cada persona y de su tratamiento: eso se habla con el médico.',
+    fuente: 'Hooper y otros, Mechanisms of Ageing and Development (2014)',
+  },
+
+  // ---- Moverse ----
+  {
+    clave: 'MOVERSE',
+    tema: 'MOVIMIENTO',
+    icono: 'movimiento',
+    titulo: 'Lo que la OMS recomienda a partir de los 65',
+    texto:
+      'De 150 a 300 minutos de actividad moderada a la semana, que son unos 20 a 40 ' +
+      'minutos al día, y tres días o más de ejercicios de equilibrio y fuerza. No es una ' +
+      'meta que haya que alcanzar mañana, y qué parte de esto le conviene a cada quien ' +
+      'depende de su situación: eso se habla con el médico.',
+    fuente: 'OMS, directrices sobre actividad física y hábitos sedentarios (2020)',
+  },
+
+  // ---- El ánimo ----
+  {
+    clave: 'COMPANIA',
+    tema: 'ANIMO',
+    icono: 'animo',
+    titulo: 'Sentirse solo es más común de lo que parece',
+    texto:
+      'Una de cada seis personas en el mundo se siente sola, y el aislamiento social ' +
+      'alcanza hasta a uno de cada tres adultos mayores. Es tan frecuente que la OMS ' +
+      'creó una comisión para estudiarlo. Si el ánimo bajo te dura muchos días seguidos, ' +
+      'vale la pena contárselo a alguien de confianza y a tu médico.',
+    fuente: 'OMS, Comisión sobre Conexión Social (2025)',
+  },
 ];
+
+/**
+ * Los datos ordenados según lo que la persona marcó.
+ *
+ * No se filtra, se ORDENA. Es la diferencia entre una lista personalizada
+ * y una lista censurada: alguien que marcó el sueño sigue pudiendo
+ * tropezarse con el dato de moverse, que es medio sentido de tener un
+ * módulo de curiosidades. Y quien no ha marcado nada lo ve todo, en el
+ * orden del catálogo.
+ *
+ * El dato sin tema va siempre primero, haya marcado lo que haya marcado.
+ */
+export function datosOrdenadosPara(
+  marcados: readonly string[],
+): { destacados: DatoDeHabito[]; resto: DatoDeHabito[] } {
+  const siempre = DATOS_DE_HABITOS.filter((d) => d.tema === null);
+  const conTema = DATOS_DE_HABITOS.filter((d) => d.tema !== null);
+
+  if (marcados.length === 0) {
+    return { destacados: [...siempre, ...conTema], resto: [] };
+  }
+
+  return {
+    destacados: [...siempre, ...conTema.filter((d) => marcados.includes(d.tema!))],
+    resto: conTema.filter((d) => !marcados.includes(d.tema!)),
+  };
+}
+
+/** El título de un tema, o `null` si esta versión de la app no lo conoce. */
+export function tituloDeTema(clave: string): string | null {
+  return TEMAS.find((t) => t.clave === clave)?.titulo ?? null;
+}
 
 /**
  * El icono de cada curiosidad calculada.

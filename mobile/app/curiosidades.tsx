@@ -13,11 +13,14 @@ import {
   Tarjeta,
   Texto,
 } from '../src/ui/componentes/basicos';
+import { Icono } from '../src/ui/componentes/Icono';
 import { fechaHaceDias } from '../src/ui/componentes/SelectorDePeriodo';
 import { useSesion } from '../src/ui/contexto/SesionContexto';
 import { colores, espacio } from '../src/ui/tema';
 import {
-  DATOS_DE_HABITOS,
+  MAXIMO_DE_TEMAS,
+  TEMAS,
+  datosOrdenadosPara,
   iconoDeCuriosidad,
   type DatoDeHabito,
 } from '../src/ui/datosDeHabitos';
@@ -39,37 +42,52 @@ import {
  * posiciones también, mientras que los premios y los puntos lo BAJAN. A
  * esta edad no motiva competir: motiva ver la propia historia.
  *
+ * Los temas se ORDENAN, no se filtran
+ * -----------------------------------
+ * Marcar «el sueño» no esconde el dato de moverse: lo baja. Es la
+ * diferencia entre una lista personalizada y una lista censurada, y la
+ * segunda vacía de sentido un módulo que existe para que la gente se
+ * tropiece con cosas. Quien no marca nada lo ve todo.
+ *
  * La regla que no se cruza
  * -----------------------
  * Ninguna tarjeta de esta pantalla regaña, y ninguna habla de la
  * enfermedad ni del tratamiento de nadie. Las de arriba describen
  * conducta ("llevas 23 días seguidos"); las de abajo son datos generales
- * de hábitos y memoria, con su fuente, iguales para todo el mundo y
- * escritos a mano. Nada de esto se genera en el momento, y por eso se
- * puede revisar antes de que alguien lo lea.
+ * con su fuente, iguales para todo el mundo y escritos a mano. Nada se
+ * genera en el momento, y por eso se puede revisar antes de que alguien
+ * lo lea.
  *
  * Solo la ve el paciente
  * ----------------------
  * El cuidador entra a la analítica y al reporte, que es lo que le sirve,
- * pero no aquí. Una racha es de quien se toma la pastilla.
+ * pero no aquí. Una racha es de quien se toma la pastilla, y los temas
+ * los marca quien va a leerlos.
  */
 
 /** Un año: las rachas y el "llevas registrando" quieren toda la historia. */
 const DIAS_DE_HISTORIA = 365;
 
 export default function Curiosidades() {
-  const { api } = useSesion();
+  const { api, perfil } = useSesion();
 
   const [curiosidades, setCuriosidades] = useState<Curiosidad[] | null>(null);
+  const [temas, setTemas] = useState<string[]>(perfil?.temasDeInteres ?? []);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
+  const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Un aviso que no es un fallo: el tope de temas, por ejemplo. */
+  const [nota, setNota] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     try {
       setError(null);
       const analitica = await api.obtenerAnalitica({ desde: fechaHaceDias(DIAS_DE_HISTORIA) });
       setCuriosidades(analitica.curiosidades);
+      // La respuesta trae lo guardado de verdad en el servidor, que gana
+      // sobre lo que esta pantalla creyera recordar de otro teléfono.
+      if (!guardando) setTemas(analitica.temasDeInteres);
     } catch (problema) {
       setError(
         problema instanceof ErrorDeApi ? problema.message : 'No pudimos cargar tus datos.',
@@ -78,6 +96,9 @@ export default function Curiosidades() {
       setCargando(false);
       setRefrescando(false);
     }
+    // `guardando` se lee a propósito sin declararlo: si entra en las
+    // dependencias, terminar de guardar relanzaría la carga entera.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api]);
 
   useFocusEffect(
@@ -85,6 +106,55 @@ export default function Curiosidades() {
       void cargar();
     }, [cargar]),
   );
+
+  /**
+   * Marcar o desmarcar un tema.
+   *
+   * Se pinta el cambio ANTES de que el servidor conteste y se deshace si
+   * falla. Con una conexión mala, esperar la respuesta hace que el toque
+   * parezca no haber funcionado y la persona lo repite, que es como se
+   * acaba marcando y desmarcando lo mismo.
+   */
+  const alternar = async (clave: string) => {
+    const estaba = temas.includes(clave);
+
+    /*
+      Al llegar al tope, el toque CONTESTA.
+
+      La primera version simplemente no hacia nada, y eso es de las peores
+      cosas que puede hacer una interfaz: quien toca y no ve reaccion no
+      concluye "habre llegado al limite", concluye que la aplicacion se
+      colgo, y vuelve a tocar. Decir por que no se puede cuesta una linea.
+    */
+    if (!estaba && temas.length >= MAXIMO_DE_TEMAS) {
+      setNota(
+        `Ya tienes ${MAXIMO_DE_TEMAS} temas marcados, que es el máximo. ` +
+          'Desmarca uno y vuelve a intentarlo.',
+      );
+      return;
+    }
+
+    setNota(null);
+    const anteriores = temas;
+    const siguientes = estaba ? temas.filter((t) => t !== clave) : [...temas, clave];
+
+    setTemas(siguientes);
+    setGuardando(true);
+    setError(null);
+    try {
+      const guardado = await api.actualizarTemasDeInteres(siguientes);
+      setTemas(guardado.temasDeInteres);
+    } catch (problema) {
+      setTemas(anteriores);
+      setError(
+        problema instanceof ErrorDeApi
+          ? problema.message
+          : 'No pudimos guardar tus temas. Inténtalo otra vez.',
+      );
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   if (cargando) return <Cargando mensaje="Buscando tus datos..." />;
 
@@ -99,6 +169,9 @@ export default function Curiosidades() {
     />
   );
 
+  const { destacados, resto } = datosOrdenadosPara(temas);
+  const lleno = temas.length >= MAXIMO_DE_TEMAS;
+
   return (
     <>
       <Stack.Screen options={{ title: 'Curiosidades' }} />
@@ -111,6 +184,7 @@ export default function Curiosidades() {
         refreshControl={recargar}
       >
         {error ? <Aviso mensaje={error} tono="error" /> : null}
+        {nota ? <Aviso mensaje={nota} tono="info" /> : null}
 
         {/* ---- Lo tuyo ---- */}
         <Rotulo>Tus números</Rotulo>
@@ -143,22 +217,77 @@ export default function Curiosidades() {
           ))
         )}
 
+        {/* ---- Elegir temas ---- */}
+        <View style={{ marginTop: espacio.md }}>
+          <Rotulo>¿De qué te gustaría leer?</Rotulo>
+        </View>
+        <Texto variante="pequeno" color={colores.textoSuave}>
+          Marca hasta {MAXIMO_DE_TEMAS} temas y los pondremos de primeros. Los demás siguen
+          estando, un poco más abajo.
+        </Texto>
+
+        <Tarjeta>
+          {TEMAS.map((tema, indice) => {
+            const marcado = temas.includes(tema.clave);
+            const bloqueado = !marcado && lleno;
+            return (
+              <View key={tema.clave}>
+                {indice > 0 ? (
+                  <View
+                    style={{
+                      height: 1,
+                      backgroundColor: colores.borde,
+                      marginVertical: espacio.sm,
+                    }}
+                  />
+                ) : null}
+                <FilaDeTema
+                  titulo={tema.titulo}
+                  descripcion={tema.descripcion}
+                  icono={tema.icono}
+                  marcado={marcado}
+                  alTope={bloqueado}
+                  ocupado={guardando}
+                  onPress={() => void alternar(tema.clave)}
+                />
+              </View>
+            );
+          })}
+        </Tarjeta>
+
+        {lleno ? (
+          <Texto variante="pequeno" color={colores.textoTenue}>
+            Ya tienes {MAXIMO_DE_TEMAS}. Para cambiar uno, primero desmárcalo.
+          </Texto>
+        ) : null}
+
         {/* ---- Lo general ----
             Esta sección se muestra SIEMPRE, incluso sin datos propios y
             incluso si el servidor no responde. Es a propósito: alguien
             que abre esto el primer día merece encontrar algo, y lo que
             tiene que encontrar es que olvidarse es normal. */}
         <View style={{ marginTop: espacio.md }}>
-          <Rotulo>Para saber</Rotulo>
+          <Rotulo>{temas.length > 0 ? 'Para ti' : 'Para saber'}</Rotulo>
         </View>
         <Texto variante="pequeno" color={colores.textoSuave}>
-          Datos generales sobre memoria y hábitos, con su fuente. No son sobre ti ni sobre tu
+          Datos generales sobre hábitos y salud, con su fuente. No son sobre ti ni sobre tu
           tratamiento.
         </Texto>
 
-        {DATOS_DE_HABITOS.map((dato) => (
+        {destacados.map((dato) => (
           <TarjetaDeHabito key={dato.clave} dato={dato} />
         ))}
+
+        {resto.length > 0 ? (
+          <>
+            <View style={{ marginTop: espacio.md }}>
+              <Rotulo>Lo demás</Rotulo>
+            </View>
+            {resto.map((dato) => (
+              <TarjetaDeHabito key={dato.clave} dato={dato} />
+            ))}
+          </>
+        ) : null}
 
         <Texto variante="pequeno" color={colores.textoTenue}>
           Nada de lo que hay en esta pantalla es un consejo médico. Si quieres cambiar algo de
@@ -170,6 +299,75 @@ export default function Curiosidades() {
 }
 
 // -----------------------------------------------------------------
+
+/**
+ * Una fila del selector de temas.
+ *
+ * La marca es un icono con forma distinta, no solo un color: un círculo
+ * vacío contra un círculo con palomita. Es el RNF-04 otra vez, y aquí
+ * hace falta porque "marcado" y "sin marcar" es justo el tipo de estado
+ * que se suele codificar solo con color.
+ *
+ * `alTope` NO deshabilita la fila, y tampoco la atenúa hasta borrarla.
+ * Atenuar al 45% dejaba el texto por debajo de cualquier contraste
+ * legible, y en una aplicación cuyo público son adultos mayores eso
+ * convierte "no puedes marcar más" en "aquí no se ve nada". Se insinúa
+ * con un 0.7 y lo que de verdad explica es el aviso que sale al tocarla.
+ */
+function FilaDeTema({
+  titulo,
+  descripcion,
+  icono,
+  marcado,
+  alTope,
+  ocupado,
+  onPress,
+}: {
+  titulo: string;
+  descripcion: string;
+  icono: Parameters<typeof Icono>[0]['nombre'];
+  marcado: boolean;
+  alTope: boolean;
+  ocupado: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Tarjeta
+      onPress={ocupado ? undefined : onPress}
+      descripcionAccesible={
+        `${titulo}. ${marcado ? 'Marcado' : 'Sin marcar'}.` +
+        (alTope ? ' Ya elegiste el máximo de temas.' : '')
+      }
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: espacio.sm,
+          opacity: alTope ? 0.7 : 1,
+        }}
+      >
+        <IconoDeEstado
+          nombre={icono}
+          color={marcado ? colores.primario : colores.textoSuave}
+          fondo={marcado ? colores.primarioSuave : colores.fondo}
+          lado={36}
+        />
+        <View style={{ flex: 1 }}>
+          <Texto peso={marcado ? 'semi' : 'regular'}>{titulo}</Texto>
+          <Texto variante="pequeno" color={colores.textoSuave}>
+            {descripcion}
+          </Texto>
+        </View>
+        <Icono
+          nombre={marcado ? 'marcado' : 'sinMarcar'}
+          tamano={26}
+          color={marcado ? colores.primario : colores.bordeFuerte}
+        />
+      </View>
+    </Tarjeta>
+  );
+}
 
 /**
  * Una curiosidad calculada: el dato en grande y la frase que lo explica.

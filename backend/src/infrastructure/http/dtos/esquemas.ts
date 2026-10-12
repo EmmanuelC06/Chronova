@@ -91,6 +91,18 @@ export const esquemaDePreferencias = z.object({
   minutosDeGracia: z.number().int().min(15).max(720).optional(),
 });
 
+/**
+ * Los temas de interes llegan como la lista COMPLETA de lo marcado.
+ *
+ * `max(10)` no es el limite real —ese lo pone el dominio, en cuatro—,
+ * es un tope de tamaño para que nadie mande cien mil cadenas y obligue
+ * al servidor a recorrerlas. Las claves validas tambien las comprueba el
+ * dominio: aqui solo se mira la forma.
+ */
+export const esquemaDeTemasDeInteres = z.object({
+  temas: z.array(z.string().max(40)).max(10),
+});
+
 const DOSIS = z.object({
   cantidad: z.number().positive('La cantidad debe ser mayor que cero.'),
   unidad: z.string().min(1),

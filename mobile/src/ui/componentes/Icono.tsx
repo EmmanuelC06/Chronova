@@ -71,6 +71,14 @@ const CATALOGO = {
   libro: 'book-open-variant',
   compartir: 'share-variant',
   diana: 'target',
+
+  // Temas de interes
+  sueno: 'weather-night',
+  alimentacion: 'food-apple-outline',
+  movimiento: 'walk',
+  animo: 'emoticon-happy-outline',
+  marcado: 'check-circle',
+  sinMarcar: 'checkbox-blank-circle-outline',
 } as const;
 
 export type NombreDeIcono = keyof typeof CATALOGO;

@@ -24,6 +24,18 @@ export interface Analitica {
   resumen: ReturnType<ResumenDeAdherencia['toJSON']>;
   mapaDeRiesgo: ReturnType<MapaDeRiesgo['toJSON']>;
   curiosidades: ReturnType<Curiosidades['toJSON']>;
+  /**
+   * Los temas que el paciente marco como de su interes.
+   *
+   * Viajan con la analitica y no solo con el perfil porque el reporte
+   * los menciona, y el reporte lo puede generar tambien el cuidador
+   * desde su telefono: su propio perfil no sabe nada de esto.
+   *
+   * Son CLAVES. Los titulos los pone la aplicacion, que es la que tiene
+   * los textos; asi una version vieja que no conozca una clave nueva la
+   * omite en vez de imprimir algo ilegible.
+   */
+  temasDeInteres: string[];
   /** Cuantos datos sostienen esto, para que la app pueda ser honesta. */
   evidencia: {
     tomasResueltas: number;
@@ -120,6 +132,7 @@ export class ObtenerAnalitica {
       resumen: resumen.toJSON(),
       mapaDeRiesgo: mapa.toJSON(),
       curiosidades: curiosidades.toJSON(),
+      temasDeInteres: paciente.temasDeInteres.toJSON(),
       evidencia: {
         tomasResueltas: mapa.totalDeObservaciones,
         suficienteParaElMapa: mapa.totalDeObservaciones >= MINIMO_PARA_EL_MAPA,

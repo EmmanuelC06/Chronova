@@ -4,6 +4,7 @@ import type { Entorno } from './config/entorno.js';
 
 import { PoliticaDeAcceso } from './application/services/PoliticaDeAcceso.js';
 import { ActualizarPreferencias } from './application/use-cases/auth/ActualizarPreferencias.js';
+import { ActualizarTemasDeInteres } from './application/use-cases/auth/ActualizarTemasDeInteres.js';
 import { VerificarSesion } from './application/use-cases/auth/VerificarSesion.js';
 import { IniciarSesion } from './application/use-cases/auth/IniciarSesion.js';
 import { ObtenerPerfil } from './application/use-cases/auth/ObtenerPerfil.js';
@@ -88,6 +89,7 @@ export interface Contenedor {
     verificarSesion: VerificarSesion;
     obtenerPerfil: ObtenerPerfil;
     actualizarPreferencias: ActualizarPreferencias;
+    actualizarTemasDeInteres: ActualizarTemasDeInteres;
 
     registrarMedicamento: RegistrarMedicamento;
     listarMedicamentos: ListarMedicamentos;
@@ -205,6 +207,7 @@ export function construirContenedor(
     verificarSesion: new VerificarSesion(pacientes, cuidadores, tokens, reloj),
     obtenerPerfil: new ObtenerPerfil(pacientes, cuidadores, reloj),
     actualizarPreferencias: new ActualizarPreferencias(pacientes, cuidadores),
+    actualizarTemasDeInteres: new ActualizarTemasDeInteres(pacientes),
 
     registrarMedicamento: new RegistrarMedicamento(medicamentos, pacientes, politica, ids, reloj),
     listarMedicamentos: new ListarMedicamentos(medicamentos, politica),
