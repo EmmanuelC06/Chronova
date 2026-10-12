@@ -127,6 +127,13 @@ WhatsApp. Las tres cosas salen del mismo cálculo y por eso llegan juntas.
 Hay que generar un development build nuevo con EAS para que el botón de reporte funcione en el
 teléfono.
 
+Y el teléfono que todavía no lo tenga **no se queda sin analítica**. Las dos librerías se
+cargan solo cuando se pulsa el botón, no al abrir la pantalla. Con el import arriba, un
+teléfono con una compilación anterior lanzaba `Cannot find native module 'ExpoPrint'` **antes
+de dibujar nada**, y el enrutador acababa mostrando «Unmatched Route» como si la pantalla no
+existiera: una capacidad opcional tumbaba la pantalla entera. Ahora el mapa y los hallazgos
+funcionan igual, y en el sitio del botón aparece un aviso que explica qué falta.
+
 ---
 
 ## [1.6.1] — 2026-09-15

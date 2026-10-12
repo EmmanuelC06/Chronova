@@ -1,6 +1,3 @@
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-
 import type { Analitica, CeldaDeRiesgo, Franja } from '../dominio/modelos';
 import { fechaEnPalabras } from './fechas';
 import { colores } from './tema';
@@ -53,23 +50,91 @@ const INICIAL_DE_DIA: Record<number, string> = {
   6: 'S',
 };
 
+interface ModulosDeImpresion {
+  print: typeof import('expo-print');
+  sharing: typeof import('expo-sharing');
+}
+
+/**
+ * `undefined` = todavía no se ha intentado. `null` = se intentó y no están.
+ */
+let modulos: ModulosDeImpresion | null | undefined;
+
+/**
+ * Carga `expo-print` y `expo-sharing` solo cuando hacen falta.
+ *
+ * Por qué no van arriba, con los demás imports
+ * --------------------------------------------
+ * Porque son **módulos nativos**: parte de su código está dentro del APK,
+ * no en el paquete de JavaScript. Si el teléfono tiene una compilación
+ * anterior a que se añadieran, el archivo de `expo-print` llama a
+ * `requireNativeModule('ExpoPrint')` nada más cargarse y lanza
+ * `Cannot find native module 'ExpoPrint'`.
+ *
+ * Con el import arriba, ese fallo ocurría al **cargar el módulo**, antes
+ * de que la pantalla de analítica llegara a dibujar nada. Resultado: el
+ * mapa de riesgo, los hallazgos y todo lo demás desaparecían, y el
+ * enrutador acababa mostrando «Unmatched Route» como si la pantalla no
+ * existiera. Una capacidad opcional tumbaba una pantalla entera.
+ *
+ * Moviéndolo aquí dentro, el fallo queda acotado a lo único que depende
+ * de él: el botón de compartir. La analítica funciona igual, y la propia
+ * pantalla puede preguntar antes con `sePuedeCompartirReporte()` y decir
+ * algo en vez de romperse.
+ *
+ * El `require` no es pereza: es la única forma de que Metro meta el
+ * módulo en el paquete pero no lo ejecute hasta que alguien lo pida.
+ */
+function cargarModulos(): ModulosDeImpresion | null {
+  if (modulos !== undefined) return modulos;
+  try {
+    modulos = {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      print: require('expo-print') as typeof import('expo-print'),
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      sharing: require('expo-sharing') as typeof import('expo-sharing'),
+    };
+  } catch {
+    modulos = null;
+  }
+  return modulos;
+}
+
+/**
+ * Si esta instalación de la aplicación puede generar el reporte.
+ *
+ * En una app publicada siempre es `true`: los módulos nativos vienen
+ * dentro. Da `false` solo durante el desarrollo, cuando el teléfono
+ * tiene un build anterior al que los incorporó.
+ */
+export function sePuedeCompartirReporte(): boolean {
+  return cargarModulos() !== null;
+}
+
 export async function compartirReporte(
   analitica: Analitica,
   nombreDelPaciente?: string,
 ): Promise<void> {
-  const { uri } = await Print.printToFileAsync({
+  const cargados = cargarModulos();
+  if (!cargados) {
+    throw new Error(
+      'Esta versión de la aplicación no puede preparar el archivo del reporte.',
+    );
+  }
+
+  const { uri } = await cargados.print.printToFileAsync({
     html: construirHtml(analitica, nombreDelPaciente),
   });
 
   // Puede no haber a dónde compartir (un emulador limpio, por ejemplo).
   // Mejor decirlo que dejar que no pase nada al tocar el botón.
-  if (!(await Sharing.isAvailableAsync())) {
+  if (!(await cargados.sharing.isAvailableAsync())) {
     throw new Error(
       'Este teléfono no tiene con qué compartir el archivo. El reporte se generó igual.',
     );
   }
 
-  await Sharing.shareAsync(uri, {
+  await cargados.sharing.shareAsync(uri, {
     mimeType: 'application/pdf',
     dialogTitle: 'Enviar mi reporte',
     UTI: 'com.adobe.pdf',

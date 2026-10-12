@@ -14,7 +14,7 @@ import {
 import { useSesion } from '../src/ui/contexto/SesionContexto';
 import { fechaEnPalabras } from '../src/ui/fechas';
 import { colores, espacio } from '../src/ui/tema';
-import { compartirReporte } from '../src/ui/reporte';
+import { compartirReporte, sePuedeCompartirReporte } from '../src/ui/reporte';
 
 /**
  * ANALÍTICA: cuándo falla esta persona, no cuánto.
@@ -54,6 +54,13 @@ export default function Analitica() {
   const deOtraPersona = Boolean(nombre);
   const quien = nombre ? nombre.split(' ')[0] : null;
   const titulo = quien ? `Patrones de ${quien}` : 'Cuándo se te quedan';
+
+  /*
+    Se pregunta una vez, al dibujar, y no al tocar el boton. Asi el boton
+    de compartir ni siquiera aparece cuando no se puede cumplir, en vez
+    de aparecer y fallar al pulsarlo.
+  */
+  const sePuedeCompartir = sePuedeCompartirReporte();
 
   const cargar = useCallback(async () => {
     try {
@@ -214,12 +221,31 @@ export default function Analitica() {
               : 'Prepara un documento con tu cumplimiento y tus patrones, y lo envías por ' +
                 'WhatsApp, correo o lo que prefieras. Tú eliges a quién.'}
           </Texto>
-          <Boton
-            titulo="Preparar reporte"
-            icono="compartir"
-            onPress={compartir}
-            ocupado={compartiendo}
-          />
+          {sePuedeCompartir ? (
+            <Boton
+              titulo="Preparar reporte"
+              icono="compartir"
+              onPress={compartir}
+              ocupado={compartiendo}
+            />
+          ) : (
+            /*
+              Solo pasa en desarrollo, con un build del telefono anterior
+              al que trajo expo-print. En una app publicada los modulos
+              nativos vienen dentro y esta rama no se ve nunca.
+            */
+            <Aviso
+              tono="info"
+              mensaje={
+                __DEV__
+                  ? 'El reporte necesita un development build nuevo: expo-print y expo-sharing ' +
+                    'son módulos nativos y este teléfono tiene una compilación anterior. El ' +
+                    'resto de la pantalla funciona igual.'
+                  : 'Esta versión de la aplicación todavía no puede preparar el reporte. ' +
+                    'Actualízala desde la tienda para tenerlo.'
+              }
+            />
+          )}
         </Tarjeta>
 
         <Texto variante="pequeno" color={colores.textoTenue}>
