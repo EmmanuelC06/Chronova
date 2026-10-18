@@ -57,6 +57,7 @@ const CATALOGO = {
 
   // Avisos
   aviso: 'alert-outline',
+  atencion: 'alert-circle',
   informacion: 'information-outline',
   campana: 'bell-outline',
 

@@ -13,6 +13,7 @@ import {
   Rotulo,
   Tarjeta,
   Texto,
+  NivelDeAdherencia,
 } from '../../src/ui/componentes/basicos';
 import {
   SelectorDePeriodo,
@@ -153,9 +154,7 @@ export default function Historial() {
             %
           </Texto>
         </View>
-        <Texto variante="rotulo" peso="semi" color={nivel.color}>
-          {nivel.etiqueta}
-        </Texto>
+        <NivelDeAdherencia nivel={nivel} />
         <Texto color={colores.textoSuave}>{historial.resumen.mensaje}</Texto>
 
         <View

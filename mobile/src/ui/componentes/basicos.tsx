@@ -513,3 +513,27 @@ export function Insignia({
     </View>
   );
 }
+
+/**
+ * El nivel de adherencia: forma, color y palabra, siempre los tres.
+ *
+ * Existe como componente y no como tres bloques repetidos porque se
+ * pinta en tres sitios —el historial del paciente, el panel del cuidador
+ * y el detalle de un paciente— y la garantia del RNF-04 solo vale si no
+ * se puede olvidar en uno. Teniendolo aqui, anadir un cuarto sitio ya no
+ * puede perder el icono por descuido.
+ */
+export function NivelDeAdherencia({
+  nivel,
+}: {
+  nivel: { color: string; etiqueta: string; icono: NombreDeIcono };
+}) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: espacio.xs }}>
+      <Icono nombre={nivel.icono} tamano={20} color={nivel.color} />
+      <Texto variante="rotulo" peso="semi" color={nivel.color}>
+        {nivel.etiqueta}
+      </Texto>
+    </View>
+  );
+}

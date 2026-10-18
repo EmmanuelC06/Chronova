@@ -248,25 +248,44 @@ export const ESTILO_POR_ESTADO = {
   },
 } as const;
 
+/**
+ * El nivel de adherencia: color, palabra Y FORMA.
+ *
+ * El icono no es decoracion. El RNF-04 pide que ningun estado se
+ * comunique solo con color, y este incumplia a medias: llevaba la
+ * palabra pero no la forma, asi que un vistazo rapido —que es como se
+ * mira un panel con cinco pacientes— quedaba fiado al verde contra el
+ * rojo. Es justo lo que no distingue quien tiene daltonismo, que en
+ * hombres es una de cada doce personas.
+ *
+ * Las cuatro formas se eligieron para que se diferencien en silueta y no
+ * solo en color: una palomita, un triangulo, un circulo relleno y una
+ * "i". Puestas en blanco y negro siguen siendo cuatro cosas distintas,
+ * que es la prueba de que la redundancia funciona.
+ */
 export const ESTILO_POR_NIVEL = {
   BUENA: {
     color: colores.exito,
     fondo: colores.exitoSuave,
     etiqueta: 'Buena adherencia',
+    icono: 'check',
   },
   REGULAR: {
     color: colores.advertencia,
     fondo: colores.advertenciaSuave,
     etiqueta: 'Adherencia regular',
+    icono: 'aviso',
   },
   BAJA: {
     color: colores.peligro,
     fondo: colores.peligroSuave,
     etiqueta: 'Adherencia baja',
+    icono: 'atencion',
   },
   SIN_DATOS: {
     color: colores.textoTenue,
     fondo: colores.superficieSuave,
     etiqueta: 'Sin datos aún',
+    icono: 'informacion',
   },
 } as const;

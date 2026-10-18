@@ -37,6 +37,38 @@ proyectos, el paquete de Android compila.
 
 ---
 
+
+---
+
+## Estado al 18 de octubre de 2026, en vísperas de la muestra
+
+Repaso completo sobre el commit `3d049cf`. Lo que se comprobó, y cómo:
+
+| Comprobación | Resultado |
+|---|---|
+| Pruebas del backend | 249 en verde, 12 archivos |
+| `tsc --noEmit` backend y móvil | Sin errores |
+| Bundle de Android (`expo export`) | Compila |
+| Cadena completa contra un servidor vivo | Registro, perfil, medicamento, agenda, confirmar toma, historial, analítica, temas de interés: todo responde. Tema inválido devuelve 400, petición sin token devuelve 401 |
+
+De los once incumplimientos que listaba este documento, **siete quedaron cerrados** (RF-02,
+RF-19, RNF-02, RNF-21 y los huecos 4.1, 4.2, 4.3, 4.5, 4.6), **uno se cerró hoy** (RNF-04) y
+quedan **cuatro abiertos**, tres de ellos a propósito:
+
+| Punto | Estado | Por qué |
+|---|---|---|
+| RNF-04 · icono en el nivel de adherencia | **Cerrado hoy** | `ESTILO_POR_NIVEL` lleva icono y el componente `NivelDeAdherencia` lo pinta en los tres sitios. Las cuatro formas (palomita, triángulo, círculo, «i») se distinguen en escala de grises |
+| RF-06 · frecuencia `CADA_N_DIAS` | **Parcial** | La fecha de inicio ya se puede elegir. El dominio soporta «cada N días» pero el formulario solo ofrece diaria y días de la semana |
+| RNF-03 · alto táctil de 64 px | **Parcial** | Se aplica en botones y campos. Falta en la `Tarjeta` pulsable y en las tres barras de pestañas, que llevan `height: 76` escrito a mano y no escala con el tamaño de letra |
+| RNF-18 · todo el SQL en un archivo | **Abierto** | Queda un `SELECT` a mano en `notificaciones/probar.ts`, que es un script de desarrollo. Además el DDL está duplicado en `esquema.ts` y `esquema.sql` |
+| Hueco 4.4 · derechos de privacidad | **Abierto a propósito** | La pantalla promete corregir datos, borrar la cuenta y retirar la autorización, y no hay rutas para ninguna. En espera de la respuesta de la universidad |
+| Hueco 4.7 · confirmación simultánea | **Abierto** | `guardar` usa `ON CONFLICT (id) DO UPDATE` sin condición de estado, y la toma y el inventario se guardan en dos transacciones distintas. Confirmar la misma toma desde dos teléfonos a la vez puede descontar el inventario dos veces |
+
+**Lo añadido después de esta revisión**, que ningún requisito del documento cubre todavía:
+el mapa de riesgo por franja, el módulo de curiosidades con temas de interés y el reporte en
+PDF para el médico. Si el documento de requerimientos se vuelve a generar, conviene que
+entren como RF nuevos en vez de quedar como funcionalidad no declarada.
+
 ## 1. Lo primero, porque es lo más barato y lo más visible
 
 Tres erratas en texto que el usuario lee. Se arreglan en dos minutos y son de las que un

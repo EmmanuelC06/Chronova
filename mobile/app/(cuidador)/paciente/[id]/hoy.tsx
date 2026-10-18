@@ -8,6 +8,7 @@ import {
   Rotulo,
   Tarjeta,
   Texto,
+  NivelDeAdherencia,
 } from '../../../../src/ui/componentes/basicos';
 import { Icono } from '../../../../src/ui/componentes/Icono';
 import { formatearHora, horaEnPalabras } from '../../../../src/ui/hora';
@@ -107,9 +108,7 @@ export default function Hoy() {
             %
           </Texto>
         </View>
-        <Texto variante="rotulo" peso="semi" color={nivel.color}>
-          {nivel.etiqueta}
-        </Texto>
+        <NivelDeAdherencia nivel={nivel} />
         <Texto variante="pequeno" color={colores.textoSuave}>
           Ultimos {DIAS_DE_RESUMEN} dias: {paciente.adherencia.tomadas} tomadas,{' '}
           {paciente.adherencia.omitidas} sin tomar, {paciente.adherencia.pendientes} pendientes.

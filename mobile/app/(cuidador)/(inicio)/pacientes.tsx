@@ -13,6 +13,7 @@ import {
   Insignia,
   Tarjeta,
   Texto,
+  NivelDeAdherencia,
 } from '../../../src/ui/componentes/basicos';
 import { useSesion } from '../../../src/ui/contexto/SesionContexto';
 import { colores, espacio, ESTILO_POR_NIVEL } from '../../../src/ui/tema';
@@ -259,9 +260,7 @@ function TarjetaDePaciente({ paciente }: { paciente: PacienteEnPanel }) {
               %
             </Texto>
             <View style={{ flex: 1 }} />
-            <Texto variante="rotulo" peso="semi" color={nivel.color}>
-              {nivel.etiqueta}
-            </Texto>
+            <NivelDeAdherencia nivel={nivel} />
           </View>
 
           <Texto variante="pequeno" color={colores.textoSuave}>
