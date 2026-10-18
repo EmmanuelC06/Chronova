@@ -123,7 +123,7 @@ export const POLITICA_DE_TRATAMIENTO: DocumentoLegal = {
     {
       titulo: 'Para qué usamos tus datos',
       bloques: [
-        { tipo: 'parrafo', texto: 'Para estas siete cosas, y para ninguna otra:' },
+        { tipo: 'parrafo', texto: 'Para estas ocho cosas, y para ninguna otra:' },
         {
           tipo: 'lista',
           puntos: [
@@ -134,6 +134,7 @@ export const POLITICA_DE_TRATAMIENTO: DocumentoLegal = {
             'Avisarle al cuidador que tú autorices cuando una toma queda sin confirmar.',
             'Dejarte recuperar la contraseña con un código que llega a tu correo.',
             'Recordar cómo prefieres ver la aplicación: el tamaño de la letra y las alertas.',
+            'Mostrarte primero los temas que marques en Curiosidades, y guardar desde cuándo marcaste cada uno para que el reporte pueda decir la verdad sobre el período que cubre.',
           ],
         },
         { tipo: 'parrafo', texto: 'Y esto es lo que no hacemos, dicho con todas las letras:' },
@@ -174,6 +175,19 @@ export const POLITICA_DE_TRATAMIENTO: DocumentoLegal = {
           tipo: 'aviso',
           texto:
             'La información sobre tu salud es un dato sensible según la ley colombiana. Eso significa tres cosas: necesitamos tu autorización explícita para tratarla, no estás obligado a darla, y tienes derecho a no responder las preguntas que traten sobre ella.',
+        },
+        { tipo: 'parrafo', texto: 'Los temas que marcas en Curiosidades:' },
+        {
+          tipo: 'lista',
+          puntos: [
+            'Cuáles de los seis temas tienes marcados ahora: acordarse mejor, hablar con el médico, el sueño, la alimentación, moverse, el ánimo.',
+            'Desde cuándo y hasta cuándo tuviste marcado cada uno. Guardamos la fecha porque tu reporte cubre un período: sin ella diría que un tema te interesaba desde hace medio año cuando lo marcaste ayer.',
+          ],
+        },
+        {
+          tipo: 'aviso',
+          texto:
+            'No guardamos qué lees ni cuántas veces lo abres. Solo lo que tú marcas, y cuándo lo marcaste. La lista de temas es fija y no hay donde escribir texto libre, a propósito: no queremos que nadie acabe guardando ahí el nombre de su enfermedad. Tus temas no los puede cambiar tu cuidador, aunque le hayas dado todos los permisos.',
         },
         { tipo: 'parrafo', texto: 'Y unos datos técnicos que hacen falta para que funcione:' },
         {

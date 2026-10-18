@@ -1,8 +1,8 @@
 import { Identificador } from '../../../domain/shared/Identificador.js';
 import { ErrorNoEncontrado } from '../../../domain/shared/errores.js';
-import { TemasDeInteres } from '../../../domain/paciente/TemasDeInteres.js';
 import type { Tema } from '../../../domain/paciente/TemasDeInteres.js';
 import type { RepositorioDePacientes } from '../../../domain/paciente/RepositorioDePacientes.js';
+import type { Reloj } from '../../ports/Reloj.js';
 
 export interface ComandoActualizarTemasDeInteres {
   pacienteId: string;
@@ -33,7 +33,16 @@ export interface ComandoActualizarTemasDeInteres {
  * seria mentira.
  */
 export class ActualizarTemasDeInteres {
-  constructor(private readonly pacientes: RepositorioDePacientes) {}
+  constructor(
+    private readonly pacientes: RepositorioDePacientes,
+    /**
+     * Hace falta porque marcar un tema ya no es poner una bandera: es
+     * abrir un periodo con una fecha. Viene del puerto y no de
+     * `new Date()` para que las pruebas puedan fijar el instante y
+     * comprobar los solapamientos.
+     */
+    private readonly reloj: Reloj,
+  ) {}
 
   async ejecutar(comando: ComandoActualizarTemasDeInteres): Promise<{ temasDeInteres: Tema[] }> {
     const paciente = await this.pacientes.buscarPorId(
@@ -41,10 +50,10 @@ export class ActualizarTemasDeInteres {
     );
     if (!paciente) throw new ErrorNoEncontrado('el paciente', comando.pacienteId);
 
-    const temas = TemasDeInteres.desde(comando.temas);
+    const temas = paciente.temasDeInteres.cambiarA(comando.temas, this.reloj.ahora());
     paciente.cambiarTemasDeInteres(temas);
     await this.pacientes.guardar(paciente);
 
-    return { temasDeInteres: temas.toJSON() };
+    return { temasDeInteres: temas.vigentes };
   }
 }

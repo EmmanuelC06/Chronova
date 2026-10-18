@@ -29,6 +29,61 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.9.0] — 2026-10-18
+
+### Corregido
+
+- **El reporte decía los temas del instante, no los del período.** El documento lleva un
+  encabezado que dice «Período del 15 de abril al 12 de octubre» y debajo imprimía lo que
+  estuviera marcado en el segundo en que se generó el PDF. Eran dos marcos de tiempo
+  distintos en la misma hoja, y fallaba por los dos lados: un tema marcado ayer insinuaba
+  medio año de interés, y uno que se tuvo marcado cinco meses y se quitó la semana pasada no
+  aparecía, cuando probablemente era el que más le decía al médico.
+
+  Ahora cada marca guarda **desde cuándo y hasta cuándo**, y el reporte pregunta por
+  solapamiento con el período: «Durante este período Rosa marcó que le interesa leer sobre
+  acordarse mejor, el sueño y el ánimo», y debajo, cuando toca, «Ya no tiene marcado el
+  ánimo». Hay dos pruebas que fijan los dos lados del error: un tema que se quitó sigue
+  contando para su período, y uno marcado después no se cuela en él.
+
+### Añadido
+
+- **`temasDeInteres` en la analítica ahora son dos listas**, `enElPeriodo` y `vigentes`, en
+  vez de una. Los extremos del período cuentan: un tema marcado el mismo día en que termina
+  entra, porque excluirlo sería una precisión falsa sobre un dato que la persona marcó a mano.
+
+- Historial acotado: como máximo 60 períodos por paciente, descartando los más antiguos ya
+  cerrados y **nunca uno abierto**, porque tirarlo desmarcaría un tema a espaldas de la
+  persona. Volver a enviar la misma lista no parte el período ni mueve su fecha: la pantalla
+  guarda en cada toque y un reintento de red no debe inventar historia.
+
+- Las filas del formato anterior (una lista de claves, sin fechas) se leen como «marcado
+  desde siempre». Consta que lo marcó y no consta cuándo, así que cuentan para cualquier
+  período en vez de desaparecer de los reportes.
+
+### Política de tratamiento de datos: **2.0 → 2.1**
+
+Guardar desde cuándo alguien marcó un tema es un dato que la política no contemplaba, así
+que sube de versión y **a las cuentas existentes se les volverá a pedir la autorización**.
+Eso no es un efecto secundario molesto: es el mecanismo del artículo 8, literal b) de la Ley
+1581 funcionando, y conviene que se vea funcionando.
+
+Se añade el numeral **3.4, Temas de interés y su historial**, con cuatro cosas dichas
+expresamente: que **no** se registra lo que la persona lee ni cuántas veces lo abre, solo lo
+que marca y cuándo; que no es un dato de salud sino una preferencia de lectura, aunque se
+trate con el mismo cuidado porque viaja en un documento que puede compartir; que la lista es
+cerrada para que nadie acabe escribiendo ahí el nombre de su enfermedad; y cuánto se conserva.
+
+Se añade la octava finalidad en el numeral 3.1, y el mismo texto al documento que vive dentro
+de la aplicación, que sube de versión en el mismo commit.
+
+> **Queda dicho en la propia política lo que falta:** todavía no hay un botón para borrar solo
+> ese historial sin borrar la cuenta. Mientras no exista, la supresión se pide por el canal de
+> la §6 y se ejecuta a mano. Está en la misma lista que los demás derechos que la pantalla de
+> privacidad promete y que siguen esperando respuesta de la universidad.
+
+---
+
 ## [1.8.0] — 2026-10-12
 
 ### Añadido

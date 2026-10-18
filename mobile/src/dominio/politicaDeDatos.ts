@@ -25,7 +25,7 @@
  * el texto de forma sustancial se sube este número **y** el del
  * documento, en el mismo commit.
  */
-export const VERSION_DE_LA_POLITICA = '2.0';
+export const VERSION_DE_LA_POLITICA = '2.1';
 
 /**
  * Dónde se lee el texto completo.

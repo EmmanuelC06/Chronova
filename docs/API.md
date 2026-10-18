@@ -412,7 +412,10 @@ Devuelve el resumen, el mapa de riesgo y las curiosidades en una sola respuesta:
   "curiosidades": [
     { "clave": "MEJOR_RACHA", "titulo": "Tu mejor racha", "valor": "23 días", "detalle": "..." }
   ],
-  "temasDeInteres": ["MEMORIA", "SUENO"],
+  "temasDeInteres": {
+    "enElPeriodo": ["MEMORIA", "SUENO", "ANIMO"],
+    "vigentes": ["MEMORIA", "SUENO"]
+  },
   "evidencia": { "tomasResueltas": 364, "suficienteParaElMapa": true }
 }
 ```
@@ -435,7 +438,18 @@ Sin eso, una casilla con una sola omisión daría 100% y encabezaría la lista. 
 
 `evidencia.suficienteParaElMapa` es `totalDeObservaciones >= 40`, unas tres semanas de un tratamiento de dos tomas diarias. Por debajo el mapa se calcula igual, pero la app avisa de que todavía hay poca historia.
 
-`temasDeInteres` son las claves que el paciente marcó en el módulo de curiosidades. Viajan aquí y no solo en el perfil porque el reporte las menciona, y el reporte lo puede generar también el cuidador desde su teléfono: su propio perfil no sabe nada de esto. El servidor devuelve claves y los títulos los pone la app, así que una versión antigua que no conozca una clave nueva la omite en vez de imprimir algo ilegible.
+`temasDeInteres` son los temas del módulo de curiosidades, **referidos al período consultado**, y vienen en dos listas:
+
+| Campo | Qué contiene |
+|---|---|
+| `enElPeriodo` | Los que estuvieron marcados en algún momento entre `desde` y `hasta`, aunque hoy ya no lo estén |
+| `vigentes` | Los que siguen marcados ahora mismo |
+
+**Por qué dos listas y no una.** El reporte lleva un encabezado que dice «Período del 15 de abril al 12 de octubre». Si debajo imprimiera la foto del instante en que se genera, un tema marcado ayer parecería medio año de interés, y uno que se tuvo marcado cinco meses y se quitó la semana pasada no saldría, que es justo el que más le diría al médico. Con las dos listas, el documento puede decir qué interesó durante esos meses y cuál ya no se marca.
+
+El solapamiento cuenta los extremos: un tema marcado el mismo día en que termina el período entra. Excluirlo sería una precisión falsa sobre un dato que la persona marcó a mano.
+
+Viajan aquí y no solo en el perfil porque el reporte las menciona, y el reporte lo puede generar también el cuidador desde su teléfono: su propio perfil no sabe nada de esto. El servidor devuelve claves y los títulos los pone la app, así que una versión antigua que no conozca una clave nueva la omite en vez de imprimir algo ilegible.
 
 ---
 
@@ -465,6 +479,10 @@ El orden se normaliza para que dos reportes del mismo mes no se diferencien solo
 **Lo cambia solo su dueño.** La ruta exige sesión de paciente y actúa sobre quien la tiene; un cuidador no puede marcar por él ni con permiso de gestionar medicamentos. El reporte dice «marcó que le interesa», y esa frase solo es verdad si lo marcó la persona.
 
 **Lo que el reporte NO dice** es cuántas veces abrió cada tema. Contar aperturas sería vigilar su lectura, necesitaría su consentimiento explícito para aparecer en un documento que va a un tercero, y además mentiría: con tres o cuatro toques al mes, «el tema que más consultó» es ruido con aspecto de dato.
+
+**Lo que sí se guarda es desde cuándo.** Cada marca abre un período (`desde`) y desmarcarla lo cierra (`hasta`), de modo que la analítica puede responder «qué le interesaba durante estos meses» en vez de solo «qué tiene marcado hoy». Se conservan como máximo 60 períodos por paciente; al pasarse se descartan los más antiguos ya cerrados, y nunca uno abierto, porque tirarlo desmarcaría un tema a espaldas de la persona. Volver a enviar la misma lista no parte el período ni mueve su fecha: la pantalla guarda en cada toque y un reintento de red no debe inventar historia.
+
+Las filas del formato anterior (una lista de cadenas, sin fechas) se leen como «marcado desde siempre»: consta que lo marcó y no consta cuándo, así que cuentan para cualquier período en vez de desaparecer de los reportes.
 
 ---
 

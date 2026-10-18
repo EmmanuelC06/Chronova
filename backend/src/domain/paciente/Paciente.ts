@@ -8,7 +8,6 @@ import { FechaLocal } from '../shared/FechaLocal.js';
 import { ErrorDeValidacion } from '../shared/errores.js';
 import { PreferenciasDeAccesibilidad } from '../shared/PreferenciasDeAccesibilidad.js';
 import { TemasDeInteres } from './TemasDeInteres.js';
-import type { Tema } from './TemasDeInteres.js';
 
 export interface PacientePlano {
   id: string;
@@ -27,13 +26,15 @@ export interface PacientePlano {
     minutosDeGracia: number;
   };
   /**
-   * Temas sobre los que quiere leer, de una lista cerrada.
+   * Temas sobre los que quiere leer, con el periodo en que lo estuvieron.
    *
-   * Opcional al leer: las cuentas anteriores a que existiera esto no lo
-   * traen, y no tenerlo significa "todavia no ha elegido", que es un
-   * estado legitimo y no un error.
+   * Opcional al leer, y de tipo abierto a proposito: las cuentas
+   * anteriores a que existiera esto no lo traen, y las de la version
+   * intermedia lo traen como lista de cadenas sin fechas. El value
+   * object entiende los dos formatos; aqui no se puede afinar mas sin
+   * cerrarle la puerta a uno de ellos.
    */
-  temasDeInteres?: Tema[] | null;
+  temasDeInteres?: unknown;
   activo: boolean;
   creadoEn: string;
   /** Version de la politica que acepto y cuando. Ausente en cuentas antiguas. */

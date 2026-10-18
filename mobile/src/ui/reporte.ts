@@ -180,32 +180,53 @@ export function construirHtml(analitica: Analitica, nombreDelPaciente?: string):
   /*
     LOS TEMAS DE INTERES.
 
-    Dice lo que la persona MARCO, no lo que abrio. La diferencia no es
-    cosmetica, son dos cosas distintas y solo una se puede poner en un
-    documento que va a manos de otro.
+    Dos decisiones, y las dos vinieron de mirar el documento impreso.
 
-    Contar aperturas seria vigilar su lectura, y ademas mentiria: con
-    tres o cuatro toques al mes, "el tema que mas consulto" es ruido con
-    aspecto de dato. Lo que marco, en cambio, lo decidio ella, lo puede
-    cambiar cuando quiera y no depende de cuanto haya usado el telefono.
+    PRIMERA: dice lo que la persona MARCO, no lo que abrio. Contar
+    aperturas seria vigilar su lectura, y ademas mentiria: con tres o
+    cuatro toques al mes, "el tema que mas consulto" es ruido con
+    aspecto de dato. Lo que marco lo decidio ella, lo puede cambiar
+    cuando quiera y no depende de cuanto haya usado el telefono.
+
+    SEGUNDA: se refiere AL PERIODO del encabezado, no al instante en que
+    se genera el PDF. La primera version imprimia la foto del momento
+    debajo de un titulo que dice "Periodo del 15 de abril al 12 de
+    octubre": un tema marcado ayer parecia seis meses de interes, y uno
+    que se tuvo medio año y se quito la semana pasada no salia, que era
+    justo el que mas le decia al medico. El servidor manda las dos
+    listas y aqui se distinguen en el texto.
 
     La frase esta redactada para que se lea como un tema de conversacion
     y no como un sintoma: "le interesa leer sobre" y no "consulta sobre",
     que sonaria a que algo le preocupa de su salud.
   */
-  const titulosDeTemas = analitica.temasDeInteres
-    .map((clave) => tituloDeTema(clave))
-    .filter((titulo): titulo is string => titulo !== null)
-    .map((titulo) => titulo.toLowerCase());
+  const { enElPeriodo, vigentes } = analitica.temasDeInteres;
+  const nombrar = (claves: readonly string[]) =>
+    claves
+      .map((clave) => tituloDeTema(clave))
+      .filter((titulo): titulo is string => titulo !== null)
+      .map((titulo) => titulo.toLowerCase());
+
+  const delPeriodo = nombrar(enElPeriodo);
+  const yaNo = nombrar(enElPeriodo.filter((clave) => !vigentes.includes(clave)));
+  const quien = nombrarAlPaciente(nombreDelPaciente);
 
   const temas =
-    titulosDeTemas.length > 0
+    delPeriodo.length > 0
       ? `<h2>Qué le interesa leer</h2>
-         <p>${escapar(nombreDelPaciente ? nombreDelPaciente.split(' ')[0]! : 'La persona')}
-            marcó en la aplicación que le interesa leer sobre
-            <strong>${escapar(enumerar(titulosDeTemas))}</strong>.</p>
-         <p class="suave">Es una preferencia que marcó por su cuenta, no una consulta ni un
-            síntoma. Se incluye por si sirve para abrir la conversación.</p>`
+         <p>Durante este período ${escapar(quien)} marcó en la aplicación que le interesa
+            leer sobre <strong>${escapar(enumerar(delPeriodo))}</strong>.</p>
+         ${
+           yaNo.length > 0
+             ? `<p class="suave">${escapar(
+                 yaNo.length === 1
+                   ? `Ya no tiene marcado ${yaNo[0]!}.`
+                   : `Ya no tiene marcados estos: ${enumerar(yaNo)}.`,
+               )}</p>`
+             : ''
+         }
+         <p class="suave">Son preferencias que marcó por su cuenta, no consultas ni
+            síntomas. Se incluyen por si sirven para abrir la conversación.</p>`
       : '';
 
   return `<!doctype html>
@@ -302,6 +323,19 @@ function tablaDelMapa(celdas: CeldaDeRiesgo[]): string {
   <p class="suave" style="font-size:8.5pt;margin-top:2mm">
     Cada casilla muestra cuántas tomas se quedaron de cuántas programadas.
   </p>`;
+}
+
+/**
+ * Cómo nombrar al paciente dentro de una frase del reporte.
+ *
+ * Con nombre se usa el de pila, que es como se habla de alguien. Sin él
+ * —cuando el propio paciente genera su reporte— no se puede escribir
+ * «usted marcó», porque quien lo lee es el médico y no ella: la frase
+ * va en tercera persona y sin nombre, que es lo único que funciona para
+ * los dos casos.
+ */
+function nombrarAlPaciente(nombreDelPaciente?: string): string {
+  return nombreDelPaciente ? nombreDelPaciente.split(' ')[0]! : 'la persona';
 }
 
 /**

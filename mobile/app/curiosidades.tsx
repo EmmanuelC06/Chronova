@@ -87,7 +87,9 @@ export default function Curiosidades() {
       setCuriosidades(analitica.curiosidades);
       // La respuesta trae lo guardado de verdad en el servidor, que gana
       // sobre lo que esta pantalla creyera recordar de otro teléfono.
-      if (!guardando) setTemas(analitica.temasDeInteres);
+      // Los VIGENTES: el selector pinta lo que está marcado ahora. La
+      // historia del período solo le interesa al reporte.
+      if (!guardando) setTemas(analitica.temasDeInteres.vigentes);
     } catch (problema) {
       setError(
         problema instanceof ErrorDeApi ? problema.message : 'No pudimos cargar tus datos.',

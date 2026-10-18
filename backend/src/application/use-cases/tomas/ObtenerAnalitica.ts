@@ -25,17 +25,27 @@ export interface Analitica {
   mapaDeRiesgo: ReturnType<MapaDeRiesgo['toJSON']>;
   curiosidades: ReturnType<Curiosidades['toJSON']>;
   /**
-   * Los temas que el paciente marco como de su interes.
+   * Los temas de interes, referidos AL PERIODO consultado.
    *
-   * Viajan con la analitica y no solo con el perfil porque el reporte
-   * los menciona, y el reporte lo puede generar tambien el cuidador
-   * desde su telefono: su propio perfil no sabe nada de esto.
+   * Son dos listas y no una, y la diferencia es justo el fallo que esto
+   * vino a arreglar. El reporte lleva un encabezado que dice "Periodo
+   * del 15 de abril al 12 de octubre"; debajo no puede imprimir la foto
+   * del instante en que se genero, porque entonces un tema marcado ayer
+   * parece seis meses de interes y uno que se tuvo medio año y se quito
+   * la semana pasada desaparece.
+   *
+   * `enElPeriodo` responde a "¿que le interesaba durante estos meses?".
+   * `vigentes` dice cuales de esos sigue marcando hoy, para que el
+   * reporte pueda distinguirlos en vez de mezclarlos.
    *
    * Son CLAVES. Los titulos los pone la aplicacion, que es la que tiene
    * los textos; asi una version vieja que no conozca una clave nueva la
    * omite en vez de imprimir algo ilegible.
    */
-  temasDeInteres: string[];
+  temasDeInteres: {
+    enElPeriodo: string[];
+    vigentes: string[];
+  };
   /** Cuantos datos sostienen esto, para que la app pueda ser honesta. */
   evidencia: {
     tomasResueltas: number;
@@ -132,7 +142,20 @@ export class ObtenerAnalitica {
       resumen: resumen.toJSON(),
       mapaDeRiesgo: mapa.toJSON(),
       curiosidades: curiosidades.toJSON(),
-      temasDeInteres: paciente.temasDeInteres.toJSON(),
+      /*
+        Se usan los mismos limites con los que se pidieron las tomas, no
+        los dias naturales. `inicioDelDia` ya esta en la zona del
+        paciente, asi que un tema marcado a las once de la noche del
+        ultimo dia del periodo cuenta para ese periodo, que es lo que
+        cualquiera esperaria.
+      */
+      temasDeInteres: {
+        enElPeriodo: paciente.temasDeInteres.marcadosEntre(
+          zona.inicioDelDia(diaInicial),
+          zona.inicioDelDia(diaFinal.sumarDias(1)),
+        ),
+        vigentes: paciente.temasDeInteres.vigentes,
+      },
       evidencia: {
         tomasResueltas: mapa.totalDeObservaciones,
         suficienteParaElMapa: mapa.totalDeObservaciones >= MINIMO_PARA_EL_MAPA,

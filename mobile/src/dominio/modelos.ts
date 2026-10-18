@@ -202,10 +202,20 @@ export interface Analitica {
   };
   curiosidades: Curiosidad[];
   /**
-   * Claves de los temas que el paciente marcó. Los títulos los pone la
-   * app: si llega una clave que esta versión no conoce, la omite.
+   * Los temas de interés, referidos al PERÍODO consultado.
+   *
+   * Dos listas y no una: `enElPeriodo` es lo que estuvo marcado en algún
+   * momento de esos meses, `vigentes` lo que sigue marcado hoy. El
+   * reporte las necesita separadas para no decir que algo interesaba
+   * durante medio año cuando se marcó ayer.
+   *
+   * Son claves. Los títulos los pone la app: si llega una que esta
+   * versión no conoce, la omite.
    */
-  temasDeInteres: string[];
+  temasDeInteres: {
+    enElPeriodo: string[];
+    vigentes: string[];
+  };
   evidencia: {
     tomasResueltas: number;
     suficienteParaElMapa: boolean;

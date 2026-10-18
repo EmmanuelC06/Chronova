@@ -103,7 +103,9 @@ export class ObtenerPerfil {
         edad: paciente.edadEn(paciente.zonaHoraria.fechaLocalDe(this.reloj.ahora())),
         zonaHoraria: paciente.zonaHoraria.valor,
         preferencias: paciente.preferencias.toJSON(),
-        temasDeInteres: paciente.temasDeInteres.toJSON(),
+        // El perfil devuelve lo marcado AHORA, que es lo que el selector
+        // de la pantalla necesita pintar. La historia solo la usa el reporte.
+        temasDeInteres: paciente.temasDeInteres.vigentes,
         autorizacionDeDatos: aVistaDeAutorizacion(paciente.autorizacionDeDatos),
       };
     }

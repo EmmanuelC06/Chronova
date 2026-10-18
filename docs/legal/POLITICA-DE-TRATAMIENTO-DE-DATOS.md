@@ -1,6 +1,6 @@
 # Política de Tratamiento de Datos Personales de Chronova
 
-**Versión 2.0 · Vigente desde el [FECHA DE PUBLICACIÓN]**
+**Versión 2.1 · Vigente desde el [FECHA DE PUBLICACIÓN]**
 
 > **Antes de publicar esto, léelo.**
 >
@@ -155,6 +155,9 @@ El tratamiento tiene **estas finalidades y ninguna otra**:
 6. **Permitir la recuperación de la contraseña** mediante un código enviado al correo.
 7. **Ajustar la accesibilidad** de la interfaz (tamaño de letra, alertas) según lo que el
    paciente elija.
+8. **Mostrar contenido general sobre hábitos** en el módulo de curiosidades, ordenado según
+   los temas que el propio paciente marque, y **dejar constancia de desde cuándo marcó cada
+   uno** para poder referirlo al período que cubra un reporte.
 
 **Lo que Chronova NO hace con los datos**, y conviene decirlo explícitamente:
 
@@ -197,7 +200,49 @@ incluye expresamente los datos «relativos a la salud».
 - El titular tiene derecho a **no responder** preguntas sobre datos sensibles, y así se le
   informa al recogerlos.
 
-### 3.4 Datos técnicos
+### 3.4 Temas de interés y su historial
+
+| Dato | Qué contiene |
+|---|---|
+| Temas marcados | Cuáles de los seis temas del módulo de curiosidades tiene marcados el paciente (acordarse mejor, hablar con el médico, el sueño, la alimentación, moverse, el ánimo) |
+| Historial de esos temas | Desde cuándo y hasta cuándo estuvo marcado cada uno |
+
+**Por qué se guarda la fecha y no solo lo marcado hoy.** El reporte que el paciente puede
+compartir cubre un período («del 15 de abril al 12 de octubre»). Sin saber desde cuándo está
+marcado cada tema, ese documento diría que algo interesaba durante medio año cuando se marcó
+ayer, o dejaría fuera un tema que se tuvo marcado cinco meses y se quitó la semana pasada.
+La fecha es lo que hace que la frase del reporte sea cierta.
+
+**Qué NO es este dato**, y conviene decirlo porque es la confusión natural:
+
+- **No es un registro de lo que la persona lee.** No se cuenta cuántas veces abre cada tema,
+  ni cuánto tiempo pasa en él, ni qué tarjetas mira. Solo queda constancia de lo que ella
+  misma marcó, y de cuándo lo marcó.
+- **No es un dato de salud.** Es una preferencia de lectura sobre contenidos generales de
+  hábitos, no una consulta médica ni un síntoma. Aun así se trata con el mismo cuidado que
+  el resto, por dos razones: aparece en un documento que el paciente puede compartir con
+  terceros, y un interés sostenido en un tema puede sugerir una preocupación. Por eso el
+  reporte dice expresamente que son preferencias que la persona marcó por su cuenta y no
+  consultas ni síntomas.
+- **No lo puede cambiar el cuidador.** A diferencia de los ajustes de accesibilidad, solo el
+  propio paciente marca y desmarca sus temas, aunque haya concedido todos los permisos.
+
+**La lista de temas es cerrada**: seis opciones fijas, sin campo de texto libre. Es una
+decisión deliberada. Un campo abierto aquí sería el lugar donde alguien escribiría el nombre
+de su enfermedad, y eso convertiría una preferencia de lectura en un dato sensible recogido
+sin que nadie lo hubiera decidido.
+
+**Cuánto se conserva.** Se guardan como máximo 60 períodos por paciente; al superarlo se
+descartan los más antiguos ya cerrados. Desmarcar un tema cierra su período pero no borra
+que estuvo marcado, porque ese es justamente el dato que el reporte necesita. Todo el
+historial se elimina con la cuenta.
+
+> **Pendiente, y se dice aquí porque toca decirlo:** la aplicación todavía no ofrece un botón
+> para borrar únicamente este historial sin borrar la cuenta. Mientras no exista, la
+> supresión se solicita por el canal de la §6 y se ejecuta a mano. Está en la misma lista de
+> trabajo pendiente que los demás derechos que la pantalla de privacidad promete.
+
+### 3.5 Datos técnicos
 
 | Dato | Para qué |
 |---|---|
@@ -208,7 +253,7 @@ incluye expresamente los datos «relativos a la salud».
 Chronova **no recoge** ubicación, contactos, cámara, micrófono, identificadores
 publicitarios ni datos biométricos.
 
-### 3.5 Encargados del tratamiento y transferencia internacional
+### 3.6 Encargados del tratamiento y transferencia internacional
 
 Chronova se apoya en proveedores que actúan como **encargados del tratamiento**. Esto
 importa, y hay que decirlo con claridad porque **algunos están fuera de Colombia**:
@@ -412,4 +457,5 @@ institucional. Si hubiera contradicción entre las dos, **prevalece la instituci
 | Versión | Fecha | Cambios |
 |---|---|---|
 | 1.0 | [NO PUBLICADA] | Versión inicial, con el Responsable sin definir |
+| 2.1 | [PENDIENTE] | Se añade el numeral 3.4, **Temas de interés y su historial**: qué se guarda cuando el paciente marca un tema en el módulo de curiosidades, por qué se guarda también desde cuándo, qué NO se guarda (lo que lee, cuántas veces lo abre) y cuánto se conserva. Se añade la octava finalidad en el numeral 3.1. Se deja constancia de que todavía no hay un botón para borrar solo ese historial. |
 | 2.0 | [PENDIENTE] | Se identifican **tres Responsables del Tratamiento**: la Universidad Católica Luis Amigó y los dos desarrolladores, con el reparto de obligaciones entre ellos y un canal de contacto común. El documento se reordena para seguir los seis numerales del art. 2.2.2.25.3.1 del Decreto 1074 de 2015. Se añaden el procedimiento de consultas y reclamos con sus plazos y el período de vigencia de la base de datos. |
