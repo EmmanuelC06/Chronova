@@ -39,11 +39,21 @@ En [render.com](https://render.com), **New → Web Service**, conectando el repo
 | Campo | Valor |
 |---|---|
 | Root Directory | `backend` |
-| Build Command | `npm install && npm run build` |
+| Build Command | `npm ci --include=dev && npm run build` |
 | Start Command | `npm start` |
 | Health Check Path | `/api/salud` |
 | Region | **Virginia (us-east)** |
 | Instance Type | **Free** para empezar. Subir a los 7 USD es después un clic |
+
+> **El `--include=dev` no es opcional, y esto costó un despliegue fallido.** Más abajo se
+> pone `NODE_ENV=production`, y con esa variable `npm install` **se salta las
+> devDependencies**. TypeScript está ahí, así que no se instalaba, `tsc` caía en la versión
+> que trae la imagen de Render —hoy TypeScript 7— y la compilación moría con
+> `Option 'baseUrl' has been removed`.
+>
+> Se usa `npm ci` y no `npm install` porque respeta el `package-lock.json` al pie de la
+> letra: Render compila con TypeScript 5.9.3, exactamente la versión con la que probaste, y
+> no con la que resulte ser la más nueva el día del despliegue.
 
 La región no es indiferente. Neon ya está en `us-east-1`, así que poner el servidor al lado
 baja la latencia de cada consulta y, sobre todo, **deja los cuatro encargados del tratamiento
