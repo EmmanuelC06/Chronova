@@ -1,6 +1,6 @@
 # Política de Tratamiento de Datos Personales de Chronova
 
-**Versión 2.1 · Vigente desde el [FECHA DE PUBLICACIÓN]**
+**Versión 2.2 · Vigente desde el [FECHA DE PUBLICACIÓN]**
 
 > **Antes de publicar esto, léelo.**
 >
@@ -262,8 +262,8 @@ importa, y hay que decirlo con claridad porque **algunos están fuera de Colombi
 |---|---|---|
 | Neon | Base de datos | AWS `us-east-1`, Virginia, **Estados Unidos** |
 | Expo (Expo Application Services) | Entrega de notificaciones al teléfono | Estados Unidos |
-| [Proveedor de alojamiento] | Servidor de la aplicación | **[POR COMPLETAR cuando se contrate]** |
-| [Proveedor de correo] | Envío del código de recuperación | **[POR COMPLETAR]** |
+| Render | Servidor de la aplicación | Región `Virginia (us-east)`, **Estados Unidos** |
+| Resend | Envío del código de recuperación de contraseña | **Estados Unidos**. Los datos de la cuenta y los registros de envío se almacenan allí |
 
 > **Esto es una transferencia internacional de datos** y el artículo 26 de la Ley 1581 la
 > prohíbe hacia países que no ofrezcan garantías adecuadas, **salvo que el titular haya
@@ -273,6 +273,20 @@ importa, y hay que decirlo con claridad porque **algunos están fuera de Colombi
 >
 > La región de la base de datos está verificada en el panel de Neon: **AWS us-east-1,
 > Virginia**. No es una suposición.
+>
+> El servidor se alojó en Render eligiendo deliberadamente la **misma región**, Virginia. No
+> es solo latencia: así los cuatro encargados están en un único país, y la autorización que
+> firma el titular describe una sola transferencia internacional en vez de un mapa.
+
+**Qué sale hacia cada uno, y qué no.** Conviene decirlo porque «hay cuatro proveedores»
+suena a que los datos circulan, y no es así:
+
+| Proveedor | Qué recibe |
+|---|---|
+| Neon | Todo lo que se guarda: la cuenta, los medicamentos y las tomas |
+| Render | Todo lo que pasa por el servidor, mientras lo procesa. No guarda nada por su cuenta |
+| Expo | Un identificador del teléfono y el texto del aviso, que **nunca** nombra el medicamento |
+| Resend | El correo electrónico y el código de recuperación. Ningún dato de salud |
 
 Una decisión de diseño que vale la pena conocer: **las notificaciones que salen hacia Expo
 no llevan el nombre del medicamento.** Dicen que una toma quedó sin confirmar y cuántas,
@@ -457,5 +471,6 @@ institucional. Si hubiera contradicción entre las dos, **prevalece la instituci
 | Versión | Fecha | Cambios |
 |---|---|---|
 | 1.0 | [NO PUBLICADA] | Versión inicial, con el Responsable sin definir |
+| 2.2 | [PENDIENTE] | Se completan los dos encargados que faltaban ahora que la aplicación se despliega de verdad: **Render** como servidor, en la región de Virginia, y **Resend** para el correo de recuperación. Se añade qué recibe cada uno de los cuatro, para que no se lea como que los datos circulan entre todos. |
 | 2.1 | [PENDIENTE] | Se añade el numeral 3.4, **Temas de interés y su historial**: qué se guarda cuando el paciente marca un tema en el módulo de curiosidades, por qué se guarda también desde cuándo, qué NO se guarda (lo que lee, cuántas veces lo abre) y cuánto se conserva. Se añade la octava finalidad en el numeral 3.1. Se deja constancia de que todavía no hay un botón para borrar solo ese historial. |
 | 2.0 | [PENDIENTE] | Se identifican **tres Responsables del Tratamiento**: la Universidad Católica Luis Amigó y los dos desarrolladores, con el reparto de obligaciones entre ellos y un canal de contacto común. El documento se reordena para seguir los seis numerales del art. 2.2.2.25.3.1 del Decreto 1074 de 2015. Se añaden el procedimiento de consultas y reclamos con sus plazos y el período de vigencia de la base de datos. |

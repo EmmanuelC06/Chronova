@@ -6,6 +6,163 @@ Hoy no se puede, y hay una sola razón de fondo. Vale la pena entenderla antes d
 
 ---
 
+## 0. El camino elegido, paso a paso · 19 de octubre de 2026
+
+Decidido: **servidor en Render de pago** (7 USD al mes, no se duerme) y **reparto por enlace
+de APK** con EAS, que es gratis y se puede hacer hoy. El resto del documento compara
+alternativas; esta sección es la que hay que seguir.
+
+### El orden importa, y es la equivocación más común
+
+> **La URL del servidor va INCRUSTADA dentro del APK.** A diferencia del *development build*,
+> que la lee del servidor de Metro cada vez que arranca, el perfil `preview` la hornea al
+> compilar. Si compilas el APK antes de tener el servidor en línea, el APK apuntará a la IP
+> de tu wifi y no funcionará en ningún otro sitio, y habrá que compilarlo otra vez.
+>
+> **Servidor primero. Después `apiUrl`. El APK al final.**
+
+### Paso 1 · Crear la cuenta de Resend y verificar un remitente
+
+Antes que nada, porque es lo único que puede tardar: sin esto, **quien olvide su contraseña
+no puede recuperarla**. Hoy `CORREO=consola` imprime el código en la terminal del servidor,
+que en tu portátil servía y en Render no sirve para nada.
+
+1. Cuenta gratuita en [resend.com](https://resend.com). La capa gratuita alcanza de sobra.
+2. Sin dominio propio se puede usar el remitente de pruebas `onboarding@resend.dev`, que es
+   el valor por defecto del proyecto. Con dominio propio hay que verificarlo primero.
+3. Copia la clave de API. Es un secreto: no va al repositorio, va en las variables de Render.
+
+### Paso 2 · Crear el servicio en Render
+
+En [render.com](https://render.com), **New → Web Service**, conectando el repositorio.
+
+| Campo | Valor |
+|---|---|
+| Root Directory | `backend` |
+| Build Command | `npm install && npm run build` |
+| Start Command | `npm start` |
+| Health Check Path | `/api/salud` |
+| Region | **Virginia (us-east)** |
+| Instance Type | **7 USD**, no Free |
+
+La región no es indiferente. Neon ya está en `us-east-1`, así que poner el servidor al lado
+baja la latencia de cada consulta y, sobre todo, **deja los cuatro encargados del tratamiento
+en un solo país**: la política describe entonces una transferencia internacional y no cuatro.
+
+### Paso 3 · Las variables de entorno
+
+En Render, pestaña **Environment**. Son estas y ninguna menos:
+
+| Variable | Valor |
+|---|---|
+| `NODE_ENV` | `production` |
+| `PERSISTENCE` | `postgres` |
+| `DATABASE_URL` | La cadena de conexión de Neon |
+| `DATABASE_SSL` | `true` |
+| `JWT_SECRET` | Una clave larga y **distinta** de la de desarrollo. Genérala con el comando de abajo |
+| `CORREO` | `resend` |
+| `RESEND_API_KEY` | La clave del paso 1 |
+| `CORREO_REMITENTE` | `Chronova <onboarding@resend.dev>` |
+| `NOTIFICACIONES` | `push` |
+| `EXPO_ACCESS_TOKEN` | El de tu cuenta de Expo |
+
+No hace falta `PORT`: Render la pone sola y el servidor la respeta.
+
+Para generar la clave, desde la carpeta `backend`:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+```
+
+Se usa Node y no `openssl` porque en Windows `openssl` no viene instalado, y Node sí lo
+tienes. Es el mismo comando que sugiere el servidor si intentas arrancarlo con la clave de
+ejemplo.
+
+Sobre `JWT_SECRET`: con esa clave se firman las sesiones. Quien la tenga puede fabricar un
+token válido para cualquier cuenta y leer los datos de salud de esa persona, sin adivinar
+ninguna contraseña. Es el secreto más importante del sistema. El código ya rechaza arrancar
+con la clave de ejemplo del repositorio, pero no puede saber si la tuya es buena.
+
+### Paso 4 · Migrar la base de datos, desde tu computador
+
+```bash
+cd backend
+npm run db:migrate
+```
+
+Con el `.env` local apuntando a Neon. Es idempotente —todo el esquema usa `IF NOT EXISTS`—
+así que se puede correr las veces que haga falta. Se hace desde tu equipo y no desde Render
+porque `db:migrate` usa `tsx`, que es dependencia de desarrollo y allí no está instalada.
+
+### Paso 5 · Comprobar que el servidor está vivo
+
+Abre en el navegador `https://<tu-servicio>.onrender.com/api/salud`. Tiene que responder:
+
+```json
+{ "estado": "ok", "persistencia": "postgres" }
+```
+
+**Si dice `memory`, la variable `PERSISTENCE` no llegó** y los datos se perderían en cada
+reinicio. No sigas hasta que diga `postgres`.
+
+### Paso 6 · Apuntar la app al servidor
+
+En `mobile/app.json`, cambia `extra.apiUrl`:
+
+```json
+"apiUrl": "https://<tu-servicio>.onrender.com"
+```
+
+Sin barra al final y **con https**. Revísalo dos veces: este es el valor que queda horneado
+en el APK.
+
+### Paso 7 · Compilar el APK
+
+```bash
+cd mobile
+eas build --profile preview --platform android
+```
+
+Al terminar, EAS da una **URL para compartir**. Cualquiera que la abra desde un Android
+descarga el APK e instala.
+
+### Paso 8 · La prueba que de verdad cuenta
+
+Instala el APK en un teléfono y **úsalo con datos móviles, con el wifi apagado y tu portátil
+cerrado**. Si funciona así, funciona para cualquiera. Mientras lo pruebes en tu propia red no
+has demostrado nada: podría seguir hablando con tu computador.
+
+Comprueba en ese teléfono: registrarse, crear un medicamento, confirmar una toma, ver el
+historial, abrir la analítica, preparar el reporte y **recuperar la contraseña** (que llegue
+el correo de verdad).
+
+### Lo que la gente va a ver al instalar
+
+Android avisa de «aplicación de origen desconocido» y pide permiso para instalar fuera de la
+Play Store. Es normal y no significa que la app sea insegura, pero conviene decirlo antes de
+pasar el enlace, sobre todo a un profesor. Si en algún momento eso estorba, la salida es la
+prueba interna de Play Store: 25 USD y de 2 a 5 días hábiles de verificación de identidad.
+
+### Lo que hay que saber antes de abrirlo a gente real
+
+- **Ya no aplica la advertencia de siempre.** Durante todo el proyecto se dijo que la app no
+  debía usarse con datos de salud de personas reales porque el servidor corría en un portátil
+  sin HTTPS. Con Render eso se acaba: el tráfico va cifrado de extremo a extremo. Es
+  justamente el paso que levanta esa restricción.
+- **La política sube a 2.2** porque aparecen dos encargados nuevos, Render y Resend. A las
+  cuentas que ya existen la aplicación les pedirá otra vez la autorización.
+- **Queda un riesgo residual conocido (G-6).** Quien ya conociera el token de notificaciones
+  de otra persona podría apropiárselo y dejarla sin avisos. No es alcanzable desde la API
+  —nunca entrega el token de otro ni lo escribe en los registros— así que haría falta acceso
+  previo a la base de datos, y quien lo tenga tiene todo lo demás. Se deja documentado en vez
+  de prohibir la reasignación, porque el caso legítimo es real: una hija que instala la app
+  en el teléfono viejo de su madre.
+- **Si cambias de plan a gratis**, el servidor duerme a los 15 minutos y el cierre automático
+  de tomas vencidas deja de correr mientras duerme. Es el aporte central del proyecto, así
+  que mantenlo de pago mientras haya gente usándolo.
+
+---
+
 ## 1. El problema real: el servidor vive en tu computador
 
 Ahora mismo `mobile/app.json` apunta a algo como `http://192.168.1.6:4000`. Esa dirección es **tu portátil dentro de tu wifi**. De ahí salen las tres limitaciones:

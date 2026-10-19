@@ -250,8 +250,23 @@ export const POLITICA_DE_TRATAMIENTO: DocumentoLegal = {
         { tipo: 'dato', etiqueta: 'Base de datos', valor: 'Neon, en Virginia, Estados Unidos' },
         {
           tipo: 'dato',
+          etiqueta: 'Servidor de la aplicación',
+          valor: 'Render, en Virginia, Estados Unidos',
+        },
+        {
+          tipo: 'dato',
           etiqueta: 'Envío de avisos al teléfono',
           valor: 'Expo, en Estados Unidos',
+        },
+        {
+          tipo: 'dato',
+          etiqueta: 'Correo para recuperar la contraseña',
+          valor: 'Resend, en Estados Unidos',
+        },
+        {
+          tipo: 'parrafo',
+          texto:
+            'Los cuatro están en el mismo país, y eso fue a propósito: así tus datos cruzan una sola frontera y no cuatro. Y no todos reciben lo mismo. La base de datos guarda tu cuenta, tus medicamentos y tus tomas; el servidor solo los procesa de paso y no guarda nada por su cuenta; al proveedor de avisos le llega un identificador de tu teléfono y un texto que nunca nombra tu medicamento; y al del correo solo tu dirección y el código, nada de salud.',
         },
         {
           tipo: 'aviso',

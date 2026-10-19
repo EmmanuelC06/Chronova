@@ -13,7 +13,7 @@ import { ErrorDeValidacion } from '../../domain/shared/errores.js';
  * numero guardado junto a la cuenta siempre se puede resolver al
  * documento exacto que esa persona leyo.
  */
-export const VERSION_VIGENTE_DE_LA_POLITICA = '2.1';
+export const VERSION_VIGENTE_DE_LA_POLITICA = '2.2';
 
 /**
  * Comprueba que el titular autorizo, de verdad, antes de crear la cuenta.
