@@ -8,8 +8,8 @@ Hoy no se puede, y hay una sola razón de fondo. Vale la pena entenderla antes d
 
 ## 0. El camino elegido, paso a paso · 19 de octubre de 2026
 
-Decidido: **servidor en Render de pago** (7 USD al mes, no se duerme) y **reparto por enlace
-de APK** con EAS, que es gratis y se puede hacer hoy. El resto del documento compara
+Decidido: **servidor en Render** —empezando en la capa gratuita y pasando a los 7 USD cuando
+haga falta— y **reparto por enlace de APK** con EAS, que es gratis y se puede hacer hoy. El resto del documento compara
 alternativas; esta sección es la que hay que seguir.
 
 ### El orden importa, y es la equivocación más común
@@ -43,11 +43,21 @@ En [render.com](https://render.com), **New → Web Service**, conectando el repo
 | Start Command | `npm start` |
 | Health Check Path | `/api/salud` |
 | Region | **Virginia (us-east)** |
-| Instance Type | **7 USD**, no Free |
+| Instance Type | **Free** para empezar. Subir a los 7 USD es después un clic |
 
 La región no es indiferente. Neon ya está en `us-east-1`, así que poner el servidor al lado
 baja la latencia de cada consulta y, sobre todo, **deja los cuatro encargados del tratamiento
 en un solo país**: la política describe entonces una transferencia internacional y no cuatro.
+
+**Empieza en Free y paga después.** Lo que puede fallar en un primer despliegue es la
+compilación, una variable mal escrita o el SSL de Neon, y nada de eso se arregla pagando:
+descubrirlo gratis sale mejor que descubrirlo pagando. Subir a la instancia de pago es un
+clic en el panel, conserva la URL y las variables, y solo reinicia el servicio.
+
+Pasa a pagar **cuando haya gente usándola de verdad, o unos días antes de la sustentación**.
+En Free el servidor duerme a los 15 minutos, y mientras duerme no corre el temporizador que
+cierra solo las tomas vencidas, que es el aporte central del proyecto. Para probar tú solo da
+igual; para que alguien abra la app sin ver una rueda girando medio minuto, no.
 
 ### Paso 3 · Las variables de entorno
 
@@ -84,6 +94,9 @@ ninguna contraseña. Es el secreto más importante del sistema. El código ya re
 con la clave de ejemplo del repositorio, pero no puede saber si la tuya es buena.
 
 ### Paso 4 · Migrar la base de datos, desde tu computador
+
+**Este paso no toca Render.** Corre en tu equipo y habla directamente con Neon, así que
+funciona igual con el servicio de Render apagado, o incluso antes de haberlo creado.
 
 ```bash
 cd backend
