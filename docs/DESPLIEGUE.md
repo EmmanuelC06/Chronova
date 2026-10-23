@@ -159,6 +159,60 @@ Comprueba en ese teléfono: registrarse, crear un medicamento, confirmar una tom
 historial, abrir la analítica, preparar el reporte y **recuperar la contraseña** (que llegue
 el correo de verdad).
 
+### Paso 9 · Cambiar cosas después de haber repartido el APK
+
+Aquí hay dos mundos distintos y conviene no confundirlos.
+
+**El servidor se actualiza solo.** Cada `git push` a `main` hace que Render recompile y
+vuelva a desplegar. Los APK que ya estén instalados en teléfonos ajenos empiezan a usar el
+servidor nuevo sin que nadie reinstale nada, porque lo único que conocen es una URL.
+Compruébalo igual en Render → Settings → **Auto-Deploy**, que viene activado por defecto.
+
+**La app no, salvo que se lo pidas.** El JavaScript va dentro del APK. Para eso está
+configurado **EAS Update**: un comando y las apps instaladas se actualizan solas.
+
+```bash
+cd mobile
+eas update --branch preview --message "Qué cambió"
+```
+
+El canal `preview` de `eas.json` conecta ese comando con los APK compilados con ese mismo
+perfil. Sin el canal, la actualización se sube y no llega a ningún teléfono, sin error y sin
+aviso.
+
+**Se ve en la segunda apertura, no en la primera.** Con `fallbackToCacheTimeout: 0` la app
+arranca de inmediato con lo que ya tiene y se descarga la actualización por detrás; la aplica
+la próxima vez que se abra. Es a propósito: nadie se queda mirando una pantalla en blanco
+porque la red vaya lenta.
+
+#### Cuándo NO basta con `eas update`
+
+La versión de ejecución usa la política `fingerprint`, que calcula una huella de todo lo que
+afecta a la capa nativa. Si esa huella cambia, las actualizaciones **dejan de llegar a los
+APK viejos a propósito**, y hay que compilar y repartir uno nuevo. Pasa cuando:
+
+- se añade un módulo nativo (fue justo el caso de `expo-print`);
+- se cambia configuración nativa de `app.json`: permisos, iconos, el paquete, los plugins;
+- se sube de versión del SDK de Expo.
+
+Esa negativa es la gracia del asunto, no un estorbo. Sin ella, un `eas update` podría mandar
+código que llama a un módulo que ese APK no tiene, y la app se cerraría al abrir la pantalla
+afectada —exactamente el «Unmatched Route» que ya vimos una vez—. Con `fingerprint`, en el
+peor caso la actualización no llega y la app sigue funcionando como estaba.
+
+**Regla práctica:** si solo tocaste archivos `.ts`, `.tsx` o textos, `eas update` basta. Si
+instalaste algo con `npx expo install`, compila.
+
+#### El resumen de los tres caminos
+
+| Qué cambiaste | Qué haces | Quién lo ve y cuándo |
+|---|---|---|
+| Backend (reglas, cálculos, endpoints) | `git push` | Todos, en cuanto Render termine |
+| Pantallas, textos, lógica de la app | `eas update --branch preview` | Todos, en la segunda apertura |
+| Un módulo nativo o config nativa | `eas build` y repartir de nuevo | Solo quien reinstale |
+
+---
+
 ### Lo que la gente va a ver al instalar
 
 Android avisa de «aplicación de origen desconocido» y pide permiso para instalar fuera de la

@@ -15,8 +15,9 @@ import {
   Texto,
 } from '../../src/ui/componentes/basicos';
 import { Icono } from '../../src/ui/componentes/Icono';
+import { BurbujaDeCuriosidades } from '../../src/ui/componentes/BurbujaDeCuriosidades';
 import { useSesion } from '../../src/ui/contexto/SesionContexto';
-import { colores, espacio, ESTILO_POR_ESTADO, radio } from '../../src/ui/tema';
+import { ALTO_TACTIL_MINIMO, colores, espacio, ESTILO_POR_ESTADO, radio } from '../../src/ui/tema';
 import { formatearHora, horaEnPalabras } from '../../src/ui/hora';
 
 /**
@@ -106,71 +107,82 @@ export default function Hoy() {
   const resueltas = agenda?.elementos.filter(estaResuelta) ?? [];
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        padding: espacio.md,
-        gap: espacio.md,
-        paddingBottom: espacio.xxl,
-      }}
-      refreshControl={
-        <RefreshControl
-          refreshing={refrescando}
-          onRefresh={() => {
-            setRefrescando(true);
-            void cargar();
-          }}
-          tintColor={colores.primario}
-        />
-      }
-    >
-      <View style={{ gap: 2 }}>
-        <Texto variante="titulo" peso="negrita">
-          Hola, {perfil?.nombre?.split(' ')[0] ?? 'qué bueno verte'}
-        </Texto>
-        <Texto variante="etiqueta" color={colores.textoSuave}>
-          {fechaEnPalabras(agenda?.fecha)}
-        </Texto>
-      </View>
-
-      {error ? <Aviso mensaje={error} tono="error" /> : null}
-      {aviso ? <Aviso mensaje={aviso} tono="advertencia" /> : null}
-
-      {agenda && agenda.elementos.length > 0 ? <ResumenDelDia agenda={agenda} /> : null}
-
-      {agenda?.elementos.length === 0 ? (
-        <EstadoVacio
-          titulo="Hoy no tienes tomas programadas"
-          descripcion="Cuando agregues un medicamento, aparecerán aquí sus horarios."
-          accion={{
-            titulo: 'Agregar un medicamento',
-            onPress: () => router.push('/medicamento/nuevo'),
-          }}
-        />
-      ) : null}
-
-      {pendientes.length > 0 ? (
-        <View style={{ gap: espacio.md }}>
-          <Rotulo>Por tomar</Rotulo>
-          {pendientes.map((elemento) => (
-            <TarjetaDeToma
-              key={elemento.tomaId}
-              elemento={elemento}
-              procesando={procesando === elemento.tomaId}
-              onAccion={(accion) => void registrar(elemento, accion)}
-            />
-          ))}
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={{
+          padding: espacio.md,
+          gap: espacio.md,
+          // Hueco extra abajo: el boton flotante se posa aqui, y sin
+          // este margen taparia la ultima tarjeta justo cuando mas se
+          // necesita verla.
+          paddingBottom: espacio.xxl + ALTO_TACTIL_MINIMO,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refrescando}
+            onRefresh={() => {
+              setRefrescando(true);
+              void cargar();
+            }}
+            tintColor={colores.primario}
+          />
+        }
+      >
+        <View style={{ gap: 2 }}>
+          <Texto variante="titulo" peso="negrita">
+            Hola, {perfil?.nombre?.split(' ')[0] ?? 'qué bueno verte'}
+          </Texto>
+          <Texto variante="etiqueta" color={colores.textoSuave}>
+            {fechaEnPalabras(agenda?.fecha)}
+          </Texto>
         </View>
-      ) : null}
 
-      {resueltas.length > 0 ? (
-        <View style={{ gap: espacio.md, marginTop: espacio.md }}>
-          <Rotulo>Ya registradas</Rotulo>
-          {resueltas.map((elemento) => (
-            <TarjetaDeToma key={elemento.tomaId} elemento={elemento} onAccion={() => {}} />
-          ))}
-        </View>
-      ) : null}
-    </ScrollView>
+        {error ? <Aviso mensaje={error} tono="error" /> : null}
+        {aviso ? <Aviso mensaje={aviso} tono="advertencia" /> : null}
+
+        {agenda && agenda.elementos.length > 0 ? <ResumenDelDia agenda={agenda} /> : null}
+
+        {agenda?.elementos.length === 0 ? (
+          <EstadoVacio
+            titulo="Hoy no tienes tomas programadas"
+            descripcion="Cuando agregues un medicamento, aparecerán aquí sus horarios."
+            accion={{
+              titulo: 'Agregar un medicamento',
+              onPress: () => router.push('/medicamento/nuevo'),
+            }}
+          />
+        ) : null}
+
+        {pendientes.length > 0 ? (
+          <View style={{ gap: espacio.md }}>
+            <Rotulo>Por tomar</Rotulo>
+            {pendientes.map((elemento) => (
+              <TarjetaDeToma
+                key={elemento.tomaId}
+                elemento={elemento}
+                procesando={procesando === elemento.tomaId}
+                onAccion={(accion) => void registrar(elemento, accion)}
+              />
+            ))}
+          </View>
+        ) : null}
+
+        {resueltas.length > 0 ? (
+          <View style={{ gap: espacio.md, marginTop: espacio.md }}>
+            <Rotulo>Ya registradas</Rotulo>
+            {resueltas.map((elemento) => (
+              <TarjetaDeToma key={elemento.tomaId} elemento={elemento} onAccion={() => {}} />
+            ))}
+          </View>
+        ) : null}
+      </ScrollView>
+
+      {/*
+        Fuera del ScrollView: un boton flotante tiene que quedarse quieto
+        mientras el contenido se desplaza, y dentro se iria con el.
+      */}
+      <BurbujaDeCuriosidades />
+    </View>
   );
 }
 

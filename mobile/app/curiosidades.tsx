@@ -17,13 +17,7 @@ import { Icono } from '../src/ui/componentes/Icono';
 import { fechaHaceDias } from '../src/ui/componentes/SelectorDePeriodo';
 import { useSesion } from '../src/ui/contexto/SesionContexto';
 import { colores, espacio } from '../src/ui/tema';
-import {
-  MAXIMO_DE_TEMAS,
-  TEMAS,
-  datosOrdenadosPara,
-  iconoDeCuriosidad,
-  type DatoDeHabito,
-} from '../src/ui/datosDeHabitos';
+import { MAXIMO_DE_TEMAS, TEMAS, iconoDeCuriosidad } from '../src/ui/datosDeHabitos';
 
 /**
  * CURIOSIDADES: la historia de la propia persona, y algo que saber.
@@ -171,7 +165,6 @@ export default function Curiosidades() {
     />
   );
 
-  const { destacados, resto } = datosOrdenadosPara(temas);
   const lleno = temas.length >= MAXIMO_DE_TEMAS;
 
   return (
@@ -263,33 +256,25 @@ export default function Curiosidades() {
           </Texto>
         ) : null}
 
-        {/* ---- Lo general ----
-            Esta sección se muestra SIEMPRE, incluso sin datos propios y
-            incluso si el servidor no responde. Es a propósito: alguien
-            que abre esto el primer día merece encontrar algo, y lo que
-            tiene que encontrar es que olvidarse es normal. */}
-        <View style={{ marginTop: espacio.md }}>
-          <Rotulo>{temas.length > 0 ? 'Para ti' : 'Para saber'}</Rotulo>
-        </View>
-        <Texto variante="pequeno" color={colores.textoSuave}>
-          Datos generales sobre hábitos y salud, con su fuente. No son sobre ti ni sobre tu
-          tratamiento.
-        </Texto>
+        {/* ---- A dónde se fueron los datos generales ----
 
-        {destacados.map((dato) => (
-          <TarjetaDeHabito key={dato.clave} dato={dato} />
-        ))}
-
-        {resto.length > 0 ? (
-          <>
-            <View style={{ marginTop: espacio.md }}>
-              <Rotulo>Lo demás</Rotulo>
-            </View>
-            {resto.map((dato) => (
-              <TarjetaDeHabito key={dato.clave} dato={dato} />
-            ))}
-          </>
-        ) : null}
+            Estaban aquí, las dieciocho tarjetas volcadas de una vez.
+            Leer dieciocho cosas no es leer ninguna, así que ahora se
+            entregan de una en una en la conversación de la pantalla de
+            Hoy. Lo que marques aquí sigue sirviendo para dos cosas: que
+            el reporte diga qué te interesa, y tenerlo a mano. */}
+        <Tarjeta>
+          <Rotulo>Dónde se leen</Rotulo>
+          <Texto color={colores.texto}>
+            Los datos sobre hábitos y salud se leen de uno en uno, tocando el botón redondo
+            que está abajo a la derecha en la pantalla de Hoy.
+          </Texto>
+          <Texto variante="pequeno" color={colores.textoSuave}>
+            Ahí eliges de qué quieres saber y te lo cuenta uno por uno, con su fuente. Lo que
+            marcaste arriba es tu preferencia, y es lo que aparece en el reporte para tu
+            médico.
+          </Texto>
+        </Tarjeta>
 
         <Texto variante="pequeno" color={colores.textoTenue}>
           Nada de lo que hay en esta pantalla es un consejo médico. Si quieres cambiar algo de
@@ -396,29 +381,6 @@ function TarjetaDeCuriosidad({ curiosidad }: { curiosidad: Curiosidad }) {
         </View>
       </View>
       <Texto color={colores.texto}>{curiosidad.detalle}</Texto>
-    </Tarjeta>
-  );
-}
-
-/** Un dato general. La fuente va visible, no en letra de contrato. */
-function TarjetaDeHabito({ dato }: { dato: DatoDeHabito }) {
-  return (
-    <Tarjeta>
-      <View style={{ flexDirection: 'row', gap: espacio.sm, alignItems: 'center' }}>
-        <IconoDeEstado
-          nombre={dato.icono}
-          color={colores.exito}
-          fondo={colores.exitoSuave}
-          lado={36}
-        />
-        <View style={{ flex: 1 }}>
-          <Texto peso="semi">{dato.titulo}</Texto>
-        </View>
-      </View>
-      <Texto color={colores.texto}>{dato.texto}</Texto>
-      <Texto variante="pequeno" color={colores.textoTenue}>
-        Fuente: {dato.fuente}
-      </Texto>
     </Tarjeta>
   );
 }

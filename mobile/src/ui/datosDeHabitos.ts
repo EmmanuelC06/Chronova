@@ -213,7 +213,124 @@ export const DATOS_DE_HABITOS: readonly DatoDeHabito[] = [
     fuente: 'OMS, directrices sobre actividad física y hábitos sedentarios (2020)',
   },
 
+  // ---- Hablar con el médico ----
+  {
+    clave: 'SE_OLVIDA_LA_CONSULTA',
+    tema: 'CITA',
+    icono: 'informacion',
+    titulo: 'De la consulta se olvida casi todo',
+    texto:
+      'Entre el 40 y el 80 por ciento de lo que dice el médico se olvida nada más salir, y ' +
+      'de lo que sí se recuerda, casi la mitad se recuerda mal. No es cosa de la memoria de ' +
+      'cada quien: pasa con todo el mundo. Por eso lo que se apunta vale más que lo que se ' +
+      'promete recordar.',
+    fuente: 'Kessels, Journal of the Royal Society of Medicine (2003)',
+  },
+  {
+    clave: 'LO_IMPORTANTE_PRIMERO',
+    tema: 'CITA',
+    icono: 'reloj',
+    titulo: 'Di lo más importante de primero',
+    texto:
+      'En un estudio de consultas grabadas, de las veces en que el médico preguntó qué le ' +
+      'preocupaba al paciente, interrumpió en dos de cada tres; y cuando interrumpió, lo hizo ' +
+      'a los once segundos de mediana. No es mala intención, es el reloj. Si llevas tres ' +
+      'cosas que contar, empieza por la que más te pesa.',
+    fuente: 'Singh Ospina y otros, Journal of General Internal Medicine (2019)',
+  },
+
+  // ---- El sueño ----
+  {
+    clave: 'SUENO_SE_ESTABILIZA',
+    tema: 'SUENO',
+    icono: 'sueno',
+    titulo: 'No todo empeora cada año',
+    texto:
+      'A lo largo de la vida adulta el sueño se va fragmentando: más minutos despierto por ' +
+      'la noche y menos sueño profundo, década a década. Pero el mayor análisis que lo midió ' +
+      'encontró que, pasados los 60, casi todos esos valores se estabilizan. Dicho de otro ' +
+      'modo: a los 75 no se duerme peor que a los 65 solo por haber cumplido años.',
+    fuente: 'Ohayon y otros, Sleep (2004), metaanálisis de parámetros del sueño',
+  },
+  {
+    clave: 'QUEJAS_DE_SUENO',
+    tema: 'SUENO',
+    icono: 'informacion',
+    titulo: 'Dormir mal no viene con la edad',
+    texto:
+      'En un estudio con más de nueve mil personas de 65 años o más, más de la mitad dijo ' +
+      'tener alguna queja de sueño casi siempre. Lo interesante es la conclusión de los ' +
+      'autores: esas molestias suelen acompañar a otras enfermedades, no al hecho de ' +
+      'envejecer. Si duermes mal, no es que te toque por edad; vale la pena contarlo en la ' +
+      'consulta.',
+    fuente: 'Foley y otros, Sleep (1995), estudio en tres comunidades',
+  },
+
+  // ---- La alimentación ----
+  {
+    clave: 'OLFATO',
+    tema: 'ALIMENTACION',
+    icono: 'alimentacion',
+    titulo: 'La comida sabe distinta, y casi siempre es la nariz',
+    texto:
+      'Lo que llamamos sabor es en buena parte olor. Y el olfato se va perdiendo con los ' +
+      'años: medido en población general, lo tiene alterado el 13 por ciento entre los 60 y ' +
+      'los 69, el 25 por ciento entre los 70 y los 79, y el 39 por ciento a partir de los 80. ' +
+      'Si la comida te sabe a menos, no te lo estás imaginando.',
+    fuente: 'Instituto Nacional de Sordera y Trastornos de la Comunicación, NIH (datos NHANES)',
+  },
+  {
+    clave: 'APETITO',
+    tema: 'ALIMENTACION',
+    icono: 'informacion',
+    titulo: 'Perder el apetito tiene nombre',
+    texto:
+      'Se llama anorexia del envejecimiento y está descrita desde hace décadas. En una ' +
+      'revisión de 62 estudios con más de ochenta mil personas mayores de 60, la presentaba ' +
+      'uno de cada cuatro de los que viven en su casa. Tener menos hambre que antes es ' +
+      'frecuente y se puede comentar con el médico como cualquier otra cosa.',
+    fuente: 'Li y otros, Age and Ageing (2025), revisión sistemática',
+  },
+
+  // ---- Moverse ----
+  {
+    clave: 'MUSCULO',
+    tema: 'MOVIMIENTO',
+    icono: 'movimiento',
+    titulo: 'El músculo se va solo si no se usa',
+    texto:
+      'Reuniendo los estudios que lo han medido, la masa muscular baja alrededor de un 4,7 ' +
+      'por ciento por década en hombres y un 3,7 por ciento en mujeres, contando desde el ' +
+      'máximo de la juventud. Es una mediana de estudios, no un destino: el músculo responde ' +
+      'al uso a cualquier edad.',
+    fuente: 'Mitchell y otros, Frontiers in Physiology (2012), revisión cuantitativa',
+  },
+  {
+    clave: 'ALGO_ES_MEJOR',
+    tema: 'MOVIMIENTO',
+    icono: 'check',
+    titulo: 'Algo es mejor que nada',
+    texto:
+      'Es una frase literal de las directrices de la OMS: para cualquier población, hacer ' +
+      'algo de actividad física es mejor que no hacer nada. Y a los adultos mayores les ' +
+      'dirige otra: ser tan activos como su capacidad funcional les permita. Ninguna de las ' +
+      'dos habla de alcanzar una meta, sino de empezar donde cada quien esté.',
+    fuente: 'OMS, directrices sobre actividad física y hábitos sedentarios (2020)',
+  },
+
   // ---- El ánimo ----
+  {
+    clave: 'ANIMO_MEJORA',
+    tema: 'ANIMO',
+    icono: 'animo',
+    titulo: 'El ánimo suele mejorar con los años',
+    texto:
+      'Va en contra de lo que se supone. Un estudio siguió a las mismas personas durante más ' +
+      'de diez años, preguntándoles varias veces al día cómo se sentían. A mayor edad, el ' +
+      'ánimo del día a día resultó en promedio más positivo y más estable. Los días malos ' +
+      'siguen existiendo; lo que cambia es que pesan menos tiempo.',
+    fuente: 'Carstensen y otros, Psychology and Aging (2011)',
+  },
   {
     clave: 'COMPANIA',
     tema: 'ANIMO',
@@ -229,30 +346,14 @@ export const DATOS_DE_HABITOS: readonly DatoDeHabito[] = [
 ];
 
 /**
- * Los datos ordenados según lo que la persona marcó.
+ * Las curiosidades de un tema, en orden.
  *
- * No se filtra, se ORDENA. Es la diferencia entre una lista personalizada
- * y una lista censurada: alguien que marcó el sueño sigue pudiendo
- * tropezarse con el dato de moverse, que es medio sentido de tener un
- * módulo de curiosidades. Y quien no ha marcado nada lo ve todo, en el
- * orden del catálogo.
- *
- * El dato sin tema va siempre primero, haya marcado lo que haya marcado.
+ * La conversación las entrega de una en una, y por eso el orden importa:
+ * la primera de cada tema es la que mejor se sostiene sola, por si nadie
+ * toca «cuéntame otra».
  */
-export function datosOrdenadosPara(
-  marcados: readonly string[],
-): { destacados: DatoDeHabito[]; resto: DatoDeHabito[] } {
-  const siempre = DATOS_DE_HABITOS.filter((d) => d.tema === null);
-  const conTema = DATOS_DE_HABITOS.filter((d) => d.tema !== null);
-
-  if (marcados.length === 0) {
-    return { destacados: [...siempre, ...conTema], resto: [] };
-  }
-
-  return {
-    destacados: [...siempre, ...conTema.filter((d) => marcados.includes(d.tema!))],
-    resto: conTema.filter((d) => !marcados.includes(d.tema!)),
-  };
+export function datosDelTema(clave: string): DatoDeHabito[] {
+  return DATOS_DE_HABITOS.filter((d) => d.tema === clave);
 }
 
 /** El título de un tema, o `null` si esta versión de la app no lo conoce. */

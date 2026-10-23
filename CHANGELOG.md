@@ -29,6 +29,101 @@ probar qué aceptó cada persona.
 
 ---
 
+## [1.11.0] — 2026-10-23
+
+### Cambiado
+
+- **Las curiosidades se entregan de una en una, en una conversación.** Antes la pantalla
+  volcaba dieciocho tarjetas de golpe, y leer dieciocho cosas no es leer ninguna. Ahora hay
+  un botón redondo abajo a la derecha en la pantalla de Hoy: se toca, se elige un tema y
+  llega **una** curiosidad. «Cuéntame otra» trae la siguiente.
+
+  **No aparece nada hasta que la persona elige.** Era el punto del cambio: antes daba igual
+  lo que le interesara a cada quien.
+
+  Cuando un tema se agota, **lo dice**: «Ya te conté todo lo que tengo sobre el sueño.
+  ¿Miramos otro tema?». Repetir en silencio era más fácil de programar y peor de leer: quien
+  toca tres veces y ve lo mismo concluye que la aplicación está rota, no que se acabó el tema.
+
+- **Parece un chat y no lo es, a propósito: no hay campo de texto.** El formato conversacional
+  se eligió porque entregar de a una cosa es justo lo que hace. Pero en cuanto se pueda
+  escribir, alguien va a preguntar «¿puedo tomar esto con el almuerzo?», y Chronova no puede
+  responder eso. Lo que la mantiene fuera del régimen de dispositivos médicos es su finalidad
+  prevista (Decreto 4725 de 2005, artículo 2), y una caja de texto que acepta preguntas de
+  salud cambia esa finalidad aunque nadie conteste. Lo único que se puede hacer es tocar un
+  tema de una lista cerrada.
+
+- **Solo en la pantalla de Hoy.** Un botón flotante tapa contenido, y en una aplicación de
+  letra grande para adultos mayores eso cuesta más que en otra. Hoy es donde la gente espera
+  la siguiente toma, que es cuando apetece leer algo; en el historial o en un formulario solo
+  estorbaría. El botón mide 64 puntos, el mínimo táctil del proyecto, y no los 56 de la
+  convención de Android: aquí pesa más una mano que tiembla que la costumbre.
+
+- La pantalla de Curiosidades conserva **tus números** y la **elección de temas**, que sigue
+  siendo la preferencia que aparece en el reporte para el médico. Solo se fue de ahí la lista
+  volcada.
+
+### Añadido
+
+- **Diez curiosidades nuevas, tres por tema.** Hacían falta: cinco de los seis temas tenían
+  **una sola**, así que el primer toque habría mostrado un dato y acto seguido habría dicho
+  «ya te conté todo». El diseño no se sostenía sin contenido.
+
+  Cada una con su fuente, y la verificación cambió cuatro de ellas antes de publicarlas:
+
+  - La cifra de pérdida de masa muscular que circula por todas partes, «3 a 8% por década»,
+    **no tiene fuente primaria**. Se usó la mediana de estudios medidos: 4,7% por década en
+    hombres y 3,7% en mujeres (Mitchell y otros, *Frontiers in Physiology*, 2012).
+  - «Los médicos interrumpen a los 11 segundos» es **falso sin su denominador**: esa mediana
+    es de las consultas en que el médico sí preguntó y además interrumpió, dos de cada tres de
+    ese subconjunto. La tarjeta lo dice con el denominador (Singh Ospina y otros, *JGIM*, 2019).
+  - El metaanálisis de sueño concluye que **pasados los 60 casi todos los parámetros se
+    estabilizan**, así que presentar «cada año se duerme peor» a un público de 65+ habría
+    contradicho a la propia fuente. La tarjeta dice lo contrario, que es lo cierto (Ohayon y
+    otros, *Sleep*, 2004).
+  - Lo que se deteriora **medido** es el olfato, no el gusto; las cifras de gusto son
+    autorreporte. La tarjeta habla de olfato y explica que el sabor es en buena parte olor
+    (NIDCD, NIH, datos NHANES).
+
+### Eliminado
+
+- `datosOrdenadosPara`, que ordenaba la lista completa según los temas marcados. Ya no hay
+  lista completa que ordenar.
+
+---
+
+## [1.10.0] — 2026-10-23
+
+### Añadido
+
+- **Actualizaciones por aire (EAS Update).** Hasta ahora, cambiar un texto de la aplicación
+  obligaba a compilar otro APK y a pedirle a cada persona que reinstalara. Con esto, un
+  `eas update --branch preview` llega solo a los teléfonos que ya la tienen.
+
+  Se activa **antes** de repartir el primer APK, y el momento importa: `expo-updates` es un
+  módulo nativo, así que activarlo cuesta una compilación. Hacerlo ahora cuesta esa; hacerlo
+  después habría obligado a reinstalar a todo el que ya la tuviera.
+
+  La versión de ejecución usa la política **`fingerprint`** y no `appVersion`. La diferencia
+  importa: `appVersion` deja pasar una actualización a un APK con otra capa nativa mientras
+  nadie se acuerde de subir el número de versión a mano, y entonces la app recibe código que
+  llama a un módulo que no tiene. Es el mismo fallo que ya tuvimos con `expo-print`, el del
+  «Unmatched Route». Con `fingerprint`, si la capa nativa cambió, la actualización
+  sencillamente no llega a los APK viejos: en el peor caso se quedan como estaban, que es un
+  fallo infinitamente mejor que uno que cierra la pantalla.
+
+  Cada perfil de `eas.json` lleva ahora su canal (`development`, `preview`, `production`).
+  Sin canal, `eas update` sube la actualización y no llega a ningún teléfono, sin error y sin
+  aviso.
+
+  Con `fallbackToCacheTimeout: 0` la app no espera a la red para arrancar: usa lo que tiene,
+  descarga por detrás y aplica en la siguiente apertura.
+
+El procedimiento de los tres caminos —servidor con `git push`, app con `eas update`, capa
+nativa con `eas build`— queda en el paso 9 de [DESPLIEGUE.md](docs/DESPLIEGUE.md).
+
+---
+
 ## [1.9.0] — 2026-10-18
 
 ### Corregido
